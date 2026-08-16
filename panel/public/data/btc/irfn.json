@@ -1,22 +1,19 @@
 {
-  "run_id": "a57ca0968199",
-  "generated_at": "2026-07-16T20:53:33.212363Z",
-  "git_commit": "nogit",
-  "config_hash": "58ce539eeb18",
-  "asof": "2026-07-16",
+  "run_id": "ece4ad3df66f",
+  "generated_at": "2026-08-16T06:01:19.897480Z",
+  "git_commit": "90140d4",
+  "config_hash": "546ad33ad808",
+  "asof": "2026-08-16",
   "version": "V3",
   "model": {
-    "K": 2,
-    "spec": "MS-GJR-GARCH (Haas et al. 2004), TVTP (tecnico), innovaciones Normales [lambda_N_z fuera del logit: ver warnings]",
-    "tvtp": true,
-    "covariates": [
-      "sma_gap",
-      "bb_width_z"
-    ],
+    "K": 1,
+    "spec": "MS-GJR-GARCH (Haas et al. 2004), UN REGIMEN (K=1: sin TVTP, sin logit de transicion), innovaciones t de Student. lambda_N_z fuera por construccion; branching ratio de Hawkes standalone.",
+    "tvtp": false,
+    "covariates": [],
     "news_layer": [],
     "estimation": {
       "method": "MLE L-BFGS-B multistart",
-      "multistart": 8,
+      "multistart": 30,
       "seed": 42,
       "converged": true
     },
@@ -116,132 +113,110 @@
       "blocker": "solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
     },
     "hawkes_layer_params": {
-      "active": false,
-      "mu_N": null,
-      "alpha": null,
-      "beta": null,
-      "se_mu_N": null,
-      "se_alpha": null,
-      "se_beta": null,
-      "mean_mark": null,
-      "branching_ratio": null,
-      "expected_cascade": null,
-      "stationary": null,
-      "ks_stat": null,
-      "ks_pvalue": null,
-      "ks_passed": null,
-      "n_events": 0,
-      "n_starts": 0,
-      "starts_at_best": 0,
+      "active": true,
+      "mu_N": 103.0425648697413,
+      "alpha": 329.66305611857194,
+      "beta": 283.95884101524234,
+      "se_mu_N": 1.1611677006771122,
+      "se_alpha": 3.554260061136355,
+      "se_beta": 3.2036754496297717,
+      "mean_mark": 0.6364006500994613,
+      "branching_ratio": 0.7388316647495151,
+      "branching_ratio_se": 0.003932624564379086,
+      "branching_ratio_ci_low": 0.7311238622386146,
+      "branching_ratio_ci_high": 0.7465394672604156,
+      "expected_cascade": 3.828948096027439,
+      "expected_cascade_bounded": true,
+      "stationary": true,
+      "ks_stat": 0.02890070620698454,
+      "ks_pvalue": 1.984058749646675e-69,
+      "ks_passed": false,
+      "n_events": 95085,
+      "n_starts": 30,
+      "starts_at_best": 30,
       "coverage": {
-        "first_day": "2026-07-12",
-        "last_day": "2026-07-12",
-        "n_days": 1,
-        "n_missing_days": 0,
-        "n_censored_days": 0
+        "first_day": "2023-11-18",
+        "last_day": "2026-08-11",
+        "n_days": 240,
+        "n_missing_days": 758,
+        "n_censored_days": 10
       },
-      "reflexive_threshold": null,
-      "blocker": "solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto."
+      "reflexive_threshold": 0.8,
+      "blocker": "covariable lambda_N_z inactiva en el logit: no aplica: el activo es K=1 (un solo regimen). Sin logit de transicion, lambda_N_z y surprise_index no tienen donde entrar como covariables. La seleccion de K se dirimio en V1 (BIC + bootstrap LR + diagnostico de estabilidad 2026-08-15, reports/diag_btc_k2t_stability.md). El branching ratio de Hawkes se publica igual, como indicador de fragilidad standalone."
     }
   },
   "regime": {
     "labels": [
-      "baja volatilidad",
-      "alta volatilidad"
+      "unico regimen"
     ],
     "xi_filtered": [
-      0.9187047679327788,
-      0.08129523206722115
+      1.0
     ],
-    "entropy": 0.28192143675606673,
-    "entropy_max": 0.6931471805599453,
+    "entropy": -0.0,
+    "entropy_max": 0.0,
     "confidence": "alta",
     "expected_duration_days": [
-      4.505331124263733,
-      1.5027713504542846
+      1000022122209.5028
     ],
-    "argmax": "baja volatilidad",
+    "argmax": "unico regimen",
     "xi_momentum_5d": [
-      -0.009099780266006219,
-      0.009099780266006163
+      0.0
     ]
   },
   "transition_matrix_today": [
     [
-      0.7983590449154534,
-      0.20164095508454663
-    ],
-    [
-      0.7138359846921875,
-      0.2861640153078126
+      1.0
     ]
   ],
   "news": {
     "surprise_index": 0.0,
-    "lambda_N": 0.0,
-    "lambda_N_z": 0.0,
-    "branching_ratio": 0.0,
-    "expected_cascade": 0.0,
+    "lambda_N": 154.25024538575678,
+    "lambda_N_z": -0.6024438991731464,
+    "branching_ratio": 0.7388316647495151,
+    "branching_ratio_ci_low": 0.7311238622386146,
+    "branching_ratio_ci_high": 0.7465394672604156,
+    "expected_cascade": 3.828948096027439,
+    "expected_cascade_bounded": true,
     "attribution": {
-      "price": 1.0,
+      "price": 0.0,
       "surprise": 0.0,
       "hawkes": 0.0
     }
   },
   "conditional_stats": {
     "BTC": {
-      "baja volatilidad": {
+      "unico regimen": {
         "mean_ann": {
-          "value": 0.09413418182872521,
-          "ci_low": -0.059239868765036265,
-          "ci_high": 0.23532820235331595
+          "value": 0.16768144875392632,
+          "ci_low": -0.08760761840625195,
+          "ci_high": 0.44379544889479733
         },
         "vol_ann": {
-          "value": 0.31000105702965375,
-          "ci_low": 0.2880304701465936,
-          "ci_high": 0.33228533283301054
+          "value": 0.5202826062860261,
+          "ci_low": 0.4738168753434036,
+          "ci_high": 0.5699449270742022
         },
         "sharpe": {
-          "value": 0.3036576156568415,
-          "ci_low": -0.19769847157918202,
-          "ci_high": 0.7727239380099801
+          "value": 0.3222891688632451,
+          "ci_low": -0.16980095471471976,
+          "ci_high": 0.8750537703621587
         },
         "maxdd": {
-          "value": -0.4713247202255564,
-          "ci_low": -0.7826233133538024,
-          "ci_high": -0.33545364188419496
-        }
-      },
-      "alta volatilidad": {
-        "mean_ann": {
-          "value": 0.6554949304149085,
-          "ci_low": -1.0725386959254495,
-          "ci_high": 2.1558363800860842
-        },
-        "vol_ann": {
-          "value": 1.1794601837691843,
-          "ci_low": 1.0432181989745624,
-          "ci_high": 1.3247855189828663
-        },
-        "sharpe": {
-          "value": 0.555758421891066,
-          "ci_low": -0.9236889810779184,
-          "ci_high": 1.955580239594509
-        },
-        "maxdd": {
-          "value": -0.7818211303510519,
-          "ci_low": -0.9489944592690418,
-          "ci_high": -0.5467172232932519
+          "value": -0.7662925431645934,
+          "ci_low": -0.9519373651703745,
+          "ci_high": -0.5800327942968982
         }
       }
     }
   },
   "warnings": [
-    "M3 (macro) bloqueado: ALFRED_API_KEY sin configurar (mismo bloqueante desde V1); M3 = M2 + macro no puede correr, y M4/M5 dependen de M3/M4 por diseno. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba; ver reports/ablation_news.md.",
-    "Diagnostico M2+H bloqueado: sin capa de Hawkes activa: solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto.",
-    "Corrida --quick: multistart reducido, NO cumple R6. Resultados PROVISIONALES.",
-    "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md).",
-    "Capa de Hawkes (V3) inactiva: solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto."
+    "M3 (macro): ALFRED_API_KEY configurada, pero la ablacion M3 con L1 no consta (reports/ablation_m3_l1_btc.json ausente); correr scripts/run_m3_l1.py para el veredicto macro. El bloqueante real de M5 vs M4 sigue siendo M4 (sorpresa), no la macro. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba (por M4/sorpresa y la cobertura de lambda_N_z, NO por la macro); ver reports/ablation_news.md.",
+    "Activo K=1 (un solo regimen; seleccion V1 por BIC + bootstrap LR + diagnostico de estabilidad 2026-08-15, reports/diag_btc_k2t_stability.md). Sin logit de transicion: NO hay TVTP y lambda_N_z/surprise_index no entran como covariables. El branching ratio de Hawkes se publica como indicador de fragilidad standalone, independiente de K.",
+    "10 dia(s) del corpus censurados por el cap del API de GDELT: lambda_N esta subestimada en esos picos (censura contada, no oculta).",
+    "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre TODO el span (origen 2023-11-18): el compensador Lambda(T)=mu_N*T integra sobre esos dias fantasma, por lo que mu_N (tasa de fondo) queda SESGADA A LA BAJA y el branching ratio n INFLADO. Decision del director (2026-08-14): ajustar sobre el span completo y documentar el sesgo. Leer n y lambda_N como COTA SUPERIOR de la excitacion, no como estimacion insesgada.",
+    "El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados). Se aplico dithering intra-bin (ruido U(0,15min) por evento, semilla fija) para identificar el Hawkes continuo, bajo el supuesto de LLEGADA UNIFORME dentro del bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera.",
+    "KS de re-escalamiento RECHAZA el kernel exponencial: el ajuste del Hawkes es imperfecto y se reporta tal cual; candidato power-law en version futura (guia 6.6).",
+    "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
   ],
   "validation_ref": "reports/validation_v3_btc.md",
   "disclaimer": "IRF-N es un indicador de investigacion, no una senal de trading ni una promesa de rendimiento. Usa solo informacion disponible en la fecha de publicacion (point-in-time)."
