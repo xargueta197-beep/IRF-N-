@@ -20,6 +20,7 @@ artifacts/runs/*
 artifacts/btc/
 artifacts/checkpoints/
 artifacts/quarantine/
+artifacts/analysis/
 
 # panel: dependencias y build generados por Next, no se versionan
 panel/node_modules/

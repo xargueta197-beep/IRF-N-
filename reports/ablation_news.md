@@ -1,6 +1,6 @@
 # Ablacion de la capa de noticias: M3 vs M4 (V2) y M4 vs M5 (V3)
 
-generado: 2026-08-16T04:01:37.023311+00:00  |  run_id: `bb2e2a84356f`  |  K=2, dist=normal  |  **corrida --quick (multistart reducido, NO cumple R6; provisional)**
+generado: 2026-08-16T04:49:29.056994+00:00  |  run_id: `7773faae4863`  |  K=2, dist=normal
 
 > Compromiso pre-registrado (V3, guia 8.1): la pregunta titular es M5 vs M4 (el flujo de noticias aporta POR ENCIMA de la sorpresa calendarizada?). Si M5 no mejora la log-loss OOS de M4 de forma distinguible (DM p < 0.10), el indicador se publica sin lambda_N_z en el logit.
 
@@ -16,7 +16,7 @@ generado: 2026-08-16T04:01:37.023311+00:00  |  run_id: `bb2e2a84356f`  |  K=2, d
 
 ## Diagnostico pre-declarado M2+H (esta sesion)
 
-**M2+H NO corrio.** Motivo: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.6 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).
+**M2+H NO corrio.** Motivo: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).
 
 El diagnostico queda pre-declarado con su compromiso (arriba) y se corre en cuanto la cobertura del backfill alcance.
 
@@ -29,15 +29,15 @@ Peldanos corridos: `['M0', 'M1', 'M2']` (M0..M5 declarados en validation/ablatio
 | modelo | descripcion | covs | bloques | n_oos | log-loss OOS/obs |
 | :-- | :-- | :-- | --: | --: | --: |
 | M0 | GARCH un solo regimen (piso) | - | 19 | 2386 | 1.2940 |
-| M1 | HMM K=2 P constante | - | 19 | 2386 | 1.2581 |
-| M2 | +TVTP tecnico ['sma_gap', 'bb_width_z'] | ['sma_gap', 'bb_width_z'] | 19 | 2386 | 1.2680 |
+| M1 | HMM K=2 P constante | - | 19 | 2386 | 1.2583 |
+| M2 | +TVTP tecnico ['sma_gap', 'bb_width_z'] | ['sma_gap', 'bb_width_z'] | 19 | 2386 | 1.2672 |
 
 ## Diebold-Mariano entre peldanos consecutivos (perdida OOS)
 
 | A vs B | DM stat | p-value | dif. media |
 | :-- | --: | --: | --: |
-| M1 vs M0 | -3.293 | 0.001 | -0.03597 |
-| M2 vs M1 | 1.814 | 0.070 | 0.00990 |
+| M1 vs M0 | -3.210 | 0.001 | -0.03579 |
+| M2 vs M1 | 1.617 | 0.106 | 0.00892 |
 
 > DM<0 => el primer modelo (A) tiene MENOR perdida (mejor). HAC Newey-West + correccion Harvey-Leybourne-Newbold.
 
