@@ -1,9 +1,9 @@
 {
-  "run_id": "190ff64f0511",
-  "generated_at": "2026-08-15T03:54:30.579063Z",
-  "git_commit": "nogit",
-  "config_hash": "1b62e6846a33",
-  "asof": "2026-07-10",
+  "run_id": "7773faae4863",
+  "generated_at": "2026-08-16T04:48:32.671451Z",
+  "git_commit": "5a778a6",
+  "config_hash": "546ad33ad808",
+  "asof": "2026-08-14",
   "version": "V3",
   "model": {
     "K": 2,
@@ -117,22 +117,26 @@
     },
     "hawkes_layer_params": {
       "active": true,
-      "mu_N": 0.07831974517534394,
-      "alpha": 120.96843550919814,
-      "beta": 77.03041643000134,
-      "se_mu_N": 0.015365329415258443,
-      "se_alpha": 1.5992855358974496,
-      "se_beta": 0.9910442729625605,
+      "mu_N": 103.0425648697413,
+      "alpha": 329.66305611857194,
+      "beta": 283.95884101524234,
+      "se_mu_N": 1.1611677006771122,
+      "se_alpha": 3.554260061136355,
+      "se_beta": 3.2036754496297717,
       "mean_mark": 0.6364006500994613,
-      "branching_ratio": 0.9994025031595837,
-      "expected_cascade": 1673.649017630322,
+      "branching_ratio": 0.7388316647495151,
+      "branching_ratio_se": 0.003932624564379086,
+      "branching_ratio_ci_low": 0.7311238622386146,
+      "branching_ratio_ci_high": 0.7465394672604156,
+      "expected_cascade": 3.828948096027439,
+      "expected_cascade_bounded": true,
       "stationary": true,
-      "ks_stat": 0.08478119344613716,
-      "ks_pvalue": 0.0,
+      "ks_stat": 0.02890070620698454,
+      "ks_pvalue": 1.984058749646675e-69,
       "ks_passed": false,
       "n_events": 95085,
       "n_starts": 30,
-      "starts_at_best": 15,
+      "starts_at_best": 30,
       "coverage": {
         "first_day": "2023-11-18",
         "last_day": "2026-08-11",
@@ -141,7 +145,7 @@
         "n_censored_days": 10
       },
       "reflexive_threshold": 0.8,
-      "blocker": "covariable lambda_N_z inactiva en el logit: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.6 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8)."
+      "blocker": "covariable lambda_N_z inactiva en el logit: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8)."
     }
   },
   "regime": {
@@ -150,38 +154,41 @@
       "alta volatilidad"
     ],
     "xi_filtered": [
-      0.9588079819379064,
-      0.041192018062093584
+      0.9682694938636893,
+      0.03173050613631068
     ],
-    "entropy": 0.17171411745092377,
+    "entropy": 0.14070705580330412,
     "entropy_max": 0.6931471805599453,
     "confidence": "alta",
     "expected_duration_days": [
-      13.19385545999782,
-      1.0000000000000013
+      13.177434028755197,
+      1.000000000000001
     ],
     "argmax": "baja volatilidad",
     "xi_momentum_5d": [
-      0.01379277637372256,
-      -0.013792776373722532
+      0.004722012504467132,
+      -0.004722012504467077
     ]
   },
   "transition_matrix_today": [
     [
-      0.9094019100770568,
-      0.09059808992294305
+      0.9375151442528242,
+      0.06248485574717576
     ],
     [
-      1.0,
-      5.1295674094668916e-20
+      0.9999999999999993,
+      5.881187990927692e-16
     ]
   ],
   "news": {
     "surprise_index": 0.0,
-    "lambda_N": 138.87292606855476,
-    "lambda_N_z": -0.17121244148736584,
-    "branching_ratio": 0.9994025031595837,
-    "expected_cascade": 1673.649017630322,
+    "lambda_N": 154.25024538575678,
+    "lambda_N_z": -0.5466385695290454,
+    "branching_ratio": 0.7388316647495151,
+    "branching_ratio_ci_low": 0.7311238622386146,
+    "branching_ratio_ci_high": 0.7465394672604156,
+    "expected_cascade": 3.828948096027439,
+    "expected_cascade_bounded": true,
     "attribution": {
       "price": 1.0,
       "surprise": 0.0,
@@ -192,53 +199,53 @@
     "SPY": {
       "baja volatilidad": {
         "mean_ann": {
-          "value": 0.3038237463129629,
-          "ci_low": 0.24283382192794362,
-          "ci_high": 0.3582110150664817
+          "value": 0.3036624369143356,
+          "ci_low": 0.25136773528223044,
+          "ci_high": 0.35908649034289825
         },
         "vol_ann": {
-          "value": 0.15416371496743378,
-          "ci_low": 0.12563724652812833,
-          "ci_high": 0.1869057211004657
+          "value": 0.15397247175411977,
+          "ci_low": 0.12581842150887979,
+          "ci_high": 0.1853969608824236
         },
         "sharpe": {
-          "value": 1.9707863577181177,
-          "ci_low": 1.431110806533688,
-          "ci_high": 2.657912990229993
+          "value": 1.9721865438339996,
+          "ci_low": 1.4397618986788645,
+          "ci_high": 2.6518450685204416
         },
         "maxdd": {
-          "value": -0.31443577233608033,
-          "ci_low": -0.33792128613814854,
-          "ci_high": -0.09609500790569173
+          "value": -0.31443585645631256,
+          "ci_low": -0.3334701243120378,
+          "ci_high": -0.10183713426336834
         }
       },
       "alta volatilidad": {
         "mean_ann": {
-          "value": -1.3921899274216794,
-          "ci_low": -2.142496166616796,
-          "ci_high": -0.6701075017541475
+          "value": -1.3871880810018946,
+          "ci_low": -2.130571995679193,
+          "ci_high": -0.623769873353375
         },
         "vol_ann": {
-          "value": 0.24946502975664156,
-          "ci_low": 0.2238578306528485,
-          "ci_high": 0.27009473587025346
+          "value": 0.2492720898731167,
+          "ci_low": 0.22406709677010406,
+          "ci_high": 0.26832641627389403
         },
         "sharpe": {
-          "value": -5.5807017471739035,
-          "ci_low": -8.621558049225458,
-          "ci_high": -2.732009230938639
+          "value": -5.564955473787678,
+          "ci_low": -8.533970719317606,
+          "ci_high": -2.6521906800262176
         },
         "maxdd": {
-          "value": -0.8398811432989673,
-          "ci_low": -0.9393734954479968,
-          "ci_high": -0.6198491043393529
+          "value": -0.8397232867687059,
+          "ci_low": -0.9398161773612246,
+          "ci_high": -0.5915892852092782
         }
       }
     }
   },
   "warnings": [
-    "M3 (macro) bloqueado: ALFRED_API_KEY sin configurar (mismo bloqueante desde V1); M3 = M2 + macro no puede correr, y M4/M5 dependen de M3/M4 por diseno. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba; ver reports/ablation_news.md.",
-    "Diagnostico M2+H bloqueado: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.6 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).",
+    "M3 (macro): NO es el bloqueante: ALFRED_API_KEY esta configurada y la ablacion M3 con L1 ya se corrio (M3 vs M2 DM=1.038, p=0.299 -> la macro NO aporta; reports/ablation_m3_l1.md). El bloqueante real de M5 vs M4 es M4 (sorpresa): sin consenso historico. M5 depende de M4 por diseno de la escalera. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba (por M4/sorpresa y la cobertura de lambda_N_z, NO por la macro); ver reports/ablation_news.md.",
+    "Diagnostico M2+H bloqueado: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).",
     "10 dia(s) del corpus censurados por el cap del API de GDELT: lambda_N esta subestimada en esos picos (censura contada, no oculta).",
     "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre TODO el span (origen 2023-11-18): el compensador Lambda(T)=mu_N*T integra sobre esos dias fantasma, por lo que mu_N (tasa de fondo) queda SESGADA A LA BAJA y el branching ratio n INFLADO. Decision del director (2026-08-14): ajustar sobre el span completo y documentar el sesgo. Leer n y lambda_N como COTA SUPERIOR de la excitacion, no como estimacion insesgada.",
     "El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados). Se aplico dithering intra-bin (ruido U(0,15min) por evento, semilla fija) para identificar el Hawkes continuo, bajo el supuesto de LLEGADA UNIFORME dentro del bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera.",

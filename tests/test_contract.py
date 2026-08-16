@@ -224,6 +224,22 @@ def test_v3_hawkes_inactivo_no_exige_parquets(tmp_path):
     assert res.promotable, res.violations
 
 
+def test_v3_k1_tvtp_false_y_hawkes_standalone_es_valido(tmp_path):
+    # K=1 (linea BTC): sin logit de transicion, tvtp=false es correcto y el Hawkes
+    # activo se publica como indicador standalone (covariates vacio). Debe promover.
+    d = tmp_path / "run"
+    _write_conforming_v3(d)  # base K=2 con Hawkes activo + parquets
+    irfn = json.loads((d / "irfn.json").read_text(encoding="utf-8"))
+    irfn["model"]["K"] = 1
+    irfn["model"]["tvtp"] = False
+    irfn["model"]["covariates"] = []
+    irfn["model"]["news_layer"] = []
+    (d / "irfn.json").write_text(json.dumps(irfn), encoding="utf-8")
+    _write_manifest(d, "abc123def456")
+    res = validate_artifact(d)
+    assert res.promotable, res.violations
+
+
 def test_manifest_run_id_incoherente(tmp_path):
     d = tmp_path / "run"
     _write_conforming_v3(d)

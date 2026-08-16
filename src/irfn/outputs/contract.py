@@ -297,16 +297,19 @@ def validate_artifact(
                 "el artefacto no corresponde a un commit limpio.")
 
     # --- Regla 6: coherencia de version ---
+    # Con K=1 NO hay logit de transicion: tvtp=false es correcto por construccion, y
+    # una capa activa (Hawkes) se publica como indicador STANDALONE, no como covariable
+    # del logit. Por eso las tres sub-reglas solo aplican con K>=2.
+    K = int(model.get("K") or 2)
     tvtp = bool(model.get("tvtp"))
     covariates = model.get("covariates") or []
     news_layer = model.get("news_layer") or []
-    if rank >= 1 and not tvtp:
-        res.violations.append("R6 version: V1+ exige tvtp=true; el artefacto trae tvtp=false.")
-    if (news_active or hawkes_active) and not covariates:
+    if rank >= 1 and K >= 2 and not tvtp:
+        res.violations.append("R6 version: con K>=2, V1+ exige tvtp=true; el artefacto trae tvtp=false.")
+    if K >= 2 and news_active and not covariates:
         res.violations.append(
-            "R6 version: hay capa de noticias activa pero covariates esta vacio "
-            "(una capa activa aporta al menos una covariable).")
-    if news_active and not news_layer:
+            "R6 version: surprise_index activa en el logit pero covariates esta vacio.")
+    if K >= 2 and news_active and not news_layer:
         res.violations.append(
             "R6 version: news_layer_params.active=true pero model.news_layer esta vacio.")
 

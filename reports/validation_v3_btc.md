@@ -1,6 +1,6 @@
 # Validacion V3 (BTC) — Hawkes y branching ratio
 
-generado: 2026-08-15T20:40:43.683674+00:00  |  run_id: `dbdc61daa50c`
+generado: 2026-08-16T06:01:45.654081+00:00  |  run_id: `ece4ad3df66f`
 
 ## Criterios de aceptacion de V3 (guia, checklist)
 

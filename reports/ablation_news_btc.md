@@ -1,6 +1,6 @@
 # Ablacion de la capa de noticias — NO APLICA (activo K=1)
 
-generado: 2026-08-15T20:40:43.683674+00:00  |  run_id: `dbdc61daa50c`  |  K=1, dist=t
+generado: 2026-08-16T06:01:45.654081+00:00  |  run_id: `ece4ad3df66f`  |  K=1, dist=t
 
 El activo se selecciono como **K=1** (un solo regimen) en V1 (BIC + bootstrap LR + diagnostico de estabilidad 2026-08-15, `reports/diag_btc_k2t_stability.md`). Sin regimenes NO hay matriz de transicion que modular: la escalera M0..M5 y el diagnostico M2+H no aplican (no hay transiciones sobre las que medir el aporte de covariables tecnicas, macro, sorpresa o lambda_N_z).
 
