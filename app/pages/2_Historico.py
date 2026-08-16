@@ -28,6 +28,7 @@ from components import (  # noqa: E402
     load_irfn,
     load_walkforward,
     pit_is_green,
+    render_freshness_gap,
     render_header,
 )
 
@@ -50,6 +51,8 @@ def main():
     if not pit_is_green(audit):
         st.error("La auditoria PIT esta en rojo. Vista deshabilitada hasta corregir el look-ahead.")
         return
+
+    render_freshness_gap(irfn)
 
     labels = irfn["regime"]["labels"]
     K = len(labels)

@@ -209,3 +209,67 @@ def render_header(irfn: dict | None = None, audit: dict | None = None) -> None:
             "Sin manifest.json en artifacts/latest/: el set no se promovio con "
             "scripts/promote.py (posible escritura manual). Procedencia no verificable."
         )
+    # Fase 6: los avisos del artefacto viajan a TODAS las pantallas, no solo Home.
+    warnings = irfn.get("warnings", [])
+    if warnings:
+        with st.expander(f"Avisos del artefacto ({len(warnings)})", expanded=False):
+            for w in warnings:
+                st.warning(w)
+
+
+# Umbral (presentacion) para avisar del hueco entre el fin de la serie OOS y asof.
+# La serie del walk-forward termina antes que asof por su cola natural (el ultimo
+# tramo no forma un bloque de test completo); por encima de esto se avisa para que
+# nadie lea el Historico como "hasta hoy".
+FRESHNESS_GAP_DAYS = 10
+
+
+def se_unreliable(irfn: dict | None) -> bool:
+    """True si el artefacto avisa de Hessiano degenerado (SE/IC no fiables)."""
+    if not irfn:
+        return False
+    return any("hessiano degenerado" in w.lower() for w in irfn.get("warnings", []))
+
+
+# Duracion esperada (dias) por debajo de la cual un regimen es un "absorbe-outliers"
+# (E[D]=1/(1-p_kk) ~ 1 dia): no persiste, no es interpretable como un estado de
+# mercado ni su retorno condicional como un retorno esperado.
+DEGENERATE_DURATION_DAYS = 2.0
+
+
+def degenerate_regimes(irfn: dict | None) -> list[tuple[str, float]]:
+    """(label, E[D]) de los regimenes con duracion esperada < DEGENERATE_DURATION_DAYS.
+    Disparado por regime.expected_duration_days del artefacto (P1-4), no hardcodeado."""
+    if not irfn:
+        return []
+    reg = irfn.get("regime", {})
+    labels = reg.get("labels", [])
+    edd = reg.get("expected_duration_days", [])
+    return [(labels[k], float(edd[k])) for k in range(min(len(labels), len(edd)))
+            if edd[k] < DEGENERATE_DURATION_DAYS]
+
+
+def render_freshness_gap(irfn: dict | None = None) -> None:
+    """Banner si la serie OOS (history.parquet) termina bastante antes que asof
+    (P0-3). Disparado por datos del artefacto, no hardcodeado."""
+    import pandas as pd
+    import streamlit as st
+
+    irfn = irfn if irfn is not None else load_irfn()
+    hist = load_history()
+    if irfn is None or hist is None or hist.empty:
+        return
+    asof_raw = irfn.get("asof")
+    if not asof_raw:
+        return
+    last = pd.to_datetime(hist.index.max()).date()
+    asof = pd.to_datetime(asof_raw).date()
+    gap = (asof - last).days
+    if gap > FRESHNESS_GAP_DAYS:
+        st.info(
+            f"La serie histórica out-of-sample llega hasta **{last}**, mientras que "
+            f"el estado de hoy es de **{asof}** ({gap} días después). No es un dato "
+            "viejo: el walk-forward evalúa fuera de muestra por bloques y el último "
+            "tramo (~{gap} días) aún no forma un bloque de test completo, así que no "
+            "se grafica. El 'Régimen hoy' sí usa toda la muestra hasta asof."
+        )

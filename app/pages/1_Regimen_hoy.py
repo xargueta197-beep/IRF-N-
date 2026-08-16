@@ -16,7 +16,14 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from components import REGIME_COLORS, load_audit, load_irfn, pit_is_green, render_header  # noqa: E402
+from components import (  # noqa: E402
+    REGIME_COLORS,
+    load_audit,
+    load_irfn,
+    pit_is_green,
+    render_freshness_gap,
+    render_header,
+)
 
 st.set_page_config(page_title="IRF-N - Regimen hoy", layout="wide")
 
@@ -159,6 +166,24 @@ def main():
         st.subheader("Matriz de transicion (constante en V0)")
 
     st.plotly_chart(_heatmap_P(labels, P_today), width="stretch")
+
+    # Fase 6 (P2-8): si las filas de la matriz son casi identicas, el regimen de
+    # manana depende muy poco del de hoy (matriz casi de rango 1). Disparado por
+    # los valores de la matriz publicada, no hardcodeado.
+    if len(labels) >= 2 and P_today:
+        maxdiff = max(
+            abs(P_today[i][j] - P_today[0][j])
+            for i in range(len(P_today)) for j in range(len(labels))
+        )
+        if maxdiff < 0.05:
+            st.caption(
+                f"Nota: las filas de la matriz son casi idénticas (diferencia máxima "
+                f"{maxdiff:.2f}). El régimen de mañana depende muy poco del de hoy: la "
+                "matriz es casi de rango 1 (las transiciones apenas reaccionan al estado "
+                "actual)."
+            )
+
+    render_freshness_gap(irfn)
 
 
 main()
