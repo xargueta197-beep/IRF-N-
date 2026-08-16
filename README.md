@@ -31,18 +31,21 @@ covariable de transición añade valor OOS distinguible.
 
 | Módulo | Qué es | Estado | Motivo |
 | :-- | :-- | :-- | :-- |
-| **M1** (regímenes) | HMM K=2, P constante | **MODELO DE PRODUCCIÓN (A4)** | Único aporte robusto (DM vs M0 p=0.001). Mismo sesgo que M2 con menor varianza (bias-variance). El contrato ya NO exige tvtp para V1+ (`outputs/contract.py`). |
-| **M2** (TVTP técnico) | + sma_gap, bb_width_z en el logit | Publicado hoy; no aporta OOS distinguible | DM M2 vs M1 p=0.106. Válido bajo el contrato, pero A4 prefiere M1. |
+| **M1** (regímenes) | HMM K=2, P constante | **MODELO DE PRODUCCIÓN — PUBLICADO** (`3b4f1e39b59c`, 2026-08-16) | Único aporte robusto (DM vs M0 p=0.001). Mismo sesgo que M2 con menor varianza (bias-variance). El contrato ya NO exige tvtp para V1+ (`outputs/contract.py`). |
+| **M2** (TVTP técnico) | + sma_gap, bb_width_z en el logit | Reemplazado por M1 (era `7c44a7fac16d`) | DM M2 vs M1 p=0.106: no aporta OOS distinguible. Válido bajo el contrato, pero A4 publica M1. |
 | **M3** (macro) | + slope_2s10y, hy_oas_z | **CERRADO POR INEFICIENCIA OOS** | Con L1 canónica, DM M3 vs M2 p=0.299: no aporta (`reports/ablation_m3_l1.md`). |
 | **V2 / M4** (sorpresa) | Índice de sorpresa SI_t (consenso point-in-time) | **CERRADO POR RESTRICCIÓN DE DATOS** | No existe fuente gratuita de consenso histórico point-in-time (4 fuentes descartadas con evidencia, `reports/data_audit.md`). Congelado por decisión del director; se reabre solo si se paga Trading Economics. |
 | **M5** (GDELT/Hawkes como covariable) | λ_N(t) del Hawkes en el logit de transición | **CERRADO POR RESTRICCIÓN DE DATOS** | El corpus GDELT (240/998 días) no alcanza para el walk-forward pre-registrado (~7 años). La capa Hawkes SÍ se publica como **indicador standalone** (n, cascada, KS), no como covariable `lambda_N_z` del logit. |
 
-**Nota de transición (A4).** El contrato permite M1 como modelo de producción válido
-(bias-variance) desde el commit `cd0e45b`. El artefacto actualmente vivo en
-`artifacts/latest/` (`7c44a7fac16d`) sigue siendo **M2**, generado bajo el contrato
-previo a la enmienda. La migración del artefacto publicado a M1 es una acción de
-**re-publicación separada, pendiente de decisión explícita** — no ejecutar sin
-autorización previa.
+**Nota de transición (A4) — MIGRACIÓN COMPLETADA 2026-08-16.** El contrato permite M1
+como modelo de producción válido (bias-variance) desde el commit `cd0e45b`. La
+migración del artefacto publicado se ejecutó el 2026-08-16 (autorización explícita del
+director): `artifacts/latest/` es ahora **M1** (`run_id=3b4f1e39b59c`, K=2, matriz de
+transición constante, `covariates=[]`, `tvtp=false`), reemplazando al M2 saliente
+(`7c44a7fac16d`). La migración se hizo con `run_v3 --publish-m1` + `promote.py`
+(atómico), re-validación formal en `reports/validation_v4.md` y panel re-exportado
+(`stale=false`). Histórico de la decisión: contrato primero (`cd0e45b`), migración del
+artefacto después (`3b4f1e39b59c`).
 
 **A1 (kernel Hawkes).** El sesgo de "días fantasma" está **cerrado**: el Hawkes se
 ajusta sobre tiempo observado (decisión del director 2026-08-15; `run_v3.py`,
