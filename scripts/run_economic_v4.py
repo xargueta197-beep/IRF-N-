@@ -86,7 +86,7 @@ def main() -> None:
               f"IC95 [{clo:.3f}, {chi:.3f}]")
     print(f"\nVEREDICTO pre-registrado: {'EXITO' if result['success'] else 'NO SUPERA'} "
           f"(criterio: IC de la diferencia excluye 0 por arriba a {econ.cost_bps} pb)")
-    print(f"escrito: {out}")
+    print(f"escrito: {run_dir / 'validation.json'}")
 
 
 if __name__ == "__main__":
