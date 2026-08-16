@@ -193,6 +193,53 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-16 (remediación de la regresión de publicación + auditoría de mejoras):**
+  - **PROBLEMA:** `artifacts/latest/` era una **mezcla** — `irfn.json`/`audit.json` V0
+    (`run_id=f5e37a1b0d02`, `git=nogit`, multistart 12) con parquets Hawkes huérfanos de
+    una corrida V3, e `history.parquet` 6 semanas rancio. La app mostraba V0 aunque los
+    docs decían V3. Causa raíz: los orquestadores escribían `latest/` pieza por pieza.
+  - **SOLUCIÓN (8 fases, 14 commits, del `77a27e9` al `6f8ae45`):**
+    - **Contrato** `src/irfn/outputs/contract.py`: procedencia única (manifest+run_id),
+      completitud por versión, no look-ahead (`history_end ≤ asof`), frescura
+      (`asof` vs `generated_at`, tol 5d — la cola del walk-forward NO se penaliza), R6
+      multistart 20-50, git real, un solo `walkforward.json`.
+    - **Publicación atómica** `publish.py::promote_run` = **ÚNICO escritor de `latest/`**
+      (swap atómico con recuperación + guardarrail anti-downgrade [<V3 o provisional ⇒
+      bloqueado salvo `--force-downgrade`] + `publish_log.jsonl`). CLI `scripts/promote.py`.
+    - **Orquestadores retargeteados:** `run_pipeline/run_v1/run_v2/run_v3/run_economic_v4`
+      escriben en `runs/<run_id>/`, **ya NO en `latest/`**. `v1_kselect/v1_ablation/
+      walkforward_v1` movidos a **`artifacts[/slug]/analysis/`** (escritor+lectores).
+    - **`run_v3` auto-contenido:** ahora emite `history.parquet` + `walkforward.json` del
+      modelo publicado (M2, o K=1 con walk-forward explícito), **recalculando** el
+      walk-forward (no heredando el V0). Helpers compartidos en
+      `src/irfn/outputs/serialize.py` (extraídos de `run_pipeline`).
+    - **App (Fase 5-6):** `load_walkforward` sin fallback al favorecedor; `render_header`
+      (coherencia de run_id + avisos en las 7 pantallas); banners **data-driven**
+      (régimen degenerado, frescura, rank-1, SE); `momentum_5d` expuesto (P3-13).
+      **Verificado en navegador real las 7 pantallas** (encontró y corrigió un `{gap}`
+      literal).
+    - **Prevención:** `scripts/ci_check_latest.py` + hook `scripts/git-hooks/pre-commit`
+      (instalado) bloquean commits si `latest/` se corrompe. **`git init`** hecho (era
+      `nogit`). `artifacts/README.md` documenta el flujo.
+  - **CORRIDA V4 PUBLICADA:** `run_id=7773faae4863` (SPY, V3, **multistart 30 R6**,
+    TVTP, Hawkes activo n=0.739, asof 2026-08-14), promovida a `latest/` de forma
+    atómica. Validador: **PROMOVIBLE**. Walk-forward M2: log-loss **0.243 vs
+    climatología 0.541** (gana). ~37 min de cómputo. Precios re-bajados frescos (la
+    caché SPY estaba en 2026-07-10; movida a `.stale`).
+  - **Fase 7 — diagnóstico del régimen degenerado** (`reports/diag_degenerate_regime.md`,
+    `scripts/diag_degenerate_regime.py` @diagnostic_only): el absorbe-outliers (E[D]≈1d)
+    es **estructural** (óptimo global, 17/50 arranques; ni Student-t ni K=3 lo corrigen).
+    Se reporta con caveat (banner), no se esconde.
+  - **Fase 8 — auditoría de mejoras** (`reports/auditoria_mejoras.md`): 11 recomendaciones
+    priorizadas. Las de mayor impacto: (1) reparametrizar el régimen degenerado (piso de
+    persistencia / jump / mezcla de colas — decisión del director), (2) evaluar publicar
+    **M1** en vez de M2 (ninguna covariable de transición aporta OOS), (3) Hawkes
+    power-law (el KS rechaza el exponencial). Datos: decidir GDELT (240/998d) y consenso
+    (V2). Higiene: cerrar R6 en BTC, promover BTC a la tubería atómica, unificar la caché
+    de precios, desplegar el panel.
+  - pytest `-m "not slow"`: **140 passed**. Tests nuevos: `test_contract` (12),
+    `test_publish_promote` (4), `test_serialize` (2), `test_app_components` (4).
+
 - **Sesión 2026-08-15 (chequeo de sensibilidad del dithering — aviso #5, SPY):**
   - **Aviso #5 de la auditoría pre-corrida RESUELTO para SPY.** El `seendate` de GDELT está
     cuantizado a 15 min (~83% de titulares empatados) y sin dithering U(0,15min) el MLE del
