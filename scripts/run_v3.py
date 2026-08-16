@@ -85,8 +85,11 @@ from irfn.features.relevance import RelevanceModelUnavailable, score_headlines  
 from irfn.models import hawkes_mle  # noqa: E402
 from irfn.models.tvtp import transition_matrix_at  # noqa: E402
 from irfn.outputs.publish import build_payload, default_hawkes_layer_params, publish  # noqa: E402
+from irfn.outputs.serialize import write_history_parquet, write_walkforward_json  # noqa: E402
 from irfn.pipeline import regime_labels, run_pipeline  # noqa: E402
+from irfn.validation import calibration  # noqa: E402
 from irfn.validation.ablation import ModelSpec, full_ladder_specs, run_ablation  # noqa: E402
+from irfn.validation.walkforward import walk_forward  # noqa: E402
 
 # Helpers de V2 reutilizados tal cual (mismo patron que run_v2 importando
 # capture_consensus: scripts/ puede importar scripts/; la LOGICA vive en src/).
@@ -704,6 +707,34 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
     run_dir.mkdir(parents=True, exist_ok=True)
     publish(payload, run_dir / "irfn.json")
     log.info("    irfn.json escrito en runs/%s (version V3); no publicado a latest/", run_id)
+
+    # --- history.parquet + walkforward.json del MODELO PUBLICADO (Fase 4) ---
+    # Condicion 2: el walk-forward se RECALCULA sobre el modelo V3 publicado, no se
+    # hereda del V0. Para K>=2 es el peldano de la ablacion que coincide con el
+    # titular (M2, o M2+H si lambda_N_z entro al logit); para K=1 se corre un
+    # walk-forward explicito del modelo de un solo regimen. El baseline de la
+    # calibracion es la climatologia de regimen (honesto), no el favorecedor.
+    n_starts_wf_pub = 6 if quick else base.v0.wf_n_starts
+    if single_regime:
+        wf_pub = walk_forward(
+            returns, K=Kt, seed=seed, n_starts=n_starts_wf_pub,
+            train_years=base.walkforward.train_years, test_months=base.walkforward.test_months,
+            n_blocks_min=base.walkforward.n_blocks, dist=distt,
+            checkpoint_path=ARTIFACTS.parent / "checkpoints" / f"v3_wf_pub_k1{REPORT_SUFFIX}.pkl",
+        )
+        published_spec_name = "K=1 (regimen unico)"
+    else:
+        published_spec_name = "M2+H" if covariate_active else "M2"
+        wf_pub = abl.wf_results[published_spec_name]
+    oos_pub = wf_pub.oos_frame
+    xi_pred_pub = oos_pub[[f"xi_predicted_{k}" for k in range(wf_pub.K)]].to_numpy()
+    xi_filt_pub = oos_pub[[f"xi_filtered_{k}" for k in range(wf_pub.K)]].to_numpy()
+    calib_pub = calibration.summarize(xi_pred_pub, xi_filt_pub)
+    write_walkforward_json(run_dir / "walkforward.json", wf_pub, calib_pub)
+    write_history_parquet(run_dir / "history.parquet", oos_pub)
+    log.info("    set OOS del modelo publicado (%s): log-loss=%.4f vs climatologia=%.4f "
+             "(%d bloques)", published_spec_name, calib_pub["log_loss"],
+             calib_pub["log_loss_baseline"], wf_pub.n_blocks)
 
     # --- artefactos de pantalla 3 (R9: la app solo lee) ---
     _dump({"events": _events_table(z_wide, weights)}, run_dir / "surprise_events.json")

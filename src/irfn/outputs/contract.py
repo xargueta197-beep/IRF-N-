@@ -72,11 +72,16 @@ def _expected_files(rank: int, news_active: bool, hawkes_active: bool) -> tuple[
         if news_active:
             required.add("surprise_history.parquet")
 
-    if rank >= 3:  # V3+: capa Hawkes obligatoria en el set
-        required.add("hawkes_history.parquet")
-        required.add("headline_rug.parquet")
+    if rank >= 3:  # V3+: capa Hawkes
         allowed.add("hawkes_history.parquet")
         allowed.add("headline_rug.parquet")
+        # obligatorios SOLO si la capa Hawkes esta activa (espejo de
+        # surprise_history): un V3 con Hawkes inactivo por falta de corpus es
+        # legitimo y no debe bloquearse por unos parquets que no existen. En V0
+        # (rank 0) estos archivos NO estan en `allowed` => siguen siendo ajenos.
+        if hawkes_active:
+            required.add("hawkes_history.parquet")
+            required.add("headline_rug.parquet")
 
     if rank >= 4:  # V4: walk-forward economico (opcional, no requerido)
         allowed.add("validation.json")

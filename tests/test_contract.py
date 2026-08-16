@@ -184,6 +184,23 @@ def test_r6_v1_sin_tvtp(tmp_path):
     assert any("tvtp" in v for v in res.violations)
 
 
+def test_v3_hawkes_inactivo_no_exige_parquets(tmp_path):
+    # Un V3 legitimo con Hawkes inactivo (corpus insuficiente) y sin parquets de
+    # Hawkes debe seguir siendo promovible (obligatorios solo si active).
+    import os
+    d = tmp_path / "run"
+    _write_conforming_v3(d)
+    os.remove(d / "hawkes_history.parquet")
+    os.remove(d / "headline_rug.parquet")
+    irfn = json.loads((d / "irfn.json").read_text(encoding="utf-8"))
+    irfn["model"]["hawkes_layer_params"]["active"] = False
+    irfn["model"]["covariates"] = ["sma_gap"]  # titular tecnico, sin lambda_N_z
+    (d / "irfn.json").write_text(json.dumps(irfn), encoding="utf-8")
+    _write_manifest(d, "abc123def456")
+    res = validate_artifact(d)
+    assert res.promotable, res.violations
+
+
 def test_manifest_run_id_incoherente(tmp_path):
     d = tmp_path / "run"
     _write_conforming_v3(d)
