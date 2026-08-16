@@ -23,8 +23,15 @@ consultan los dos documentos de referencia absoluta (CLAUDE.md raíz).
   - **PENDIENTE de decisión del usuario:** re-publicar el artefacto para que A2/A3 lleguen al
     `latest/` vivo (commit por R5 → `run_v3 --no-capture` ~37 min R6 → `promote.py` atómico →
     re-exportar). El código y los tests ya están verdes; falta solo la corrida.
-- **Fase 2 (decisiones del director A1/A4/A6):** NO iniciada (metodología; requiere OK).
-- **Fase 3 (limbos de datos):** NO iniciada.
+- **Fase 2 (decisiones del director A1/A4/A6):** RESUELTAS con OK del director (2026-08-16).
+  A1 = mantener exponencial + caveat KS (sesgo ya cerrado). A4 = contrato desvincula
+  V1+⇒tvtp; M1 producción por bias-variance (`contract.py`); artefacto vivo sigue M2 hasta
+  re-publicación explícita. A6 = óptimo global sin parches, decisión informada documentada.
+- **Fase 3 (limbos de datos):** parcialmente cerrada. M5 (GDELT) y V2 (consenso) CERRADOS por
+  restricción de datos (README "Estado de módulos"). Caché de precios: freshness de 7 días
+  aplicada (`data/prices.py`). Pendientes: despliegue del panel (credenciales) y re-validación
+  formal si se reactivan datos.
+- **Re-validación formal (F6):** CERRADA — `validation.json` stale=false sobre `7c44a7fac16d`.
 
 ---
 

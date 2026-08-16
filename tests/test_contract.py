@@ -197,14 +197,32 @@ def test_r5_git_commit_nogit(tmp_path):
 
 
 def test_r6_v1_sin_tvtp(tmp_path):
+    # Con covariables de transicion DECLARADAS (sma_gap, lambda_N_z) pero tvtp=false,
+    # sigue siendo incoherente (A4 solo desvincula tvtp cuando NO hay covariables).
     d = tmp_path / "run"
     _write_conforming_v3(d)
     irfn = json.loads((d / "irfn.json").read_text(encoding="utf-8"))
-    irfn["model"]["tvtp"] = False  # sigue siendo V3 -> V1+ exige tvtp
+    irfn["model"]["tvtp"] = False  # covariables presentes + tvtp=false -> incoherente
     (d / "irfn.json").write_text(json.dumps(irfn), encoding="utf-8")
     _write_manifest(d, "abc123def456")
     res = validate_artifact(d)
     assert any("tvtp" in v for v in res.violations)
+
+
+def test_a4_m1_sin_covariables_tvtp_false_es_valido(tmp_path):
+    # A4 (decision del director 2026-08-16): M1 -- K=2, regimenes solos, SIN
+    # covariables de transicion -- es un modelo de produccion valido; el contrato ya
+    # NO exige tvtp por el solo hecho de ser V1+. covariates=[] + tvtp=false => OK.
+    d = tmp_path / "run"
+    _write_conforming_v3(d)
+    irfn = json.loads((d / "irfn.json").read_text(encoding="utf-8"))
+    irfn["model"]["tvtp"] = False
+    irfn["model"]["covariates"] = []   # M1: sin covariables de transicion
+    (d / "irfn.json").write_text(json.dumps(irfn), encoding="utf-8")
+    _write_manifest(d, "abc123def456")
+    res = validate_artifact(d)
+    assert res.promotable, res.violations
+    assert not any("tvtp" in v for v in res.violations)
 
 
 def test_v3_hawkes_inactivo_no_exige_parquets(tmp_path):

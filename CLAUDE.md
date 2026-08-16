@@ -193,6 +193,38 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-16 (Re-validación formal F6 + Bloque 2: cierre documental, A4, freshness):**
+  - **Diagnóstico del salto del Test 3 (p=0.048→0.90): H2 benigno, NO A1.** El modelo
+    publicado usa `covariates=[sma_gap, bb_width_z]`, `news_layer=[]`, `lambda_N_z` inactiva
+    → Hawkes no entra al logit y no toca `r_pred_mean`. El "0.048" venía de un walk-forward
+    SUPERADO (V1/ablación, `16d4190d17e2`); los 3 runs recientes (incl. pre-sprint) dan
+    p=0.90 bit-idéntico. Test 2 igual: baseline viejo (climatología de régimen) vs nuevo
+    (climatología MARGINAL de run_v3) son definiciones distintas. Sin bug.
+  - **Re-validación formal sobre el run vivo `7c44a7fac16d` (Bloque 1, autorizada):**
+    `reports/validation_v4.md` reescrito. Tests 2/3/4/6/7 desde artefactos ya existentes del
+    run (sin cómputo pesado); Test 5 re-corrido con `run_economic_v4` (NO SUPERA, diff −0.502
+    IC [−1.301, 0.031]). Resultados: Test 3 SIN señal (p=0.90); Test 4 M1 vs M0 −3.21 p=0.001;
+    Test 6 Sharpe [0.168,1.396]; Test 7 M1>M0 robusto, M2/M3 no aportan. **Baseline del Test 2
+    documentado explícito** (climatología marginal, distinta del baseline viejo). Bug cosmético
+    de `run_economic_v4` (NameError en print post-escritura) corregido. **`validation.json` del
+    panel: `stale=false`**, run_id/asof sincronizados; `contract`/`ci_check` PROMOVIBLE, triplete
+    irfn/audit/manifest comparte run_id. F6 CERRADO.
+  - **Bloque 2 — cierre documental + A4 + freshness:**
+    - **A4 (contrato):** `outputs/contract.py` DESVINCULA "V1+ ⇒ tvtp=true"; ahora solo exige
+      tvtp si SE DECLARAN covariables de transición (coherencia). M1 (K=2, `covariates=[]`,
+      tvtp=false) es modelo de producción válido por bias-variance. El guardarraíl anti-downgrade
+      de VERSIÓN (promote bloquea <V3) queda intacto. Test nuevo `test_a4_m1_sin_covariables...`.
+      **NOTA:** el artefacto vivo sigue siendo M2 (válido bajo el contrato enmendado); el cambio
+      a M1 como publicado es un paso aparte que requiere OK explícito (re-publicación).
+    - **Cierre de módulos (README.md, "Estado de módulos"):** M5 (GDELT/Hawkes como covariable)
+      y V2/M4 (sorpresa/consenso) marcados **CERRADOS POR RESTRICCIÓN DE DATOS**; M3 (macro)
+      CERRADO POR INEFICIENCIA OOS; M1 = producción (A4). Documentados A6 (régimen degenerado:
+      óptimo global, sin parches, decisión informada) y A1 (sesgo cerrado; exponencial + caveat KS).
+    - **Freshness del caché de precios (`data/prices.py`):** `_cache_is_fresh` +
+      `_CACHE_MAX_AGE_DAYS=7` (7 d ≈ 5 hábiles + finde, alineado con la tolerancia del contrato);
+      un caché >7 d se re-descarga (evita el bug del caché rancio de 5 semanas). 4 tests nuevos.
+  - **pytest `-m "not slow"`: 154 passed, 0 failed.** No pusheado.
+
 - **Sesión 2026-08-16 (Sprint de honestidad — A2 + A3 + A5; código, sin metodología):**
   - Ejecutada la Fase 1 del `reports/plan_desarrollo_2026-08-16.md` (reconciliación de las
     dos auditorías de hoy). Objetivo: dejar de publicar precisión que el método no sostiene,

@@ -161,7 +161,8 @@ def validate_artifact(
       3. Coherencia temporal: asof - max(history.fecha) <= tolerance_days.
       4. R6: multistart en [20, 50] (duro; provisional bajo allow_provisional).
       5. Reproducibilidad: git_commit != 'nogit' (+ arbol limpio si repo_root).
-      6. Coherencia de version: V1+ => tvtp; capa activa => covariables no vacias.
+      6. Coherencia de version: covariables de transicion declaradas => tvtp=true
+         (A4: M1 sin covariables y tvtp=false es valido); capa activa => covariables.
       7. Un solo walk-forward: walkforward.json si, walkforward_v1.json no.
     """
     res = ContractResult()
@@ -304,8 +305,21 @@ def validate_artifact(
     tvtp = bool(model.get("tvtp"))
     covariates = model.get("covariates") or []
     news_layer = model.get("news_layer") or []
-    if rank >= 1 and K >= 2 and not tvtp:
-        res.violations.append("R6 version: con K>=2, V1+ exige tvtp=true; el artefacto trae tvtp=false.")
+    # A4 (decision del director 2026-08-16, criterio bias-variance): M1 -- solo
+    # regimenes de volatilidad, SIN covariables de transicion -- es un modelo de
+    # produccion legitimo. Ninguna covariable de transicion (tecnica ni macro) anade
+    # valor OOS distinguible (Test 7), asi que M1 tiene el mismo sesgo que M2 con
+    # menor varianza. Se DESVINCULA "V1+ => tvtp=true": ya NO se exige tvtp por el
+    # solo hecho de ser V1+. Lo que se conserva es la COHERENCIA: si el artefacto
+    # DECLARA covariables de transicion, entonces tvtp debe estar on (covariables sin
+    # logit no tienen sentido). M1 publica covariates=[] y tvtp=false: valido. El
+    # guardarrail anti-downgrade de VERSION (promote_run bloquea < V3) es
+    # independiente de esta regla y sigue intacto: relajar tvtp NO abre la puerta a
+    # una regresion V0.
+    if rank >= 1 and K >= 2 and covariates and not tvtp:
+        res.violations.append(
+            "R6 version: con K>=2 y covariables de transicion declaradas, tvtp debe ser "
+            "true (covariables sin logit no tienen sentido); el artefacto trae tvtp=false.")
     if K >= 2 and news_active and not covariates:
         res.violations.append(
             "R6 version: surprise_index activa en el logit pero covariates esta vacio.")

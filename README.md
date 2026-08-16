@@ -17,11 +17,38 @@ innegociables que gobiernan este repo.
 
 ## Estado actual
 
-**Sesión 0 — andamiaje.** No existe modelo todavía: ni filtro de Hamilton, ni
-MS-GJR-GARCH, ni TVTP, ni Hawkes. Esta sesión entrega estructura de repo,
-contrato de salida, guardián anti-look-ahead, tests (en rojo/skip) y
-auditoría de fuentes de datos. Ver `reports/data_audit.md` y la sección
-"ESTADO ACTUAL DEL PROYECTO" en `CLAUDE.md`.
+**V4 — validación estadística formal.** Modelo completo y vivo: MS-GJR-GARCH
+K=2 con filtro de Hamilton, TVTP y capa Hawkes. Indicador publicado
+atómicamente en `artifacts/latest/` (SPY `run_id=7c44a7fac16d`, R6). El detalle
+por sesión vive en "ESTADO ACTUAL DEL PROYECTO" (`CLAUDE.md`); la validación
+formal en `reports/validation_v4.md`.
+
+### Estado de módulos (cierre documental, 2026-08-16)
+
+Escalera de covariables M0→M5 (ver `reports/validation_v4.md`, Test 7). El único
+aporte robusto OOS son los **regímenes de volatilidad** (M1>M0); ninguna
+covariable de transición añade valor OOS distinguible.
+
+| Módulo | Qué es | Estado | Motivo |
+| :-- | :-- | :-- | :-- |
+| **M1** (regímenes) | HMM K=2, P constante | **MODELO DE PRODUCCIÓN (A4)** | Único aporte robusto (DM vs M0 p=0.001). Mismo sesgo que M2 con menor varianza (bias-variance). El contrato ya NO exige tvtp para V1+ (`outputs/contract.py`). |
+| **M2** (TVTP técnico) | + sma_gap, bb_width_z en el logit | Publicado hoy; no aporta OOS distinguible | DM M2 vs M1 p=0.106. Válido bajo el contrato, pero A4 prefiere M1. |
+| **M3** (macro) | + slope_2s10y, hy_oas_z | **CERRADO POR INEFICIENCIA OOS** | Con L1 canónica, DM M3 vs M2 p=0.299: no aporta (`reports/ablation_m3_l1.md`). |
+| **V2 / M4** (sorpresa) | Índice de sorpresa SI_t (consenso point-in-time) | **CERRADO POR RESTRICCIÓN DE DATOS** | No existe fuente gratuita de consenso histórico point-in-time (4 fuentes descartadas con evidencia, `reports/data_audit.md`). Congelado por decisión del director; se reabre solo si se paga Trading Economics. |
+| **M5** (GDELT/Hawkes como covariable) | λ_N(t) del Hawkes en el logit de transición | **CERRADO POR RESTRICCIÓN DE DATOS** | El corpus GDELT (240/998 días) no alcanza para el walk-forward pre-registrado (~7 años). La capa Hawkes SÍ se publica como **indicador standalone** (n, cascada, KS), no como covariable `lambda_N_z` del logit. |
+
+**A1 (kernel Hawkes).** El sesgo de "días fantasma" está **cerrado**: el Hawkes se
+ajusta sobre tiempo observado (decisión del director 2026-08-15; `run_v3.py`,
+μ_N corregido, n=0.7388). El único eje abierto es kernel exponencial vs power-law:
+el KS rechaza el exponencial (D=0.029, pequeño, dominado por n≈95k), el power-law
+gana AIC pero tampoco pasa el KS → se mantiene el exponencial con el caveat honesto
+del KS. Ver `reports/nota_decisiones_director_2026-08-16.md`.
+
+**A6 (régimen degenerado).** El segundo régimen es un absorbe-outliers (E[D]≈1 día):
+es el **óptimo global**, no un bug. Decisión informada del director: se conserva la
+estimación puntual **sin parches de persistencia artificiales** (piso/jump/mezcla);
+se reporta con honestidad (IC condicional suprimido + banner en la app). NO es una
+omisión: es una decisión documentada de no forzar el modelo.
 
 ## Instalación
 
