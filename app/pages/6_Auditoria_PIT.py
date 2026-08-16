@@ -15,7 +15,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from components import load_audit  # noqa: E402
+from components import load_audit, render_header  # noqa: E402
 
 st.set_page_config(page_title="IRF-N - Auditoria PIT", layout="wide")
 
@@ -26,6 +26,7 @@ def _badge(passed: bool) -> str:
 
 def main():
     st.title("Auditoria point-in-time")
+    render_header()
     audit = load_audit()
     if audit is None:
         st.info("No hay artefactos todavia. Corre el pipeline desde la Sala de control.")

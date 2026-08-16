@@ -14,7 +14,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from components import load_audit, load_irfn, pit_is_green  # noqa: E402
+from components import load_audit, load_irfn, pit_is_green, render_header  # noqa: E402
 
 st.set_page_config(page_title="IRF-N - Retornos condicionales", layout="wide")
 
@@ -23,6 +23,7 @@ def main():
     st.title("Retornos condicionales por regimen")
     irfn = load_irfn()
     audit = load_audit()
+    render_header(irfn, audit)
     if irfn is None:
         st.info("No hay artefactos todavia. Corre el pipeline desde la Sala de control.")
         return

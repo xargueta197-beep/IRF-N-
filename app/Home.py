@@ -23,6 +23,7 @@ from components import (  # noqa: E402
     load_audit,
     load_irfn,
     pit_is_green,
+    render_header,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -117,6 +118,7 @@ def main() -> None:
 
     irfn = load_irfn()
     audit = load_audit()
+    render_header(irfn, audit)
 
     verde = _semaforo_pit(audit)
     st.divider()

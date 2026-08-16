@@ -46,14 +46,38 @@ def load_audit() -> dict | None:
 
 
 def load_walkforward() -> dict | None:
-    """Walk-forward mas reciente disponible: prefiere el de V1 (walkforward_v1.json,
-    escrito por scripts/run_v1.py ablation) y cae al de V0 si aun no existe."""
-    return _read_json("walkforward_v1.json") or _read_json("walkforward.json")
+    """Walk-forward del artefacto VIGENTE: SOLO artifacts/latest/walkforward.json,
+    que la promocion atomica garantiza que es el del modelo publicado (mismo run_id).
+
+    Fase 5: se elimino el fallback a walkforward_v1.json. Ese archivo era de una
+    corrida V1 distinta con un baseline mas favorable; dejarlo como respaldo hacia
+    que la pantalla de Validacion mostrara metricas de OTRO modelo. Si falta el
+    walkforward.json vigente, se devuelve None y la pantalla muestra vacio honesto,
+    NUNCA el de otra corrida."""
+    return _read_json("walkforward.json")
 
 
 def load_ablation() -> dict | None:
-    """Resultado de la fase 2 de V1 (ablacion + DM vs V0), o None si no ha corrido."""
+    """Ablacion V1 (DM vs V0). Ya NO vive en artifacts/latest/ (es analisis V1, no
+    parte del set publicado; la promocion atomica solo trae el set del modelo
+    vigente). Devuelve None salvo que exista: la pantalla de Validacion oculta el
+    bloque en vez de mostrar el DM de una version que no es la publicada."""
     return _read_json("v1_ablation.json")
+
+
+def load_manifest() -> dict | None:
+    """manifest.json del set vigente (run_id + version + sha256 por archivo). Lo
+    escribe la promocion; es la fuente de verdad de 'que corrida es esta'."""
+    return _read_json("manifest.json")
+
+
+def artifact_coherent(irfn: dict | None, audit: dict | None, manifest: dict | None) -> bool:
+    """True si irfn/audit/manifest declaran el MISMO run_id. Con promocion atomica
+    siempre deberia serlo; si no, es que alguien escribio latest/ a mano (la
+    regresion que estamos matando) y la app debe avisar en vez de dibujar una
+    mezcla."""
+    ids = {o.get("run_id") for o in (irfn, audit, manifest) if o}
+    return len(ids) <= 1
 
 
 def load_surprise_events() -> list[dict]:
@@ -154,3 +178,34 @@ def pit_is_green(audit: dict | None) -> bool:
 
 def dev_mode() -> bool:
     return os.environ.get("IRFN_DEV_MODE", "").lower() in {"1", "true", "yes"}
+
+
+def render_header(irfn: dict | None = None, audit: dict | None = None) -> None:
+    """Cabecera comun de las 7 pantallas: identidad del artefacto vigente
+    (version, run_id, git, asof) + coherencia de procedencia. Fase 5: si irfn,
+    audit y manifest no comparten run_id, se avisa en TODAS las pantallas -- una
+    mezcla de procedencia (la regresion V0) no se dibuja en silencio."""
+    import streamlit as st
+
+    irfn = irfn if irfn is not None else load_irfn()
+    audit = audit if audit is not None else load_audit()
+    manifest = load_manifest()
+    if irfn is None:
+        return
+    c1, c2, c3, c4 = st.columns(4)
+    c1.caption(f"**version** {irfn.get('version', '?')}")
+    c2.caption(f"**run_id** {irfn.get('run_id', '?')}")
+    c3.caption(f"**git** {irfn.get('git_commit', '?')}")
+    c4.caption(f"**asof** {irfn.get('asof', '?')}")
+    if not artifact_coherent(irfn, audit, manifest):
+        st.error(
+            "Procedencia INCOHERENTE: irfn/audit/manifest no comparten run_id. "
+            "El set de artifacts/latest/ es una MEZCLA de corridas (no se promovio "
+            "de forma atomica). No confies en lo que se dibuja hasta re-promover con "
+            "scripts/promote.py."
+        )
+    if manifest is None:
+        st.warning(
+            "Sin manifest.json en artifacts/latest/: el set no se promovio con "
+            "scripts/promote.py (posible escritura manual). Procedencia no verificable."
+        )

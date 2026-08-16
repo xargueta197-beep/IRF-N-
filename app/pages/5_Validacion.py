@@ -15,7 +15,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from components import load_ablation, load_irfn, load_validation_report, load_walkforward  # noqa: E402
+from components import load_ablation, load_irfn, load_validation_report, load_walkforward, render_header  # noqa: E402
 
 st.set_page_config(page_title="IRF-N - Validacion", layout="wide")
 
@@ -42,6 +42,7 @@ def main():
     irfn = load_irfn()
     version = (irfn or {}).get("version", "V0")
     st.title(f"Validacion {version}")
+    render_header(irfn)
     wf = load_walkforward()
     report = load_validation_report()
     abl = load_ablation()

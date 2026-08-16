@@ -27,6 +27,7 @@ from components import (  # noqa: E402
     load_irfn,
     load_surprise_events,
     load_surprise_history,
+    render_header,
 )
 
 st.set_page_config(page_title="IRF-N - Noticias", layout="wide")
@@ -280,6 +281,7 @@ def _hawkes_section(irfn: dict) -> None:
 def main():
     st.title("Noticias")
     irfn = load_irfn()
+    render_header(irfn)
     if irfn is None:
         st.info("No hay artefactos todavia. Corre `python scripts/run_v2.py` (o V0/V1 primero).")
         return

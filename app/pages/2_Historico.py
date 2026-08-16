@@ -28,6 +28,7 @@ from components import (  # noqa: E402
     load_irfn,
     load_walkforward,
     pit_is_green,
+    render_header,
 )
 
 st.set_page_config(page_title="IRF-N - Historico", layout="wide")
@@ -39,6 +40,7 @@ def main():
 
     irfn = load_irfn()
     audit = load_audit()
+    render_header(irfn, audit)
     hist = load_history()
     wf = load_walkforward()
 
