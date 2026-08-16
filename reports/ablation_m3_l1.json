@@ -1,0 +1,137 @@
+{
+  "table": [
+    {
+      "model": "M0",
+      "description": "GARCH un solo regimen (piso)",
+      "K": 1,
+      "dist": "normal",
+      "covariates": [],
+      "n_blocks": 17,
+      "n_oos": 2135,
+      "oos_logloss_per_obs": 1.3713257255598674,
+      "oos_loglik_per_obs": -1.3713257255598674,
+      "l1_lambdas_por_bloque": null
+    },
+    {
+      "model": "M1",
+      "description": "HMM K=2 P constante",
+      "K": 2,
+      "dist": "normal",
+      "covariates": [],
+      "n_blocks": 17,
+      "n_oos": 2135,
+      "oos_logloss_per_obs": 1.332060155400965,
+      "oos_loglik_per_obs": -1.332060155400965,
+      "l1_lambdas_por_bloque": null
+    },
+    {
+      "model": "M2",
+      "description": "+TVTP tecnico ['sma_gap', 'bb_width_z']",
+      "K": 2,
+      "dist": "normal",
+      "covariates": [
+        "sma_gap",
+        "bb_width_z"
+      ],
+      "n_blocks": 17,
+      "n_oos": 2135,
+      "oos_logloss_per_obs": 1.3369394876349205,
+      "oos_loglik_per_obs": -1.3369394876349205,
+      "l1_lambdas_por_bloque": [
+        2.0,
+        8.0,
+        32.0,
+        32.0,
+        32.0,
+        0.0,
+        8.0,
+        2.0,
+        8.0,
+        8.0,
+        8.0,
+        2.0,
+        8.0,
+        8.0,
+        8.0,
+        2.0,
+        32.0
+      ]
+    },
+    {
+      "model": "M3",
+      "description": "+macro ['sma_gap', 'bb_width_z', 'slope_2s10y', 'hy_oas_z']",
+      "K": 2,
+      "dist": "normal",
+      "covariates": [
+        "sma_gap",
+        "bb_width_z",
+        "slope_2s10y",
+        "hy_oas_z"
+      ],
+      "n_blocks": 17,
+      "n_oos": 2135,
+      "oos_logloss_per_obs": 1.3416154050927025,
+      "oos_loglik_per_obs": -1.3416154050927025,
+      "l1_lambdas_por_bloque": [
+        0.0,
+        32.0,
+        32.0,
+        32.0,
+        32.0,
+        8.0,
+        8.0,
+        8.0,
+        32.0,
+        8.0,
+        32.0,
+        8.0,
+        8.0,
+        32.0,
+        0.5,
+        8.0,
+        8.0
+      ]
+    }
+  ],
+  "dm_pairs": [
+    {
+      "statistic": -3.4006312434048005,
+      "dm_stat": -3.4006312434048005,
+      "p_value": 0.00068468346582901,
+      "mean_diff": -0.03926557015890243,
+      "better": true,
+      "n_obs": 2135,
+      "n_lags": 19,
+      "h": 1,
+      "note": "DM<0 => el primer modelo tiene MENOR perdida (mejor); HAC Newey-West + HLN",
+      "model_a": "M1",
+      "model_b": "M0"
+    },
+    {
+      "statistic": 2.247312951330743,
+      "dm_stat": 2.247312951330743,
+      "p_value": 0.024721823024672965,
+      "mean_diff": 0.004879332233955612,
+      "better": false,
+      "n_obs": 2135,
+      "n_lags": 19,
+      "h": 1,
+      "note": "DM<0 => el primer modelo tiene MENOR perdida (mejor); HAC Newey-West + HLN",
+      "model_a": "M2",
+      "model_b": "M1"
+    },
+    {
+      "statistic": 1.0383886835518936,
+      "dm_stat": 1.0383886835518936,
+      "p_value": 0.299206775158893,
+      "mean_diff": 0.004675917457781787,
+      "better": false,
+      "n_obs": 2135,
+      "n_lags": 19,
+      "h": 1,
+      "note": "DM<0 => el primer modelo tiene MENOR perdida (mejor); HAC Newey-West + HLN",
+      "model_a": "M3",
+      "model_b": "M2"
+    }
+  ]
+}

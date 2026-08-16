@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-08-15T20:24:50.015784+00:00",
+  "asset": "BTC",
+  "seed": 42,
+  "n_starts": 100,
+  "sample": {
+    "n_obs": 2987,
+    "start": "2018-05-13",
+    "end": "2026-07-16"
+  },
+  "r6_reference": {
+    "K1_t": {
+      "bic": 14559.11,
+      "conv": "18/20"
+    },
+    "K2_t": {
+      "bic": 14569.94,
+      "conv": "1/20"
+    },
+    "K2_normal": {
+      "bic": 14665.57,
+      "conv": "10/20"
+    },
+    "hansen_K2vs1_t": {
+      "lr_obs": 53.18,
+      "p_value": 0.02
+    }
+  },
+  "cells": {
+    "K1_t": {
+      "K": 1,
+      "dist": "t",
+      "loglik": -7255.550411697038,
+      "k_free": 6,
+      "bic": 14559.112972303372,
+      "aic": 14523.100823394076,
+      "n_converged": 95,
+      "n_starts": 100,
+      "nu": [
+        3.1346574143456576
+      ],
+      "seconds": 13.4,
+      "conv_frac": 0.95
+    },
+    "K2_t": {
+      "K": 2,
+      "dist": "t",
+      "loglik": -7227.936005359596,
+      "k_free": 14,
+      "bic": 14567.900358174216,
+      "aic": 14483.872010719191,
+      "n_converged": 1,
+      "n_starts": 100,
+      "nu": [
+        30.547856110327952,
+        2.8576641496055855
+      ],
+      "seconds": 172.2,
+      "conv_frac": 0.01
+    },
+    "K2_normal": {
+      "K": 2,
+      "dist": "normal",
+      "loglik": -7284.774743795895,
+      "k_free": 12,
+      "bic": 14665.573785410383,
+      "aic": 14593.54948759179,
+      "n_converged": 44,
+      "n_starts": 100,
+      "nu": null,
+      "seconds": 80.4,
+      "conv_frac": 0.44
+    }
+  },
+  "hansen_K2vs1_t_stabilized": {
+    "K_null": 1,
+    "K_alt": 2,
+    "dist": "t",
+    "lr_obs": 55.228812674884466,
+    "loglik_null": -7255.550411697038,
+    "loglik_alt": -7227.936005359596,
+    "n_boot": 49,
+    "n_boot_ok": 49,
+    "n_boot_failed": 0,
+    "p_value": 0.02,
+    "lr_boot_q50": 12.320290448658852,
+    "lr_boot_q95": 22.61915938002165,
+    "method": "bootstrap parametrico (LR estandar invalido: Davies/parametros no identificados bajo H0; Hansen 1992 exacto descartado por costo, decision documentada en validation/tests_stat.py)",
+    "seconds": 733.2
+  }
+}

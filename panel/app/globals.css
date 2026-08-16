@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: #f7f6f2;
+  color: #1a1a1a;
+}
+
+/* Tipografia de docs/metodologia.md renderizado (app/metodologia/page.tsx).
+   Sin plugin de tailwind-typography: reglas minimas, lectura lineal. */
+.prose-metodologia h2 {
+  font-family: var(--font-instrument-serif), serif;
+  font-size: 1.75rem;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  color: #1a1a1a;
+}
+
+.prose-metodologia h3 {
+  font-family: var(--font-instrument-serif), serif;
+  font-size: 1.35rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+}
+
+.prose-metodologia p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+  color: #1a1a1a;
+}
+
+.prose-metodologia strong {
+  font-weight: 600;
+}
+
+.prose-metodologia ol,
+.prose-metodologia ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  line-height: 1.7;
+}
+
+.prose-metodologia ol {
+  list-style: decimal;
+}
+
+.prose-metodologia ul {
+  list-style: disc;
+}
+
+.prose-metodologia table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.prose-metodologia th,
+.prose-metodologia td {
+  border: 1px solid #e2e1dc;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose-metodologia th {
+  color: #6b6b6b;
+  font-weight: 500;
+}

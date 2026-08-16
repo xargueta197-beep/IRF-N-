@@ -1,0 +1,248 @@
+{
+  "run_id": "a57ca0968199",
+  "generated_at": "2026-07-16T20:53:33.212363Z",
+  "git_commit": "nogit",
+  "config_hash": "58ce539eeb18",
+  "asof": "2026-07-16",
+  "version": "V3",
+  "model": {
+    "K": 2,
+    "spec": "MS-GJR-GARCH (Haas et al. 2004), TVTP (tecnico), innovaciones Normales [lambda_N_z fuera del logit: ver warnings]",
+    "tvtp": true,
+    "covariates": [
+      "sma_gap",
+      "bb_width_z"
+    ],
+    "news_layer": [],
+    "estimation": {
+      "method": "MLE L-BFGS-B multistart",
+      "multistart": 8,
+      "seed": 42,
+      "converged": true
+    },
+    "news_layer_params": {
+      "active": false,
+      "delta": null,
+      "delta_se": null,
+      "surprise_start_date": null,
+      "indicators": [
+        {
+          "indicator": "CPI",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "NFP",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "FOMC",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "PMI",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "RETAIL_SALES",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "UNEMPLOYMENT",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        }
+      ],
+      "coverage": {
+        "CPI": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "NFP": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "FOMC": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "PMI": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "RETAIL_SALES": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "UNEMPLOYMENT": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        }
+      },
+      "blocker": "solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
+    },
+    "hawkes_layer_params": {
+      "active": false,
+      "mu_N": null,
+      "alpha": null,
+      "beta": null,
+      "se_mu_N": null,
+      "se_alpha": null,
+      "se_beta": null,
+      "mean_mark": null,
+      "branching_ratio": null,
+      "expected_cascade": null,
+      "stationary": null,
+      "ks_stat": null,
+      "ks_pvalue": null,
+      "ks_passed": null,
+      "n_events": 0,
+      "n_starts": 0,
+      "starts_at_best": 0,
+      "coverage": {
+        "first_day": "2026-07-12",
+        "last_day": "2026-07-12",
+        "n_days": 1,
+        "n_missing_days": 0,
+        "n_censored_days": 0
+      },
+      "reflexive_threshold": null,
+      "blocker": "solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto."
+    }
+  },
+  "regime": {
+    "labels": [
+      "baja volatilidad",
+      "alta volatilidad"
+    ],
+    "xi_filtered": [
+      0.9187047679327788,
+      0.08129523206722115
+    ],
+    "entropy": 0.28192143675606673,
+    "entropy_max": 0.6931471805599453,
+    "confidence": "alta",
+    "expected_duration_days": [
+      4.505331124263733,
+      1.5027713504542846
+    ],
+    "argmax": "baja volatilidad",
+    "xi_momentum_5d": [
+      -0.009099780266006219,
+      0.009099780266006163
+    ]
+  },
+  "transition_matrix_today": [
+    [
+      0.7983590449154534,
+      0.20164095508454663
+    ],
+    [
+      0.7138359846921875,
+      0.2861640153078126
+    ]
+  ],
+  "news": {
+    "surprise_index": 0.0,
+    "lambda_N": 0.0,
+    "lambda_N_z": 0.0,
+    "branching_ratio": 0.0,
+    "expected_cascade": 0.0,
+    "attribution": {
+      "price": 1.0,
+      "surprise": 0.0,
+      "hawkes": 0.0
+    }
+  },
+  "conditional_stats": {
+    "BTC": {
+      "baja volatilidad": {
+        "mean_ann": {
+          "value": 0.09413418182872521,
+          "ci_low": -0.059239868765036265,
+          "ci_high": 0.23532820235331595
+        },
+        "vol_ann": {
+          "value": 0.31000105702965375,
+          "ci_low": 0.2880304701465936,
+          "ci_high": 0.33228533283301054
+        },
+        "sharpe": {
+          "value": 0.3036576156568415,
+          "ci_low": -0.19769847157918202,
+          "ci_high": 0.7727239380099801
+        },
+        "maxdd": {
+          "value": -0.4713247202255564,
+          "ci_low": -0.7826233133538024,
+          "ci_high": -0.33545364188419496
+        }
+      },
+      "alta volatilidad": {
+        "mean_ann": {
+          "value": 0.6554949304149085,
+          "ci_low": -1.0725386959254495,
+          "ci_high": 2.1558363800860842
+        },
+        "vol_ann": {
+          "value": 1.1794601837691843,
+          "ci_low": 1.0432181989745624,
+          "ci_high": 1.3247855189828663
+        },
+        "sharpe": {
+          "value": 0.555758421891066,
+          "ci_low": -0.9236889810779184,
+          "ci_high": 1.955580239594509
+        },
+        "maxdd": {
+          "value": -0.7818211303510519,
+          "ci_low": -0.9489944592690418,
+          "ci_high": -0.5467172232932519
+        }
+      }
+    }
+  },
+  "warnings": [
+    "M3 (macro) bloqueado: ALFRED_API_KEY sin configurar (mismo bloqueante desde V1); M3 = M2 + macro no puede correr, y M4/M5 dependen de M3/M4 por diseno. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba; ver reports/ablation_news.md.",
+    "Diagnostico M2+H bloqueado: sin capa de Hawkes activa: solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto.",
+    "Corrida --quick: multistart reducido, NO cumple R6. Resultados PROVISIONALES.",
+    "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md).",
+    "Capa de Hawkes (V3) inactiva: solo 115 titulares puntuados (se requieren >= 200, config news.headlines.min_events_fit) para un MLE de Hawkes honesto."
+  ],
+  "validation_ref": "reports/validation_v3_btc.md",
+  "disclaimer": "IRF-N es un indicador de investigacion, no una senal de trading ni una promesa de rendimiento. Usa solo informacion disponible en la fecha de publicacion (point-in-time)."
+}

@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-14",
+  "rows": [
+    {
+      "test": "1. Número de regímenes",
+      "result": "BIC elige K=2 normal de forma inequívoca (8195.8, mínimo claro). Bootstrap de Hansen **ya con potencia (R6, corrida completa 2026-07-22, `v1_kselect.json`, B=49): K=2 vs K=1 p=0.02** — se rechaza K=1. K=2 confirmado por BIC **y** bootstrap.",
+      "verdict": "✓"
+    },
+    {
+      "test": "2. Calibración",
+      "result": "Bien calibrado y ligeramente **sub-confiado**; gana a la climatología en Brier (0.079 vs 0.082) pero **no** en log-loss (0.179 vs 0.177).",
+      "verdict": "⚠"
+    },
+    {
+      "test": "3. Precisión direccional (PT)",
+      "result": "**R6 (2026-07-29)**: hit rate 55,28% vs 54,17% esperado, PT=1,66, **p=0,048** — señal direccional **marginalmente significativa** al 5% (cruza el umbral por poco; sensible al multistart, era p=0,082 en `--quick`).",
+      "verdict": "⚠"
+    },
+    {
+      "test": "4. Comparación con benchmark (DM)",
+      "result": "**R6 (2026-07-29)**: vence al GARCH de un régimen en densidad predictiva (M1 vs M0, DM=−3.15, **p=0.002**, robusto); el TVTP técnico con L1 (M2 vs M1) es nominalmente mejor pero **no distinguible** (DM=−1.14, p=0.253); **no** vence a la climatología de régimen en log-loss.",
+      "verdict": "⚠"
+    },
+    {
+      "test": "5. Walk-forward económico",
+      "result": "**Económico ejecutado 2026-07-18** (regla pre-registrada de des-riesgo, aprobada por el director): Sharpe de la diferencia vs buy-and-hold −0.03, IC95 [−0.70, 0.53] → **NO supera el criterio**, como declaraba la hipótesis del pre-registro. El **estadístico**: 19 bloques (R2 ✓), el modelo bate a la climatología solo en 6/19 bloques, **concentrados en los de estrés**.",
+      "verdict": "⚠"
+    },
+    {
+      "test": "6. Sharpe real (bootstrap)",
+      "result": "El IC 95% del Sharpe condicional excluye el cero [0.18, 1.42], pero es **casi idéntico** al de comprar y mantener SPY: el modelo no aporta al Sharpe.",
+      "verdict": "⚠"
+    },
+    {
+      "test": "7. Ablación de noticias",
+      "result": "**R6 + L1, cerrada (2026-07-29)**: M0→M1 aporta (regímenes, DM p=0.001, robusto). **M3 (macro) con L1: NO aporta** sobre M2 (DM=+1.04, p=0.299). El TVTP técnico (M2) es marginal y sensible a la muestra. Único aporte robusto: los regímenes. M4 congelado (consenso de paga), M5 esperando GDELT.",
+      "verdict": "⚠"
+    }
+  ],
+  "source": "reports/validation_v4.md"
+}

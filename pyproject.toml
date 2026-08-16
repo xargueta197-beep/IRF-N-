@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "irfn"
+version = "0.0.0"
+description = "IRF-N — Indice de Regimen Filtrado con Noticias"
+requires-python = ">=3.11,<3.12"
+readme = "README.md"
+dependencies = [
+    "pandas",
+    "numpy",
+    "scipy",
+    "pyarrow",
+    "pydantic-settings",
+    "pyyaml",
+    "arch",
+    "statsmodels",
+    "numba",
+    "yfinance",
+    "streamlit",
+    "plotly",
+    "requests",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "hypothesis",
+]
+# Capa de relevancia de titulares (V3): FinBERT local. Grupo aparte porque
+# torch pesa cientos de MB y solo hace falta para puntuar s_i.
+news = [
+    "transformers",
+    "torch",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/irfn"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+markers = [
+    "diagnostic_only: marca tests que ejercitan codigo @diagnostic_only (nunca en artifacts/ ni app/, R1)",
+    "slow: tests de estimacion/recuperacion que corren un multistart completo (segundos, no milisegundos)",
+]

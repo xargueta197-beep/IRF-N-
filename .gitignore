@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+
+# datos e inmutables/generados, no se versionan en git
+data/raw/*
+!data/raw/.gitkeep
+data/vintages/*
+!data/vintages/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+artifacts/latest/*
+!artifacts/latest/.gitkeep
+artifacts/runs/*
+!artifacts/runs/.gitkeep
+artifacts/btc/
+artifacts/checkpoints/
+artifacts/quarantine/
+
+# panel: dependencias y build generados por Next, no se versionan
+panel/node_modules/
+panel/out/
+panel/.next/
+
+# logs de corridas en la raiz del proyecto
+_*.log

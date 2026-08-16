@@ -1,0 +1,250 @@
+{
+  "run_id": "190ff64f0511",
+  "generated_at": "2026-08-15T03:54:30.579063Z",
+  "git_commit": "nogit",
+  "config_hash": "1b62e6846a33",
+  "asof": "2026-07-10",
+  "version": "V3",
+  "model": {
+    "K": 2,
+    "spec": "MS-GJR-GARCH (Haas et al. 2004), TVTP (tecnico), innovaciones Normales [lambda_N_z fuera del logit: ver warnings]",
+    "tvtp": true,
+    "covariates": [
+      "sma_gap",
+      "bb_width_z"
+    ],
+    "news_layer": [],
+    "estimation": {
+      "method": "MLE L-BFGS-B multistart",
+      "multistart": 30,
+      "seed": 42,
+      "converged": true
+    },
+    "news_layer_params": {
+      "active": false,
+      "delta": null,
+      "delta_se": null,
+      "surprise_start_date": null,
+      "indicators": [
+        {
+          "indicator": "CPI",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "NFP",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "FOMC",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "PMI",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "RETAIL_SALES",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        },
+        {
+          "indicator": "UNEMPLOYMENT",
+          "w": null,
+          "se": null,
+          "t_stat": null,
+          "distinguible_de_cero": false,
+          "n_events": 0
+        }
+      ],
+      "coverage": {
+        "CPI": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "NFP": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "FOMC": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "PMI": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "RETAIL_SALES": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        },
+        "UNEMPLOYMENT": {
+          "n_releases": 0,
+          "n_with_consensus": 0,
+          "first_release": null,
+          "last_release": null
+        }
+      },
+      "blocker": "solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
+    },
+    "hawkes_layer_params": {
+      "active": true,
+      "mu_N": 0.07831974517534394,
+      "alpha": 120.96843550919814,
+      "beta": 77.03041643000134,
+      "se_mu_N": 0.015365329415258443,
+      "se_alpha": 1.5992855358974496,
+      "se_beta": 0.9910442729625605,
+      "mean_mark": 0.6364006500994613,
+      "branching_ratio": 0.9994025031595837,
+      "expected_cascade": 1673.649017630322,
+      "stationary": true,
+      "ks_stat": 0.08478119344613716,
+      "ks_pvalue": 0.0,
+      "ks_passed": false,
+      "n_events": 95085,
+      "n_starts": 30,
+      "starts_at_best": 15,
+      "coverage": {
+        "first_day": "2023-11-18",
+        "last_day": "2026-08-11",
+        "n_days": 240,
+        "n_missing_days": 758,
+        "n_censored_days": 10
+      },
+      "reflexive_threshold": 0.8,
+      "blocker": "covariable lambda_N_z inactiva en el logit: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.6 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8)."
+    }
+  },
+  "regime": {
+    "labels": [
+      "baja volatilidad",
+      "alta volatilidad"
+    ],
+    "xi_filtered": [
+      0.9588079819379064,
+      0.041192018062093584
+    ],
+    "entropy": 0.17171411745092377,
+    "entropy_max": 0.6931471805599453,
+    "confidence": "alta",
+    "expected_duration_days": [
+      13.19385545999782,
+      1.0000000000000013
+    ],
+    "argmax": "baja volatilidad",
+    "xi_momentum_5d": [
+      0.01379277637372256,
+      -0.013792776373722532
+    ]
+  },
+  "transition_matrix_today": [
+    [
+      0.9094019100770568,
+      0.09059808992294305
+    ],
+    [
+      1.0,
+      5.1295674094668916e-20
+    ]
+  ],
+  "news": {
+    "surprise_index": 0.0,
+    "lambda_N": 138.87292606855476,
+    "lambda_N_z": -0.17121244148736584,
+    "branching_ratio": 0.9994025031595837,
+    "expected_cascade": 1673.649017630322,
+    "attribution": {
+      "price": 1.0,
+      "surprise": 0.0,
+      "hawkes": 0.0
+    }
+  },
+  "conditional_stats": {
+    "SPY": {
+      "baja volatilidad": {
+        "mean_ann": {
+          "value": 0.3038237463129629,
+          "ci_low": 0.24283382192794362,
+          "ci_high": 0.3582110150664817
+        },
+        "vol_ann": {
+          "value": 0.15416371496743378,
+          "ci_low": 0.12563724652812833,
+          "ci_high": 0.1869057211004657
+        },
+        "sharpe": {
+          "value": 1.9707863577181177,
+          "ci_low": 1.431110806533688,
+          "ci_high": 2.657912990229993
+        },
+        "maxdd": {
+          "value": -0.31443577233608033,
+          "ci_low": -0.33792128613814854,
+          "ci_high": -0.09609500790569173
+        }
+      },
+      "alta volatilidad": {
+        "mean_ann": {
+          "value": -1.3921899274216794,
+          "ci_low": -2.142496166616796,
+          "ci_high": -0.6701075017541475
+        },
+        "vol_ann": {
+          "value": 0.24946502975664156,
+          "ci_low": 0.2238578306528485,
+          "ci_high": 0.27009473587025346
+        },
+        "sharpe": {
+          "value": -5.5807017471739035,
+          "ci_low": -8.621558049225458,
+          "ci_high": -2.732009230938639
+        },
+        "maxdd": {
+          "value": -0.8398811432989673,
+          "ci_low": -0.9393734954479968,
+          "ci_high": -0.6198491043393529
+        }
+      }
+    }
+  },
+  "warnings": [
+    "M3 (macro) bloqueado: ALFRED_API_KEY sin configurar (mismo bloqueante desde V1); M3 = M2 + macro no puede correr, y M4/M5 dependen de M3/M4 por diseno. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba; ver reports/ablation_news.md.",
+    "Diagnostico M2+H bloqueado: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.6 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).",
+    "10 dia(s) del corpus censurados por el cap del API de GDELT: lambda_N esta subestimada en esos picos (censura contada, no oculta).",
+    "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre TODO el span (origen 2023-11-18): el compensador Lambda(T)=mu_N*T integra sobre esos dias fantasma, por lo que mu_N (tasa de fondo) queda SESGADA A LA BAJA y el branching ratio n INFLADO. Decision del director (2026-08-14): ajustar sobre el span completo y documentar el sesgo. Leer n y lambda_N como COTA SUPERIOR de la excitacion, no como estimacion insesgada.",
+    "El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados). Se aplico dithering intra-bin (ruido U(0,15min) por evento, semilla fija) para identificar el Hawkes continuo, bajo el supuesto de LLEGADA UNIFORME dentro del bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera.",
+    "KS de re-escalamiento RECHAZA el kernel exponencial: el ajuste del Hawkes es imperfecto y se reporta tal cual; candidato power-law en version futura (guia 6.6).",
+    "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
+  ],
+  "validation_ref": "reports/validation_v3.md",
+  "disclaimer": "IRF-N es un indicador de investigacion, no una senal de trading ni una promesa de rendimiento. Usa solo informacion disponible en la fecha de publicacion (point-in-time)."
+}

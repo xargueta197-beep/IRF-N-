@@ -1,0 +1,30 @@
+# Activos y fuentes de precio/volumen.
+# BTC via Binance, resto via yfinance. Fechas de inicio a confirmar/ajustar
+# segun disponibilidad real (ver reports/data_audit.md).
+
+assets:
+  - name: BTC
+    source: binance
+    symbol: BTCUSDT
+    interval: 1d
+    start_date: "2017-08-17"   # arranque real del par BTCUSDT en Binance
+
+  - name: SPY
+    source: yfinance
+    ticker: SPY
+    start_date: "1993-01-29"
+
+  - name: GOLD
+    source: yfinance
+    ticker: GLD
+    start_date: "2004-11-18"
+
+  - name: UST
+    source: yfinance
+    ticker: IEF
+    start_date: "2002-07-30"
+
+  - name: DXY
+    source: yfinance
+    ticker: DX-Y.NYB
+    start_date: "1971-01-04"

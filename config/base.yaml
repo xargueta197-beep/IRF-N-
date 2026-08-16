@@ -1,0 +1,120 @@
+# Configuracion base del modelo y del pipeline.
+# Cero constantes magicas fuera de config/: si un numero aparece en el codigo
+# y no viene de aqui ni de una estimacion, es un bug (ver CLAUDE.md).
+
+model:
+  K: 2                    # numero de regimenes; V0 = K=2 (ver CLAUDE.md ESTADO ACTUAL). K=3 es V1+
+  seed: 42                # semilla fija, se registra en cada artefacto (R6)
+  n_multistart: 30        # arranques aleatorios por estimacion, 20-50 (R6)
+
+windows:
+  sma_short: 20            # dias, para sma_gap
+  sma_long: 200            # dias, para sma_gap
+  bb_window: 20             # dias, para bb_width_z
+  bb_k: 2.0                 # multiplicador de las bandas de Bollinger (cancela en el z-score)
+  z_window: 250             # dias del z-score movil (bb_width_z, hy_oas_z): ~1 anio bursatil
+
+walkforward:
+  n_blocks: 6              # minimo obligatorio de bloques de test (R2, R8)
+  train_years: 4            # anios de entrenamiento por bloque
+  test_months: 6            # meses de test por bloque
+
+regime:
+  # Umbrales sobre la entropia normalizada H/ln(K) in [0,1]. Definen las tres
+  # zonas de confianza del indicador. Cero constantes magicas en el codigo: estos
+  # numeros viven aqui (CLAUDE.md).
+  entropy_threshold: 0.85   # >= este valor => "el modelo no distingue" (sin senal clara)
+  entropy_mid: 0.55         # >= este y < threshold => confianza "media"; por debajo => "alta"
+
+# Walk-forward de V0: sobre que activo y con que ventana de retornos se corre.
+# El activo ancla es SPY (ver reports/data_audit.md y demo_v0.py).
+v0:
+  anchor_asset: SPY
+  returns_start: "2013-01-01"   # inicio de la descarga; da margen para 6+ bloques
+  wf_n_starts: 20               # arranques por bloque de walk-forward (R6: 20-50)
+
+# V1: TVTP + seleccion de K + innovaciones t de Student.
+v1:
+  # Los precios se descargan desde antes de returns_start SOLO para que las
+  # ventanas de los features (SMA200 + z_window) esten calientes cuando arranca
+  # la muestra del modelo. Usar pasado extra no es look-ahead; usar futuro si.
+  prices_start: "2010-01-01"
+  k_candidates: [1, 2, 3, 4]        # tabla BIC completa; no se esconden perdedores
+  dist_candidates: [normal, t]      # decide el BIC, no nosotros
+  covariates: [sma_gap, hy_oas_z]   # ARRANCAR CON 2, no 5 (guia 6.3): 36 params con K=3 y 5 covs memoriza
+  covariates_ablation_m2: [sma_gap, bb_width_z]  # M2 de la ablacion = TVTP tecnico (guia 8.1)
+  tvtp:
+    # Malla del lambda de la penalizacion L1 sobre beta_ij. Se elige por CV
+    # temporal DENTRO del bloque de entrenamiento (jamas mirando el test).
+    # 0.0 incluido: dejar que los datos digan si la penalizacion ayuda.
+    l1_grid: [0.0, 0.5, 2.0, 8.0, 32.0]
+    cv_val_frac: 0.25       # ultima fraccion del train como validacion interna
+    cv_n_starts: 6          # multistart reducido en los fits internos del CV
+    l1_smooth_eps: 1.0e-6   # suavizado de |x| ~ sqrt(x^2+eps^2)-eps para L-BFGS-B
+  ktest:
+    # Bootstrap parametrico para K vs K-1 (Hansen 1992 exacto es prohibitivo;
+    # ver validation/tests_stat.py para la justificacion documentada).
+    n_boot: 49              # replicas -> granularidad de p-value 1/50
+    boot_n_starts: 6        # multistart reducido por replica (documentado)
+    bic_n_starts: 20        # multistart de la tabla BIC (R6: 20-50)
+
+# V2: capa de noticias calendarizadas (indice de sorpresa). Ver config/news.yaml
+# para los indicadores/pesos y CLAUDE.md para el espec completo de SI_t.
+v2:
+  # M3 de la ablacion = M2 (tecnico) + macro (guia 8.1); M4 = M3 + surprise_index
+  # (agregado programaticamente en validation/ablation.py, no aqui).
+  covariates_ablation_m3: [sma_gap, bb_width_z, slope_2s10y, hy_oas_z]
+  news_covariate_name: surprise_index
+  bootstrap:
+    # Bootstrap estacionario (Politis-Romano) para el IC de las estadisticas
+    # condicionales (pantalla 4). block_len ~ vida media del bloque geometrico;
+    # ci_level = ancho del intervalo reportado; min_obs = minimo de dias en el
+    # regimen para siquiera intentarlo (con menos, la celda queda vacia, no se
+    # inventa un IC de dos observaciones).
+    n_boot: 999
+    block_len: 20
+    ci_level: 0.90
+    min_obs: 30
+  delta_mle:
+    # Fit dedicado que estima delta por MLE del modelo completo (R7): 1 sola
+    # covariable (surprise_index), multistart reducido porque la superficie es
+    # de baja dimension frente al titular completo. min_events_total es el
+    # minimo de sorpresas VALIDAS (ya pasado el warm-up de sigma_i) acumuladas
+    # en TODOS los indicadores antes de siquiera intentar el fit -- con menos,
+    # se documenta el bloqueante en vez de estimar delta con ruido.
+    n_starts: 12
+    min_events_total: 30
+
+# V4: walk-forward economico PRE-REGISTRADO (docs/preregistro_regla_trading.md,
+# aprobado por el director 2026-07-18). Estos numeros se congelaron ANTES de
+# correr el test; cambiarlos despues de ver resultados viola el pre-registro
+# (R8). p_threshold=0.5 es el unico punto focal no arbitrario de una
+# probabilidad binaria (argmax); w_reduced=0 es salir a efectivo (el caso mas
+# simple, sin apalancamiento ni cortos); 2 pb es un costo conservador para el
+# ETF mas liquido del mundo, con sensibilidad informativa a 0 y 5 pb.
+v4:
+  economic:
+    p_threshold: 0.5
+    w_reduced: 0.0
+    cost_bps: 2.0
+    cost_bps_sensitivity: [0.0, 5.0]
+    n_boot: 999
+
+# Series macro vintage (ALFRED, R4). El rezago de cada una es su lag de
+# publicacion REAL (realtime_start del vintage), no un shift(1) arbitrario.
+macro:
+  availability_margin_days: 1   # margen: dato publicado en t se usa desde t+1 habil
+                                # (la hora intradia de publicacion no viaja en el vintage;
+                                # asumir "publicado hoy => usable hoy" seria optimista)
+  use_recovered_prefix: true    # DECISION DEL DIRECTOR (2026-07-18): anteponer el
+                                # historico recuperado de Wayback (data/raw/recovered/)
+                                # a las vintages ALFRED truncadas por la ventana de 3
+                                # anios de FRED. Defendible bajo R4 porque las series de
+                                # esta capa NO se revisan tras publicarse (data_audit
+                                # seccion 3, QA: diff maxima 0.0 en 603 dias de solape).
+                                # El empalme es prefijo estricto: en el solape manda
+                                # ALFRED. Ver src/irfn/data/recovered.py.
+  series:
+    - {series_id: DGS10, name: rendimiento 10y}
+    - {series_id: DGS2, name: rendimiento 2y}
+    - {series_id: BAMLH0A0HYM2, name: HY OAS}

@@ -1,0 +1,68 @@
+"""Retornos condicionales: estadisticas por regimen (activo x regimen).
+
+R9: solo lee de artifacts/. Las estadisticas las calcula el pipeline
+(outputs/publish.conditional_stats); aqui solo se tabulan.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from components import load_audit, load_irfn, pit_is_green  # noqa: E402
+
+st.set_page_config(page_title="IRF-N - Retornos condicionales", layout="wide")
+
+
+def main():
+    st.title("Retornos condicionales por regimen")
+    irfn = load_irfn()
+    audit = load_audit()
+    if irfn is None:
+        st.info("No hay artefactos todavia. Corre el pipeline desde la Sala de control.")
+        return
+    if not pit_is_green(audit):
+        st.error("La auditoria PIT esta en rojo. Vista deshabilitada.")
+        return
+
+    st.caption(
+        "Estadisticas sobre ventanas donde argmax(ξ) = k. Con ξ filtrada, no suavizada."
+    )
+
+    def _fmt_cell(m: dict, pct: bool) -> str:
+        v = m["value"]
+        val_s = f"{v:.1%}" if pct else f"{v:.2f}"
+        if m["ci_low"] is None or m["ci_high"] is None:
+            return val_s
+        lo, hi = m["ci_low"], m["ci_high"]
+        ci_s = f"[{lo:.1%}, {hi:.1%}]" if pct else f"[{lo:.2f}, {hi:.2f}]"
+        return f"{val_s} {ci_s}"
+
+    metric_cols = [
+        ("mean_ann", "retorno anual", True),
+        ("vol_ann", "vol anual", True),
+        ("sharpe", "Sharpe", False),
+        ("maxdd", "max caida", True),
+    ]
+
+    for asset, regimes in irfn["conditional_stats"].items():
+        st.subheader(asset)
+        rows = {}
+        for regime, metrics in regimes.items():
+            rows[regime] = {label: _fmt_cell(metrics[key], pct) for key, label, pct in metric_cols}
+        df = pd.DataFrame(rows).T
+        st.dataframe(df, width="stretch")
+    st.caption(
+        "IC al 90% (config v2.bootstrap.ci_level) por bootstrap estacionario "
+        "(Politis-Romano, validation/bootstrap.py). Celda sin corchetes = menos "
+        "observaciones que v2.bootstrap.min_obs en ese regimen: se muestra el "
+        "punto, no se inventa un intervalo."
+    )
+
+
+main()

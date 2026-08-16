@@ -1,0 +1,123 @@
+# Indicadores del calendario macro usados para el indice de sorpresa (SI_t).
+#
+# ESTOS PESOS SE ESTIMAN (R7). Estos valores son placeholders y deben ser
+# sobreescritos por la regresion de impacto |r_ventana| = a + w_i*|z_i| + u
+# (ver src/irfn/features/surprise.py). Ningun peso se asigna a mano en produccion.
+
+# Capa de sorpresa (V2): controla si SI_t entra al logit de transicion como UNA
+# covariable mas (no reemplaza a las tecnicas). Cero constantes magicas en el
+# codigo: estos numeros viven aqui.
+surprise_layer: false          # activa la capa de sorpresa en el TVTP (V2).
+sigma_min_obs: 12              # min. de sorpresas VALIDAS por indicador para emitir z_i
+                               # (con menos, z_i=NaN: no se inventa una escala; decision del director).
+impact_t_threshold: 2.0        # |t| minimo para marcar w_i "distinguible de cero" en la regresion de impacto.
+
+# REGLA (sesion V2, 2026-07-12): si no hay consenso historico antes de cierta
+# fecha, esta variable documenta el limite. El indice de sorpresa arranca ahi y
+# la interfaz (pantalla 3) lo muestra con un banner. No se imputa, no se
+# inventa, no se rellena hacia atras.
+#
+# Hoy vale null: ver reports/data_audit.md secciones 4 y 7. Ninguna fuente
+# gratuita y honesta de consenso historico sobrevivio a la auditoria (Trading
+# Economics es de pago con demo publico muerto -- 410 Gone verificado en vivo;
+# Forex Factory prohibe explicitamente en sus ToS tanto el acceso automatizado
+# como la redistribucion de su historico). data/raw/consensus_calendar/ acumula
+# snapshots diarios hacia adelante desde scripts/capture_consensus.py; el valor
+# se actualiza a mano (o via scripts/run_v2.py) el dia que exista al menos un
+# snapshot con consenso valido para calcular z_i de al menos un indicador.
+#
+# DECISION DEL DIRECTOR (2026-07-18): V2 CONGELADA. Tras agotar las cinco
+# fuentes auditadas (data_audit.md secciones 4, 7, 8 y 9: Investing.com,
+# Trading Economics, Forex Factory, Econoday, FXStreet), la capa de sorpresa
+# queda inactiva de forma EXPLICITA, no como pendiente abierto. Se reabre solo
+# si algun dia se contrata Trading Economics (unica via verificada con endpoint
+# point-in-time). capture_consensus.py sigue corriendo sin cambios.
+surprise_start_date: null
+
+decay:
+  delta_placeholder: 0.0277   # ln(2)/25, vida media ~25 dias. SE ESTIMA (R7) por MLE del modelo completo.
+
+# --------------------------------------------------------------------------- #
+# V3: flujo de titulares (GDELT) -> relevancia s_i (FinBERT) -> Hawkes lambda_N
+# --------------------------------------------------------------------------- #
+headlines:
+  enabled: true
+  # Consulta del DOC 2.0 API de GDELT que define "presion de noticias" para el
+  # activo ancla (SPY / macro EEUU). Cambiarla invalida el historico acumulado
+  # en data/raw/headlines/ (otra poblacion de eventos): si se cambia, hay que
+  # re-backfillear y decirlo en el reporte.
+  # Sintaxis GDELT: las comillas son SOLO para frases de varias palabras; una
+  # palabra sola entre comillas ("FOMC") devuelve "phrase is too short".
+  #
+  # NARROWING (2026-07-15, sesion de bloqueantes V4): se quito "stock market"
+  # de la lista original de 7 terminos. Verificado en vivo contra GDELT (dia
+  # de prueba 2018-06-05, un dia historico cualquiera, no noticioso): la query
+  # de 7 terminos y la de 6 (sin "stock market") devuelven AMBAS 250/250
+  # articulos (tope duro del API) en la ventana de 24h completa -- es decir,
+  # "stock market" no era el termino que saturaba por si solo, y quitarlo NO
+  # elimina el cap-hit a nivel de dia (capture_headlines.py sigue necesitando
+  # partir el dia en sub-tramos; medido en 07-14: resuelve de forma fiable a
+  # ~6h de ventana). Se quita de todas formas por una razon metodologica
+  # independiente del cap: "stock market" es el termino MENOS ligado a un
+  # evento discreto (aparece en comentario de mercado ambiental, no en un
+  # shock identificable), mientras que los 6 restantes corresponden todos a
+  # eventos/entidades puntuales (reuniones FOMC, publicaciones de CPI/NFP,
+  # declaraciones de Powell) -- que es justo lo que Hawkes necesita modelar
+  # como "evento", no ruido de fondo. No se toco "federal reserve" pese a ser
+  # tambien generico: es el nucleo semantico declarado del proyecto (presion
+  # de noticias sobre politica de la Fed) y removerlo perderia cobertura real
+  # de shocks de politica monetaria que no mencionan "FOMC" ni "Powell"
+  # textualmente.
+  query: '("federal reserve" OR FOMC OR "jerome powell" OR "treasury yields" OR "jobs report" OR "inflation data") sourcelang:english'
+  start_date: "2017-01-02"          # limite practico del archivo del DOC 2.0 API
+  max_records: 250                  # cap duro del API por consulta; si un tramo lo
+                                    # satura, capture_headlines lo parte en dos
+                                    # (censura documentada, no silenciosa)
+  request_spacing_seconds: 12.0     # el API exige 1 peticion cada 5 s; doble margen
+                                    # porque esta salida a internet comparte IP
+                                    # (contencion medida en vivo 2026-07-14)
+  rate_limit_backoff_seconds: 15.0  # reintento POR PETICION ante el rechazo por
+                                    # tasa: la contencion es una loteria (~1 de 3-4
+                                    # pasa), la proxima ranura llega en segundos
+  max_backoff_retries: 40           # paciencia por peticion: 40 x 15 s = 10 min
+  min_window_hours: 3               # no partir tramos por debajo de esto: se acepta
+                                    # el cap y se registra la censura
+  match_window_hours: 36            # ventana para emparejar titular <-> release del
+                                    # calendario macro (auditoria de timestamps, Trampa 3)
+  min_events_fit: 200               # minimo de titulares con s_i para intentar el MLE
+
+relevance:
+  # Trampa 4: al clasificador SOLO se le pregunta relevancia/intensidad, JAMAS
+  # direccion (bullish/bearish). Ver features/relevance.py.
+  finbert_model: "ProsusAI/finbert"
+  batch_size: 32
+
+hawkes:
+  n_starts: 30                # multistart del MLE de Hawkes (R6: 20-50)
+  reflexive_threshold: 0.8    # n >= este => alerta "mercado en modo reflexivo" (pantalla 3)
+  cascade_ci_trigger: 0.95    # IC superior de n >= este => cascada "no acotada" (Parte B, censura 2026-08-15)
+
+indicators:
+  - name: CPI
+    series_id: CPIAUCSL
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
+
+  - name: NFP
+    series_id: PAYEMS
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
+
+  - name: FOMC
+    series_id: FEDFUNDS
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
+
+  - name: PMI
+    series_id: NAPM
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
+
+  - name: RETAIL_SALES
+    series_id: RSAFS
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
+
+  - name: UNEMPLOYMENT
+    series_id: UNRATE
+    w_i_placeholder: 1.0    # ESTOS PESOS SE ESTIMAN (R7). Placeholder, debe ser sobreescrito.
