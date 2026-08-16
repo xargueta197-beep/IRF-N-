@@ -50,6 +50,7 @@ from irfn.audit.pit import (  # noqa: E402
 from irfn.config import AssetsConfig, BaseConfig, NewsConfig  # noqa: E402
 from irfn.data.prices import load_returns  # noqa: E402
 from irfn.outputs.publish import build_payload, publish  # noqa: E402
+from irfn.outputs.serialize import write_history_parquet, write_walkforward_json  # noqa: E402
 from irfn.pipeline import regime_labels, run_pipeline  # noqa: E402
 from irfn.validation import calibration  # noqa: E402
 from irfn.validation.walkforward import walk_forward  # noqa: E402
@@ -242,8 +243,8 @@ def full_run(quick: bool = False, asset_override: str | None = None) -> None:
                       _sources_freshness(asset, source, returns), run_id,
                       entropy_zones={"mid": base.regime.entropy_mid,
                                      "high": base.regime.entropy_threshold})
-    _write_walkforward_json(run_dir / "walkforward.json", wf, calib)
-    _write_history(run_dir / "history.parquet", oos, prices)
+    write_walkforward_json(run_dir / "walkforward.json", wf, calib)
+    write_history_parquet(run_dir / "history.parquet", oos)
 
     # --- Reporte de validacion (R8). ---
     print(f"[6/6] Escribiendo reports/{report_name}...")
@@ -313,49 +314,6 @@ def _write_audit_json(path, pit_df, ledger_df, reest_df, sources, run_id, entrop
         "sources": sources,
     }
     path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
-
-
-def _write_walkforward_json(path, wf, calib) -> None:
-    blocks = []
-    for b in wf.blocks:
-        blocks.append({
-            "block_id": b.block_id,
-            "train_start": str(b.train_start.date()),
-            "test_start": str(b.test_start.date()),
-            "test_end": str(b.test_end.date()),
-            "n_train": b.n_train,
-            "n_test": b.n_test,
-            "loglik_train_per_obs": b.loglik_train_per_obs,
-            "loglik_test_per_obs": b.loglik_test_per_obs,
-            "n_converged": b.n_converged,
-            "kappa": b.kappa.tolist(),
-            "P": b.P.tolist(),
-        })
-    obj = {
-        "n_blocks": wf.n_blocks,
-        "K": wf.K,
-        "seed": wf.seed,
-        "n_starts": wf.n_starts,
-        "block_boundaries": [str(d.date()) for d in wf.block_boundaries],
-        "blocks": blocks,
-        "calibration": calib,
-    }
-    path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
-
-
-def _write_history(path, oos, prices) -> None:
-    """Historia out-of-sample para la vista Historico: ξ filtrado + precio ancla.
-
-    El precio se alinea por fecha con el ξ out-of-sample; se reconstruye un indice
-    de precio (equity) a partir de los log-retornos disponibles para dar contexto
-    visual, mas el precio real donde exista.
-    """
-    df = oos.copy()
-    # equity acumulado desde el primer dia oos (contexto visual del precio)
-    r_dec = df["r"].to_numpy() / 100.0
-    df["equity"] = np.exp(np.cumsum(r_dec))
-    df.index.name = "fecha"
-    df.reset_index().to_parquet(path, index=False)
 
 
 def _write_diagnostic_smoother(today, K) -> None:
