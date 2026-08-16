@@ -9,16 +9,29 @@ calculando entropia, confianza, duracion esperada y estadisticas condicionales.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+import shutil
+import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import numpy as np
 
+from irfn.outputs.contract import (
+    ContractViolation,
+    _version_rank,
+    validate_artifact,
+)
 from irfn.outputs.schema import IRFNOutput
 from irfn.validation.bootstrap import bootstrap_regime_stats
 
 FORBIDDEN_KEYS = {"xi_smoothed", "smoothed", "kim_smoother", "xi_tT"}
+
+# Rango minimo de version promovible a latest/ sin --force-downgrade. La regresion
+# que motivo todo esto fue publicar V0 encima de V3; el guardarrail lo prohibe.
+MIN_PROMOTABLE_RANK = 3  # V3
 
 
 class LookAheadViolation(Exception):
@@ -32,6 +45,152 @@ def _check_forbidden_keys(flat: str) -> None:
                 f"'{key}' encontrado en el payload de publicacion. "
                 f"Regla R1: jamas se publica el smoother."
             )
+
+
+# ---------------------------------------------------------------------------
+# Promocion atomica a artifacts/latest/ (UNICO punto de escritura de latest/).
+#
+# Flujo (Fase 3 de la remediacion): las corridas escriben SIEMPRE en
+# artifacts/runs/<run_id>/. Para que un artefacto llegue a latest/ hay que
+# promoverlo con `promote_run`, que (1) escribe el manifiesto, (2) corre el
+# validador del contrato, (3) aplica el guardarrail anti-downgrade y (4) hace el
+# swap atomico. Nada de copiar archivo por archivo: latest/ nunca queda en un
+# estado intermedio, y si el proceso muere a mitad del swap se recupera solo.
+# ---------------------------------------------------------------------------
+
+def _sha256(p: Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def write_manifest(run_dir: Path) -> Path:
+    """Escribe run_dir/manifest.json (run_id + version + sha256 de cada archivo).
+    Es lo que le permite al contrato afirmar 'procedencia unica'."""
+    run_dir = Path(run_dir)
+    irfn = json.loads((run_dir / "irfn.json").read_text(encoding="utf-8"))
+    files: dict[str, dict] = {}
+    for p in sorted(run_dir.iterdir()):
+        if p.is_file() and p.name != "manifest.json":
+            files[p.name] = {"sha256": _sha256(p), "size": p.stat().st_size}
+    manifest = {
+        "run_id": irfn.get("run_id"),
+        "version": irfn.get("version"),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "files": files,
+    }
+    path = run_dir / "manifest.json"
+    path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return path
+
+
+def _recover_latest(latest_dir: Path) -> None:
+    """Si latest/ no existe pero quedo un .latest.trash.* de un swap interrumpido,
+    restaura el mas reciente. Idempotente."""
+    latest_dir = Path(latest_dir)
+    if latest_dir.exists():
+        return
+    parent = latest_dir.parent
+    trashes = sorted(parent.glob(".latest.trash.*"))
+    if trashes:
+        os.replace(str(trashes[-1]), str(latest_dir))
+        for t in trashes[:-1]:
+            shutil.rmtree(t, ignore_errors=True)
+
+
+def _atomic_swap(run_dir: Path, latest_dir: Path) -> None:
+    """Reemplaza latest/ por una copia completa de run_dir mediante renames
+    atomicos (cada os.replace tiene destino inexistente => atomico en NTFS/POSIX).
+
+    Invariante: latest/ SOLO puede observarse como (a) el set viejo completo,
+    (b) inexistente por un instante entre los dos renames -recuperable desde el
+    trash-, o (c) el set nuevo completo. NUNCA una mezcla archivo-por-archivo.
+    """
+    run_dir = Path(run_dir)
+    latest_dir = Path(latest_dir)
+    parent = latest_dir.parent
+    parent.mkdir(parents=True, exist_ok=True)
+
+    staging = parent / f".latest.staging.{os.getpid()}.{int(time.time()*1000)}"
+    if staging.exists():
+        shutil.rmtree(staging)
+    shutil.copytree(run_dir, staging)
+    # marcador de carpeta versionada (lo pide .gitignore)
+    (staging / ".gitkeep").write_text("", encoding="utf-8")
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%f")
+    trash = parent / f".latest.trash.{ts}"
+    if latest_dir.exists():
+        os.replace(str(latest_dir), str(trash))   # rename 1: dst inexistente
+    try:
+        os.replace(str(staging), str(latest_dir))  # rename 2: dst inexistente
+    except BaseException:
+        # restaurar el estado anterior si el segundo rename fallo
+        if not latest_dir.exists() and trash.exists():
+            os.replace(str(trash), str(latest_dir))
+        raise
+    if trash.exists():
+        shutil.rmtree(trash, ignore_errors=True)
+
+
+def _append_publish_log(artifacts_root: Path, res, *, triggered_by: str, forced: bool) -> None:
+    line = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "run_id": res.run_id,
+        "version": res.version,
+        "forced": forced,
+        "provisional": bool(res.provisional_reasons),
+        "triggered_by": triggered_by,
+    }
+    log_path = Path(artifacts_root) / "publish_log.jsonl"
+    with log_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(line) + "\n")
+
+
+def promote_run(
+    run_dir: Path,
+    *,
+    latest_dir: Path,
+    repo_root: Path | None = None,
+    force_downgrade: bool = False,
+    allow_provisional: bool = False,
+    triggered_by: str = "desconocido",
+    tolerance_days: int = 3,
+):
+    """UNICO punto de escritura de artifacts/latest/. Promueve run_dir a latest/
+    solo si pasa el contrato y el guardarrail. Devuelve el ContractResult.
+
+    - Violaciones DURAS del contrato (procedencia mezclada, set incompleto, hueco
+      de frescura, git=nogit, ...): NUNCA se promueven, ni con force_downgrade.
+    - version < V3 o corrida provisional (R6): bloqueado salvo force_downgrade
+      explicito, que ademas queda registrado en artifacts/publish_log.jsonl.
+    """
+    run_dir = Path(run_dir)
+    latest_dir = Path(latest_dir)
+
+    write_manifest(run_dir)
+    _recover_latest(latest_dir)  # por si un swap anterior murio a la mitad
+
+    res = validate_artifact(
+        run_dir, tolerance_days=tolerance_days,
+        allow_provisional=allow_provisional, repo_root=repo_root,
+    )
+    if res.violations:
+        detail = "\n".join("  - " + v for v in res.violations)
+        raise ContractViolation(
+            f"Promocion RECHAZADA ({run_dir}): violaciones duras del contrato:\n{detail}")
+
+    blockers: list[str] = []
+    if _version_rank(res.version) < MIN_PROMOTABLE_RANK:
+        blockers.append(f"version {res.version} < V{MIN_PROMOTABLE_RANK}")
+    if res.provisional_reasons:
+        blockers.append("corrida provisional (R6): " + "; ".join(res.provisional_reasons))
+    if blockers and not force_downgrade:
+        raise ContractViolation(
+            "Promocion BLOQUEADA por el guardarrail: " + "; ".join(blockers) +
+            ". Requiere force_downgrade=True explicito (queda en publish_log.jsonl).")
+
+    _atomic_swap(run_dir, latest_dir)
+    _append_publish_log(latest_dir.parent, res, triggered_by=triggered_by, forced=bool(blockers))
+    return res
 
 
 def publish(payload: dict, out_path: Path) -> None:

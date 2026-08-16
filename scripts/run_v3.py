@@ -698,23 +698,21 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
         news_layer=news_layer_list, news_block=news_block,
         news_layer_params=news_layer_params, hawkes_layer_params=hawkes_layer_params,
     )
-    ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    # Fase 3 (publicacion atomica): escribir SOLO en runs/<run_id>/. A latest/
+    # solo se llega con scripts/promote.py (contrato + guardarrail).
     run_dir = RUNS / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    publish(payload, ARTIFACTS / "irfn.json")
     publish(payload, run_dir / "irfn.json")
-    log.info("    publicado irfn.json (version V3, run_id=%s).", run_id)
+    log.info("    irfn.json escrito en runs/%s (version V3); no publicado a latest/", run_id)
 
     # --- artefactos de pantalla 3 (R9: la app solo lee) ---
-    _dump({"events": _events_table(z_wide, weights)}, ARTIFACTS / "surprise_events.json")
+    _dump({"events": _events_table(z_wide, weights)}, run_dir / "surprise_events.json")
     if hawkes_indicator_active:
         lam_hist = pd.DataFrame({"fecha": lam_raw.index.astype(str),
                                  "lambda_N": lam_raw.to_numpy()}).dropna()
-        lam_hist.to_parquet(ARTIFACTS / "hawkes_history.parquet", index=False)
         lam_hist.to_parquet(run_dir / "hawkes_history.parquet", index=False)
         rug = hawkes["scored"][["hora_titular", "s"]].copy()
         rug["hora_titular"] = rug["hora_titular"].dt.tz_convert("UTC").dt.tz_localize(None)
-        rug.to_parquet(ARTIFACTS / "headline_rug.parquet", index=False)
         rug.to_parquet(run_dir / "headline_rug.parquet", index=False)
 
     # --- auditoria PIT (incluye lambda_N_z si esta en el titular) ---
@@ -776,8 +774,7 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
              "last_date": hl_cov["last_day"], "n_obs": int(fith.n_events if hawkes_indicator_active else 0)},
         ] if hl_cov["last_day"] else []),
     }
-    _dump(audit_obj, ARTIFACTS / "audit.json")
-    (run_dir / "audit.json").write_bytes((ARTIFACTS / "audit.json").read_bytes())
+    _dump(audit_obj, run_dir / "audit.json")
 
     # --- i) reportes (R8: SIEMPRE) ---
     log.info("[i] escribiendo reports/ablation_news.md y reports/validation_v3.md...")

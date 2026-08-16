@@ -229,25 +229,21 @@ def full_run(quick: bool = False, asset_override: str | None = None) -> None:
         bootstrap_min_obs=base.v2.bootstrap.min_obs,
     )
 
-    latest = artifacts_root / "latest"
+    # Fase 3 (publicacion atomica): la corrida escribe SOLO en runs/<run_id>/.
+    # A latest/ solo se llega con scripts/promote.py (unico punto de promocion,
+    # con contrato + guardarrail). Aqui no se toca latest/.
     run_dir = artifacts_root / "runs" / run_id
-    latest.mkdir(parents=True, exist_ok=True)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # publish() corre el guardian anti-smoother (R1) antes de escribir.
-    publish(payload, latest / "irfn.json")
     publish(payload, run_dir / "irfn.json")
 
-    _write_audit_json(latest / "audit.json", pit_df, ledger_df, reest_df,
+    _write_audit_json(run_dir / "audit.json", pit_df, ledger_df, reest_df,
                       _sources_freshness(asset, source, returns), run_id,
                       entropy_zones={"mid": base.regime.entropy_mid,
                                      "high": base.regime.entropy_threshold})
-    _write_walkforward_json(latest / "walkforward.json", wf, calib)
-    _write_history(latest / "history.parquet", oos, prices)
-
-    # copia inmutable de auditoria/validacion junto al run
-    for name in ("audit.json", "walkforward.json", "history.parquet"):
-        (run_dir / name).write_bytes((latest / name).read_bytes())
+    _write_walkforward_json(run_dir / "walkforward.json", wf, calib)
+    _write_history(run_dir / "history.parquet", oos, prices)
 
     # --- Reporte de validacion (R8). ---
     print(f"[6/6] Escribiendo reports/{report_name}...")
@@ -259,6 +255,8 @@ def full_run(quick: bool = False, asset_override: str | None = None) -> None:
         print("      IRFN_DEV_MODE: smoother de diagnostico en data/interim/ (fuera de artifacts).")
 
     print(f"\nListo. run_id={run_id}  PIT={'VERDE' if pit_df.attrs['passed'] else 'ROJA'}")
+    print(f"Artefacto en {run_dir} (NO publicado). Para promover a latest/:")
+    print(f"  python scripts/promote.py runs/{run_id}   # V0 requiere --force-downgrade")
 
 
 def _build_warnings(today, wf, pit_df, reest_df) -> list[str]:

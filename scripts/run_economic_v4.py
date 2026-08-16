@@ -60,11 +60,12 @@ def main() -> None:
         **result,
     }
 
-    out = ARTIFACTS / "validation.json"
-    out.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    # Fase 3: no escribir a latest/. validation.json se deja junto a su run en
+    # runs/<run_id>/; llega a latest/ solo si ese run se promueve (scripts/promote.py).
     run_dir = ROOT / "artifacts" / "runs" / run_id
-    if run_dir.exists():
-        (run_dir / "validation.json").write_bytes(out.read_bytes())
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "validation.json").write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
     m = result["main"]
     print(f"run_id consumido: {run_id}  (n={result['n_obs']} dias OOS)")

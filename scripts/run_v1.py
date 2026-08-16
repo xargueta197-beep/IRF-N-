@@ -215,7 +215,7 @@ def stage_kselect(quick: bool) -> None:
     winner = min(bic, key=lambda row: row["bic"])
     out["winner"] = {"K": winner["K"], "dist": winner["dist"], "bic": winner["bic"]}
     log.info("BIC ganador: K=%d dist=%s bic=%.1f", winner["K"], winner["dist"], winner["bic"])
-    _dump(out, ARTIFACTS / "v1_kselect.json")   # persiste ya
+    _dump(out, ARTIFACTS.parent / "analysis" / "v1_kselect.json")   # persiste ya
 
     # --- 2) Bootstrap parametrico K vs K-1 para la dist ganadora (Hansen es
     #        prohibitivo; decision documentada en validation/tests_stat.py). ---
@@ -233,7 +233,7 @@ def stage_kselect(quick: bool) -> None:
         res["seconds"] = round(time.time() - t0, 1)
         boots.append(res)
         out["bootstrap_ladder"] = boots
-        _dump(out, ARTIFACTS / "v1_kselect.json")   # persiste tras cada comparacion
+        _dump(out, ARTIFACTS.parent / "analysis" / "v1_kselect.json")   # persiste tras cada comparacion
         log.info("  LR_obs=%.2f p=%.3f (%.0fs)", res["lr_obs"], res["p_value"], res["seconds"])
 
     # --- 3) Fit titular: K*, dist*, TVTP tecnico. lambda L1 por CV DENTRO de la
@@ -245,7 +245,7 @@ def stage_kselect(quick: bool) -> None:
         # Sin regimenes no hay matriz de transicion que modular: el titular TVTP
         # no aplica. Se reporta y se degrada al modelo ganador P-constante.
         out["titular"] = {"note": "BIC eligio K=1: sin TVTP posible; titular = GARCH un regimen."}
-        _dump(out, ARTIFACTS / "v1_kselect.json")
+        _dump(out, ARTIFACTS.parent / "analysis" / "v1_kselect.json")
         _publish_v1_artifact(base, returns, X, Kt, distt, l1_lambda=0.0, tvtp=False)
     else:
         cv_starts = 3 if quick else v1.tvtp.cv_n_starts
@@ -272,7 +272,7 @@ def stage_kselect(quick: bool) -> None:
             "v": fr.params["v"].tolist(),
             "labels": regime_labels(Kt),
         }
-        _dump(out, ARTIFACTS / "v1_kselect.json")
+        _dump(out, ARTIFACTS.parent / "analysis" / "v1_kselect.json")
         _publish_v1_artifact(base, returns, X, Kt, distt, l1_lambda=lam, tvtp=True,
                              titular=titular)
 
@@ -335,12 +335,12 @@ def _publish_v1_artifact(base, returns, X, K, dist, *, l1_lambda, tvtp, titular=
         bootstrap_ci_level=base.v2.bootstrap.ci_level,
         bootstrap_min_obs=base.v2.bootstrap.min_obs,
     )
-    ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    publish(payload, ARTIFACTS / "irfn.json")
+    # Fase 3: escribir SOLO en runs/<run_id>/; a latest/ solo por scripts/promote.py.
     run_dir = RUNS / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     publish(payload, run_dir / "irfn.json")
-    log.info("artefacto V1 publicado (run_id=%s, tvtp=%s)", run_id, tvtp)
+    log.info("artefacto V1 escrito en runs/%s (run_id=%s, tvtp=%s); no publicado a latest/",
+             run_id, run_id, tvtp)
 
 
 # --------------------------------------------------------------------------- #
@@ -354,7 +354,7 @@ def stage_ablation(quick: bool, test_months: int | None, n_jobs: int = 1) -> Non
     covs = list(X.columns)
 
     # Ganador de la seleccion de K (de la fase 1). Si no existe, cae a K=2/t.
-    ks_path = ARTIFACTS / "v1_kselect.json"
+    ks_path = ARTIFACTS.parent / "analysis" / "v1_kselect.json"
     if ks_path.exists():
         ks = json.loads(ks_path.read_text(encoding="utf-8"))
         Kt, distt = ks["winner"]["K"], ks["winner"]["dist"]
@@ -421,7 +421,7 @@ def stage_ablation(quick: bool, test_months: int | None, n_jobs: int = 1) -> Non
         "pesaran_timmermann_titular": pt,
         "n_blocks": abl.wf_results["M2"].n_blocks,
     }
-    _dump(out, ARTIFACTS / "v1_ablation.json")
+    _dump(out, ARTIFACTS.parent / "analysis" / "v1_ablation.json")
     _write_v1_walkforward_json(abl, wf_v0)
     _append_ablation_report(out)
     log.info("FASE 2 lista. DM(titular vs V0) stat=%.3f p=%.3f", dm_vs_v0["dm_stat"], dm_vs_v0["p_value"])
@@ -686,7 +686,7 @@ def _write_v1_walkforward_json(abl, wf_v0) -> None:
         "block_boundaries": [str(d.date()) for d in wf.block_boundaries],
         "blocks": blocks, "calibration": calib,
     }
-    _dump(obj, ARTIFACTS / "walkforward_v1.json")
+    _dump(obj, ARTIFACTS.parent / "analysis" / "walkforward_v1.json")
 
 
 def main() -> None:

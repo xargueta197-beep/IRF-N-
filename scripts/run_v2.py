@@ -375,7 +375,7 @@ def load_sample(base: BaseConfig) -> tuple[pd.Series, pd.DataFrame]:
 
 
 def _load_titular_K_dist(base: BaseConfig) -> tuple[int, str]:
-    ks_path = ARTIFACTS / "v1_kselect.json"
+    ks_path = ARTIFACTS.parent / "analysis" / "v1_kselect.json"
     if ks_path.exists():
         ks = json.loads(ks_path.read_text(encoding="utf-8"))
         K, dist = ks["winner"]["K"], ks["winner"]["dist"]
@@ -596,21 +596,19 @@ def full_run(quick: bool = False, n_jobs: int = 1) -> None:
         news_layer=([base.v2.news_covariate_name] if news_active else []),
         news_block=news_block, news_layer_params=news_layer_params,
     )
-    ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    # Fase 3 (publicacion atomica): escribir SOLO en runs/<run_id>/. A latest/
+    # solo se llega con scripts/promote.py (contrato + guardarrail).
     run_dir = RUNS / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    publish(payload, ARTIFACTS / "irfn.json")
     publish(payload, run_dir / "irfn.json")
 
     # --- serie de SI_t + eventos individuales, para pantalla 3 (R9: la app solo
     #     lee; este es el unico lugar que ESCRIBE estos artefactos). ---
     events_table = _events_table(z_wide, weights)
-    _dump({"events": events_table}, ARTIFACTS / "surprise_events.json")
+    _dump({"events": events_table}, run_dir / "surprise_events.json")
     if news_active:
         si_hist = pd.DataFrame({"fecha": returns.index.astype(str), "surprise_index": si_full})
-        si_hist.to_parquet(ARTIFACTS / "surprise_history.parquet", index=False)
         si_hist.to_parquet(run_dir / "surprise_history.parquet", index=False)
-    (run_dir / "surprise_events.json").write_bytes((ARTIFACTS / "surprise_events.json").read_bytes())
 
     # --- auditoria: PIT + ledger + reestimacion + vintage + expanding window ---
     log.info("    auditoria PIT (con registro de features de noticias)...")
@@ -654,8 +652,7 @@ def full_run(quick: bool = False, n_jobs: int = 1) -> None:
         "sources": [{"name": ASSET_NAME, "source": ASSET_SOURCE,
                      "last_date": str(returns.index[-1].date()), "n_obs": int(len(returns))}],
     }
-    _dump(audit_obj, ARTIFACTS / "audit.json")
-    (run_dir / "audit.json").write_bytes((ARTIFACTS / "audit.json").read_bytes())
+    _dump(audit_obj, run_dir / "audit.json")
 
     # --- i) reports/ablation_news.md (R8: SIEMPRE, sea cual sea el resultado) ---
     log.info("[i] escribiendo reports/ablation_news.md...")
