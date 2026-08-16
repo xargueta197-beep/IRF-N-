@@ -17,9 +17,31 @@ import pandas as pd
 # ajustados entre llamadas, asi que dos descargas del mismo ticker dan retornos
 # ligeramente distintos (documentado en CLAUDE.md ESTADO ACTUAL). Para que una
 # corrida de V1 sea reproducible bit a bit se cachea el cierre descargado la
-# PRIMERA vez y se reutiliza despues; borrar el archivo fuerza una descarga
-# fresca. El cache vive en data/raw/ (inmutable por convencion del repo).
+# PRIMERA vez y se reutiliza despues. El cache vive en data/raw/.
 _RAW_DIR = Path(__file__).resolve().parents[3] / "data" / "raw"
+
+# Politica de frescura del cache (2026-08-16): un cache mas viejo que esto se ignora
+# y se re-descarga. Motivo: un cache rancio publico precios de ~5 semanas atras en
+# una corrida real (bug documentado en CLAUDE.md ESTADO ACTUAL). 7 dias CALENDARIO
+# = ~5 dias habiles + fin de semana largo: cubre feriados/puentes y garantiza que el
+# cache nunca quede mas de una semana por detras del mercado, alineado con la
+# tolerancia de frescura del contrato de publicacion (contract.DEFAULT_TOLERANCE_DAYS
+# = 5 dias). La reproducibilidad DENTRO de la semana se conserva (mismo vintage entre
+# corridas seguidas); mas alla de una semana, refrescar es lo correcto -- publicar
+# precios rancios es peor que perder la reproducibilidad bit-a-bit de un vintage viejo.
+_CACHE_MAX_AGE_DAYS = 7
+
+
+def _cache_is_fresh(cache: Path) -> bool:
+    """True si `cache` existe y su antiguedad (mtime) es <= _CACHE_MAX_AGE_DAYS.
+
+    Un cache mas viejo se trata como inexistente (se re-descarga), evitando publicar
+    precios rancios. Se mide sobre el mtime del archivo, no sobre la ultima fecha de
+    la serie, porque lo que importa es cuando se capturo el vintage."""
+    if not cache.exists():
+        return False
+    age_days = (_time.time() - cache.stat().st_mtime) / 86400.0
+    return age_days <= _CACHE_MAX_AGE_DAYS
 
 _BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines"
 _BINANCE_PAGE_LIMIT = 1000
@@ -113,7 +135,9 @@ def load_close(
     precios entre corridas de V1 (CLAUDE.md pide cachearlo).
     """
     cache = _RAW_DIR / f"close_{symbol}_{start}.parquet"
-    if use_cache and cache.exists():
+    # Frescura (2026-08-16): un cache >7 dias se ignora y se re-descarga (evita
+    # publicar precios rancios). Ver _cache_is_fresh / _CACHE_MAX_AGE_DAYS.
+    if use_cache and _cache_is_fresh(cache):
         s = pd.read_parquet(cache)["close"]
         s.index = pd.to_datetime(s.index)
         s.name = "close"
