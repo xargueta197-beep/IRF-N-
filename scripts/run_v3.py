@@ -648,11 +648,13 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
         span = cov["n_days"] + cov["n_missing_days"]
         warnings_list.append(
             f"El corpus cubre {cov['n_days']} dias dentro de un span de {span} ({cov['n_missing_days']} "
-            f"dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre TODO el span "
-            f"(origen {cov['first_day']}): el compensador Lambda(T)=mu_N*T integra sobre esos dias "
-            "fantasma, por lo que mu_N (tasa de fondo) queda SESGADA A LA BAJA y el branching ratio n "
-            "INFLADO. Decision del director (2026-08-14): ajustar sobre el span completo y documentar "
-            "el sesgo. Leer n y lambda_N como COTA SUPERIOR de la excitacion, no como estimacion insesgada."
+            f"dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre el TIEMPO OBSERVADO "
+            f"(origen {cov['first_day']}; los dias fantasma se excinden del reloj), decision del director "
+            "(2026-08-15) que REVIERTE la de ajustar sobre el span completo: mu_N y n son estimaciones "
+            "sobre soporte observado, NO cotas superiores infladas por integrar mu_N sobre dias fantasma "
+            "(trazabilidad antes/despues en validation_v3.md). Caveat vigente: el corpus es una muestra "
+            f"acotada (~{cov['n_days']} dias) y el KS rechaza el kernel exponencial (D pequeno, ver aviso "
+            "KS), asi que n/lambda_N reflejan ese ajuste exponencial sobre la ventana observada."
         )
     if hawkes_indicator_active:
         warnings_list.append(
