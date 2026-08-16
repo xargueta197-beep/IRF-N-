@@ -751,6 +751,14 @@ def full_run(quick: bool = False, no_capture: bool = False, publish_m1: bool = F
             n_jobs=-1,  # paraleliza por bloque; determinista bit-identico al serial (R2)
         )
         published_spec_name = "K=1 (regimen unico)"
+    elif publish_m1:
+        # A4: el walk-forward publicado debe ser el del MODELO publicado (M1), no el
+        # de M2. Se toma el peldano M1 de la escalera ya corrida (mismo spec que el
+        # titular M1: K>=2, P constante, sin covariables). Coherencia irfn<->wf.
+        if "M1" not in abl.wf_results:
+            raise RuntimeError("--publish-m1: la escalera no corrio M1; no hay walk-forward M1 que publicar.")
+        published_spec_name = "M1"
+        wf_pub = abl.wf_results["M1"]
     else:
         published_spec_name = "M2+H" if covariate_active else "M2"
         wf_pub = abl.wf_results[published_spec_name]
