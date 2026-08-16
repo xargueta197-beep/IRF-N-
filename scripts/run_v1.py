@@ -334,6 +334,7 @@ def _publish_v1_artifact(base, returns, X, K, dist, *, l1_lambda, tvtp, titular=
         bootstrap_block_len=base.v2.bootstrap.block_len,
         bootstrap_ci_level=base.v2.bootstrap.ci_level,
         bootstrap_min_obs=base.v2.bootstrap.min_obs,
+        bootstrap_degenerate_duration_days=base.v2.bootstrap.degenerate_duration_days,
     )
     # Fase 3: escribir SOLO en runs/<run_id>/; a latest/ solo por scripts/promote.py.
     run_dir = RUNS / run_id

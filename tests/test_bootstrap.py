@@ -91,3 +91,53 @@ def test_stationary_bootstrap_returns_three_floats():
     point, lo, hi = stationary_bootstrap(r, np.mean, n_boot=200, seed=1)
     assert lo <= point <= hi
     assert np.isfinite([point, lo, hi]).all()
+
+
+# --------------------------------------------------------------------------- #
+# Sprint de honestidad (2026-08-16): no publicar IC que el metodo no sostiene.
+# --------------------------------------------------------------------------- #
+def test_maxdd_ci_is_suppressed_but_point_survives():
+    """F3: el bootstrap estacionario NO es valido sobre el maximo drawdown (un
+    funcional de valor extremo). El punto se reporta; el IC debe ser None. Las
+    demas metricas (Sharpe, etc.) SI llevan IC con datos suficientes."""
+    from irfn.validation.bootstrap import bootstrap_regime_stats
+
+    rng = np.random.default_rng(7)
+    r = rng.normal(0.0003, 0.01, size=500)
+    stats = bootstrap_regime_stats(
+        r, n_boot=200, block_len=20, ci_level=0.90, seed=1, min_obs=30
+    )
+    dd_point, dd_lo, dd_hi = stats["maxdd"]
+    assert np.isfinite(dd_point) and dd_point <= 0.0
+    assert dd_lo is None and dd_hi is None  # sin IC espurio
+    # una metrica valida SI trae IC
+    sh_point, sh_lo, sh_hi = stats["sharpe"]
+    assert sh_lo is not None and sh_hi is not None
+
+
+def test_conditional_stats_suppresses_degenerate_regime_ci():
+    """F4: un regimen 'absorbe-outliers' (E[D] < umbral) publica el punto de sus
+    metricas pero NO su IC (sus dias son excursiones sueltas: el bootstrap por
+    bloques finge precision). El regimen persistente conserva su IC."""
+    from irfn.outputs.publish import conditional_stats
+
+    rng = np.random.default_rng(11)
+    n = 600
+    r_pct = rng.normal(0.03, 1.0, size=n)          # log-retornos en %
+    argmax = np.zeros(n, dtype=int)
+    argmax[::2] = 1                                 # regimen 1 con muchos dias, pero degenerado por E[D]
+    labels = ["persistente", "degenerado"]
+    out = conditional_stats(
+        r_pct, argmax, labels, "SPY",
+        bootstrap_n_boot=200, bootstrap_block_len=20, bootstrap_ci_level=0.90,
+        bootstrap_min_obs=30, bootstrap_seed=1,
+        expected_durations=[12.0, 1.3],            # regimen 1: E[D] < 2.0 => degenerado
+        degenerate_duration_days=2.0,
+    )["SPY"]
+    # persistente: IC presente en las metricas validas (Sharpe)
+    assert out["persistente"]["sharpe"]["ci_low"] is not None
+    # degenerado: TODAS las metricas sin IC (incluida Sharpe), pero con punto
+    for metric in ("mean_ann", "vol_ann", "sharpe", "maxdd"):
+        assert out["degenerado"][metric]["ci_low"] is None
+        assert out["degenerado"][metric]["ci_high"] is None
+        assert "value" in out["degenerado"][metric]

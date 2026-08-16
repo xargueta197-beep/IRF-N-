@@ -228,6 +228,7 @@ def full_run(quick: bool = False, asset_override: str | None = None) -> None:
         bootstrap_block_len=base.v2.bootstrap.block_len,
         bootstrap_ci_level=base.v2.bootstrap.ci_level,
         bootstrap_min_obs=base.v2.bootstrap.min_obs,
+        bootstrap_degenerate_duration_days=base.v2.bootstrap.degenerate_duration_days,
     )
 
     # Fase 3 (publicacion atomica): la corrida escribe SOLO en runs/<run_id>/.

@@ -251,6 +251,8 @@ def conditional_stats(
     bootstrap_ci_level: float,
     bootstrap_min_obs: int,
     bootstrap_seed: int,
+    expected_durations: list[float] | None = None,
+    degenerate_duration_days: float = 0.0,
 ) -> dict[str, dict[str, dict]]:
     """Estadisticas de retorno por regimen (argmax de ξ_{t|t}), anualizadas, con
     su intervalo de confianza por bootstrap estacionario (Politis-Romano, V2;
@@ -267,9 +269,18 @@ def conditional_stats(
     v2.bootstrap.min_obs): con pocos datos se reporta el punto, nunca un
     intervalo inventado. bootstrap_seed se desplaza por regimen (+k) para que
     las replicas de cada regimen sean independientes pero reproducibles.
+
+    Regimen DEGENERADO (F4): si `expected_durations[k] < degenerate_duration_days`
+    (E[D]=1/(1-p_kk) ~ 1 dia, un 'absorbe-outliers' que no persiste), se publica
+    el punto de TODAS sus metricas pero se SUPRIME el IC (None): sus dias son
+    excursiones sueltas, no una serie con dependencia de corto plazo, asi que el
+    bootstrap por bloques finge una precision que no existe. Mismo criterio que
+    la app (components.DEGENERATE_DURATION_DAYS). degenerate_duration_days=0.0
+    (default) desactiva la supresion (compat V0/V1 sin el umbral configurado).
     """
     r_dec = np.asarray(r_pct, dtype=float) / 100.0
     idx = np.asarray(argmax_idx)
+    edd = expected_durations if expected_durations is not None else []
     out: dict[str, dict] = {}
     for k, label in enumerate(labels):
         sel = idx == k
@@ -278,12 +289,13 @@ def conditional_stats(
             rk, n_boot=bootstrap_n_boot, block_len=bootstrap_block_len,
             ci_level=bootstrap_ci_level, seed=bootstrap_seed + k, min_obs=bootstrap_min_obs,
         )
+        degenerate = k < len(edd) and edd[k] < degenerate_duration_days
         entry: dict[str, dict] = {}
         for name, (point, lo, hi) in stats.items():
             entry[name] = {
                 "value": point if np.isfinite(point) else 0.0,
-                "ci_low": lo,
-                "ci_high": hi,
+                "ci_low": None if degenerate else lo,
+                "ci_high": None if degenerate else hi,
             }
         out[label] = entry
     return {asset: out}
@@ -372,6 +384,7 @@ def build_payload(
     bootstrap_block_len: float,
     bootstrap_ci_level: float,
     bootstrap_min_obs: int,
+    bootstrap_degenerate_duration_days: float = 0.0,
     news_layer: list[str] | None = None,
     news_block: dict | None = None,
     news_layer_params: dict | None = None,
@@ -443,6 +456,10 @@ def build_payload(
         )
 
     P_today = P if transition_matrix_today is None else transition_matrix_today
+    # E[D_k] = 1/(1-p_kk): se calcula una vez y se reutiliza para el bloque de
+    # regimen y para decidir que regimenes son degenerados en conditional_stats
+    # (les suprimimos el IC, F4).
+    durations = expected_duration_days(P)
 
     payload = {
         "run_id": run_id,
@@ -472,7 +489,7 @@ def build_payload(
             "entropy": H,
             "entropy_max": H_max,
             "confidence": confidence_label(H_norm, entropy_mid, entropy_high),
-            "expected_duration_days": expected_duration_days(P),
+            "expected_duration_days": durations,
             "argmax": labels[int(xi_today.argmax())],
             "xi_momentum_5d": momentum,
         },
@@ -483,6 +500,8 @@ def build_payload(
             bootstrap_n_boot=bootstrap_n_boot, bootstrap_block_len=bootstrap_block_len,
             bootstrap_ci_level=bootstrap_ci_level, bootstrap_min_obs=bootstrap_min_obs,
             bootstrap_seed=seed,
+            expected_durations=durations,
+            degenerate_duration_days=bootstrap_degenerate_duration_days,
         ),
         "warnings": news_warnings,
         "validation_ref": validation_ref,
