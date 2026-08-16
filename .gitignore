@@ -21,6 +21,7 @@ artifacts/btc/
 artifacts/checkpoints/
 artifacts/quarantine/
 artifacts/analysis/
+artifacts/publish_log.jsonl
 
 # panel: dependencias y build generados por Next, no se versionan
 panel/node_modules/
