@@ -196,8 +196,10 @@ Claude Code: actualiza esta sección al final de cada sesión.
 - **Sesión 2026-08-16 (Sprint de honestidad — A2 + A3 + A5; código, sin metodología):**
   - Ejecutada la Fase 1 del `reports/plan_desarrollo_2026-08-16.md` (reconciliación de las
     dos auditorías de hoy). Objetivo: dejar de publicar precisión que el método no sostiene,
-    sin tocar ningún número del modelo. **CÓDIGO HECHO Y VERIFICADO (149 passed, 0 failed);
-    PENDIENTE de re-publicar el artefacto para que A2/A3 lleguen al `latest/` vivo.**
+    sin tocar ningún número del modelo. **HECHO, VERIFICADO Y PUBLICADO** (run final
+    `7c44a7fac16d`, promovido atómicamente, contrato PROMOVIBLE; 149 passed, 0 failed).
+    Mergeado a `master` (NO pusheado). Hubo 2 re-publicaciones: `58077981ed78` (A2/A3) y
+    `7c44a7fac16d` (+ fix del warning Hawkes stale, ver abajo).
   - **A2 — dos IC apagados (se reporta el punto, ci=None):**
     - **maxdd (F3):** `validation/bootstrap.py::bootstrap_regime_stats` ya no calcula IC para
       `maxdd` (funcional de valor extremo; el bootstrap estacionario no es válido). Constante
@@ -229,11 +231,24 @@ Claude Code: actualiza esta sección al final de cada sesión.
     power-law gana AIC ΔAIC+180, ninguno pasa KS → confirma que el KS está sobre-apoderado a
     n=95k, F1); `src/irfn/models/hawkes_powerlaw.py` + `tests/test_hawkes_powerlaw.py` en
     producción. Conteo real de tests hoy: **149** (subió de 141 por los 8 nuevos).
-  - **PENDIENTE para materializar A2/A3 en producción:** commit (R5 exige árbol limpio) →
-    `run_v3.py --no-capture` (~37 min, R6) → `scripts/promote.py runs/<id> --repo-root .`
-    (atómico) → re-exportar el panel del nuevo run. El swap atómico protege `latest/` si el
-    proceso muere a mitad. **Bloque de decisiones del director (A1 Hawkes-soporte, A4 M1-vs-M2,
-    A6 régimen degenerado) NO tocado: son metodología.**
+  - **HALLAZGO (no maquillar): warning Hawkes stale corregido.** El emisor del warning en
+    `run_v3.py` afirmaba "el Hawkes se ajusta sobre TODO el span... n INFLADO... leer n como
+    COTA SUPERIOR (decisión del director 2026-08-14)", pero el código ajusta sobre el TIEMPO
+    OBSERVADO (`times_obs`/`T_obs`) desde la Parte A (decisión del director **2026-08-15** que
+    REVIERTE la del 2026-08-14), y el reporte `validation_v3.md` ya lo describía correcto. El
+    warning hacía que el artefacto describiera su propio `n=0.7388` como cota superior inflada
+    cuando es la estimación sobre soporte observado (μ_N=103, no sesgada). Corregido: ahora el
+    warning describe el ajuste real + caveats vigentes (muestra acotada + KS rechaza el
+    exponencial, D pequeño). **Esto ACLARA el A1 del audit: el sesgo Hawkes YA estaba cerrado;
+    el audit se basó en el warning stale.**
+  - **Nota de decisiones del director (Fase 2):** `reports/nota_decisiones_director_2026-08-16.md`
+    con A1 (kernel exponencial vs power-law; el sesgo ya cerrado), A4 (M1 vs M2 + enmienda del
+    contrato V1+⇒tvtp), A6 (régimen degenerado, baja prioridad). Ninguna implementada: son
+    metodología, requieren OK del director + consulta de los 2 docs de referencia.
+  - **Estado publicado final:** `artifacts/latest/` = `7c44a7fac16d` (V3, R6, asof 2026-08-14):
+    A2 (maxdd + régimen degenerado sin IC), A3 (KS con D=0.0289), warning Hawkes correcto. El
+    panel refleja el run; `validation.json` queda `stale=true` (valida `02db03d3d6d3`): la
+    resolución REAL de F6 es re-correr la validación formal sobre el run publicado (Fase 3).
 
 - **Sesión 2026-08-16 (remediación de la regresión de publicación + auditoría de mejoras):**
   - **PROBLEMA:** `artifacts/latest/` era una **mezcla** — `irfn.json`/`audit.json` V0
