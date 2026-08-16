@@ -153,7 +153,7 @@ def promote_run(
     force_downgrade: bool = False,
     allow_provisional: bool = False,
     triggered_by: str = "desconocido",
-    tolerance_days: int = 3,
+    tolerance_days: int = 5,
 ):
     """UNICO punto de escritura de artifacts/latest/. Promueve run_dir a latest/
     solo si pasa el contrato y el guardarrail. Devuelve el ContractResult.

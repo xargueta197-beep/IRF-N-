@@ -41,7 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--force-downgrade", action="store_true",
                     help="Permite promover version < V3 o provisional (queda en publish_log.jsonl).")
     ap.add_argument("--allow-provisional", action="store_true")
-    ap.add_argument("--tolerance-days", type=int, default=3)
+    ap.add_argument("--tolerance-days", type=int, default=5,
+                    help="Max dias que asof puede quedar por detras de generated_at (frescura).")
     ap.add_argument("--no-clean-tree-check", action="store_true",
                     help="No verificar que el arbol git este limpio (R5).")
     args = ap.parse_args(argv)

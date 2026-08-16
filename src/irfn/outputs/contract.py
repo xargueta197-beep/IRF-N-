@@ -35,9 +35,13 @@ from pathlib import Path
 R6_MULTISTART_MIN = 20
 R6_MULTISTART_MAX = 50
 
-# Frescura por defecto: asof no puede adelantar al ultimo dato de history mas de
-# esto (en dias de calendario). 3 tolera un fin de semana largo.
-DEFAULT_TOLERANCE_DAYS = 3
+# Frescura por defecto: asof (ultimo dato usado) no puede quedar mas de esto por
+# detras de generated_at (cuando se genero el artefacto). 5 tolera fin de semana
+# largo/feriados. NO se mide asof-vs-history_end: la serie OOS termina antes que
+# asof por la cola natural del walk-forward (el ultimo tramo no forma un bloque de
+# test completo), y eso es legitimo; la mezcla vieja-historia/nuevo-asof la impide
+# la atomicidad (R1: manifest + un solo run_id).
+DEFAULT_TOLERANCE_DAYS = 5
 
 # Archivo que jamas es "ajeno" (marcador de carpeta versionada).
 _ALWAYS_ALLOWED = {".gitkeep"}
@@ -234,21 +238,40 @@ def validate_artifact(
                 ", ".join(forbidden_v0) + ".")
 
     # --- Regla 3: coherencia temporal ---
+    # (a) look-ahead: history NUNCA puede terminar DESPUES de asof (seria futuro
+    #     en la serie OOS). Que termine antes es la cola normal del walk-forward.
+    # (b) frescura: asof no puede quedar muy por detras de generated_at (datos
+    #     rancios al generar). La mezcla vieja-historia/nuevo-asof la impide R1.
     asof_raw = irfn.get("asof")
+    gen_raw = irfn.get("generated_at")
     hist_path = d / "history.parquet"
-    if asof_raw and hist_path.exists():
+    asof = None
+    if asof_raw:
+        try:
+            asof = date.fromisoformat(str(asof_raw)[:10])
+        except ValueError:
+            res.violations.append(f"R3 temporal: asof no parseable ({asof_raw!r}).")
+    if asof is not None and hist_path.exists():
         try:
             import pandas as pd
             hist = pd.read_parquet(hist_path, columns=["fecha"])
             last = pd.to_datetime(hist["fecha"]).max().date()
-            asof = date.fromisoformat(str(asof_raw)[:10])
-            gap = (asof - last).days
-            if gap > tolerance_days:
+            if last > asof:
                 res.violations.append(
-                    f"R3 temporal: asof ({asof}) adelanta al ultimo dato de history "
-                    f"({last}) en {gap} dias (> tolerancia {tolerance_days}).")
+                    f"R3 look-ahead: history llega a {last}, DESPUES de asof ({asof}): "
+                    "hay futuro en la serie OOS.")
         except Exception as e:  # pragma: no cover - defensivo
-            res.violations.append(f"R3 temporal: no se pudo comparar asof vs history ({e}).")
+            res.violations.append(f"R3 temporal: no se pudo leer history ({e}).")
+    if asof is not None and gen_raw:
+        try:
+            gen = date.fromisoformat(str(gen_raw)[:10])
+            lag = (gen - asof).days
+            if lag > tolerance_days:
+                res.violations.append(
+                    f"R3 frescura: asof ({asof}) queda {lag} dias por detras de "
+                    f"generated_at ({gen}) (> tolerancia {tolerance_days}): datos rancios.")
+        except ValueError:
+            pass
 
     # --- Regla 4: R6 multistart ---
     n_ms = ((model.get("estimation") or {}).get("multistart"))

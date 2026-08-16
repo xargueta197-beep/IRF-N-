@@ -1,6 +1,6 @@
 # Validacion V3 (SPY) — Hawkes y branching ratio
 
-generado: 2026-08-15T06:53:51.771035+00:00  |  run_id: `dbdc61daa50c`  |  **corrida --quick (provisional, no cumple R6)**
+generado: 2026-08-16T04:01:37.023311+00:00  |  run_id: `bb2e2a84356f`  |  **corrida --quick (provisional, no cumple R6)**
 
 ## Criterios de aceptacion de V3 (guia, checklist)
 
@@ -34,21 +34,6 @@ El Hawkes se ajusta sobre el TIEMPO OBSERVADO, no sobre el span calendario (deci
 | DESPUES (tiempo observado) | 241.0 | 103.0426 | 0.7388 |
 
 Multistart (R6): 8/8 arranques convergieron al mismo optimo (tolerancia 1e-4 en log-verosimilitud). Pocos arranques en el optimo indicarian un problema de identificacion; no es el caso.
-
-### Sensibilidad al dithering de de-empate (aviso #5, 2026-08-15)
-
-El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados); sin dithering U(0,15min) el MLE continuo degenera. Como el ruido se inyecta en la mayoria de los datos, se verifico que el optimo lo fijan los datos y no la realizacion del dithering: se re-ajusto con **5 semillas de dithering** (42/1/7/123/2024), con la semilla del multistart FIJA en 42 y `n_starts=30` (R6), para aislar el efecto del de-empate.
-
-| cantidad | rango entre semillas | en unidades de su SE | veredicto |
-| :-- | :-- | :-- | :-- |
-| n (branching ratio, PUBLICADO) | 0.7388-0.7406 (0.0018) | 0.46 SE de n; dentro del IC95 [0.731, 0.747] | robusto |
-| mu_N (piso, PUBLICADO) | 102.33-103.04 | < 0.62 SE | robusto |
-| E[hijos] (cascada, PUBLICADO) | 3.83-3.86 | -- | robusto |
-| alpha, beta (marginales) | ~2 SE marginales | co-movidos ~1:1 (ratio 0.90-1.07) | cresta de la verosimilitud |
-
-**Veredicto: PASA con matiz.** Lo que se publica (`n`, cascada, `mu_N`) es estable al dithering dentro de su propia incertidumbre. `alpha` y `beta` se mueven ~2 SE marginales, pero **juntos** (co-identificados en el kernel exponencial): el de-empate desliza el par sobre la cresta de la verosimilitud sin tocar `n = alpha*E[s]/beta`. El MLE no lee ruido inyectado como senal en el indicador reportado. No revierte el rechazo del KS (abajo): `n` sigue siendo cota superior cualitativa bajo un kernel mal especificado. Diagnostico reproducible: `scripts/dithering_sensitivity_v3.py` (`@diagnostic_only`) -> `reports/dithering_sensitivity_v3.md`.
-
-Dos extensiones ejecutadas en el mismo diagnostico: (a) **optimo global** -- barriendo la semilla del multistart con el dithering fijo, las 5 semillas caen en el mismo optimo (log-verosimilitud rango 1.4e-07, `n` rango 1.6e-06), asi que el MLE es unimodal y R6 no es el eslabon debil; (b) **imputacion multiple (Rubin)** sobre las semillas de dithering -- `n` agrupado 0.7399, SE 0.00394 -> 0.00403 (+2.1%; r=0.042, el dithering añade ~4% a la varianza), IC95 [0.732, 0.748]. El aporte del dithering a la incertidumbre es real pero de segundo orden; adoptar el `n`/IC agrupado en la ruta publicada seria decision del director (R3).
 
 ### Bondad de ajuste (teorema de re-escalamiento temporal)
 

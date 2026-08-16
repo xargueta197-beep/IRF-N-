@@ -81,9 +81,11 @@ def test_cuarentena_falla_al_menos_5_reglas():
     assert not res.promotable
     assert not res.ok
     assert len(res.violations) >= 5, res.violations
-    # que efectivamente toque las reglas 1,2,3,5,6(R6),7
+    # toca R1,R2,R5,R6,R7. NO R3: su problema de fechas era la mezcla vieja-historia/
+    # nuevo-asof, que ahora atrapa R1 (procedencia). asof-vs-generated_at es fresco
+    # (1 dia) y history no adelanta a asof, asi que R3 no dispara -- correcto.
     blob = " ".join(res.violations)
-    for marca in ("R1", "R2", "R3", "R5", "R6", "R7"):
+    for marca in ("R1", "R2", "R5", "R6", "R7"):
         assert marca in blob, f"esperaba {marca} en las violaciones: {blob}"
 
 
@@ -131,15 +133,36 @@ def test_r2_v0_no_puede_traer_hawkes(tmp_path):
     assert any("R2" in v and "Hawkes" in v for v in res.violations)
 
 
-def test_r3_hueco_de_frescura(tmp_path):
+def test_r3_cola_walkforward_es_legitima(tmp_path):
+    # history que termina ANTES de asof (cola del walk-forward) NO es violacion.
     d = tmp_path / "run"
     _write_conforming_v3(d, asof="2026-08-14")
-    # reescribir history terminando 40 dias antes del asof
-    dates = pd.date_range(end="2026-07-05", periods=10, freq="D")
+    dates = pd.date_range(end="2026-07-05", periods=10, freq="D")  # ~40 dias antes
     pd.DataFrame({"fecha": dates}).to_parquet(d / "history.parquet", index=False)
     _write_manifest(d, "abc123def456")
     res = validate_artifact(d)
-    assert any("R3" in v for v in res.violations)
+    assert not any("R3" in v for v in res.violations), res.violations
+
+
+def test_r3_lookahead_history_despues_de_asof(tmp_path):
+    d = tmp_path / "run"
+    _write_conforming_v3(d, asof="2026-08-14")
+    dates = pd.date_range(end="2026-09-30", periods=10, freq="D")  # DESPUES de asof
+    pd.DataFrame({"fecha": dates}).to_parquet(d / "history.parquet", index=False)
+    _write_manifest(d, "abc123def456")
+    res = validate_artifact(d)
+    assert any("R3 look-ahead" in v for v in res.violations)
+
+
+def test_r3_frescura_asof_rancio(tmp_path):
+    d = tmp_path / "run"
+    _write_conforming_v3(d, asof="2026-01-01")  # history termina en asof
+    irfn = json.loads((d / "irfn.json").read_text(encoding="utf-8"))
+    irfn["generated_at"] = "2026-08-15T00:00:00+00:00"  # generado 7 meses despues
+    (d / "irfn.json").write_text(json.dumps(irfn), encoding="utf-8")
+    _write_manifest(d, "abc123def456")
+    res = validate_artifact(d)
+    assert any("R3 frescura" in v for v in res.violations)
 
 
 def test_r4_r6_multistart_bajo_es_duro_pero_provisional_con_flag(tmp_path):
