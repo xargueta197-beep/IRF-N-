@@ -367,7 +367,7 @@ def build_hawkes_layer(
 # --------------------------------------------------------------------------- #
 # Corrida completa
 # --------------------------------------------------------------------------- #
-def full_run(quick: bool = False, no_capture: bool = False) -> None:
+def full_run(quick: bool = False, no_capture: bool = False, publish_m1: bool = False) -> None:
     base = BaseConfig.load()
     news_cfg = NewsConfig.load()
     seed = base.model.seed
@@ -510,12 +510,24 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
         else:
             covariate_active = False
             covariate_reason = m2h_blocker or "diagnostico M2+H no corrido."
+    if publish_m1 and not single_regime:
+        # A4 (bias-variance): publicar M1 (solo regimenes de volatilidad). Se fuerza
+        # lambda_N_z fuera del logit e se ignora el diagnostico M2+H: M1 no lleva
+        # NINGUNA covariable de transicion (ni tecnica ni de noticias).
+        covariate_active = False
+        covariate_reason = "M1 (A4, bias-variance): sin covariables de transicion en el logit."
     log.info("    covariable lambda_N_z activa en el titular: %s (%s)", covariate_active, covariate_reason)
 
     # --- h) titular V3 ---
     log.info("[h] estimando el titular V3...")
     n_starts_today = 8 if quick else base.model.n_multistart
-    if covariate_active:
+    if publish_m1 and not single_regime:
+        # M1 (A4): K>=2 con matriz de transicion CONSTANTE, SIN covariables de
+        # transicion (titular_X=None => tvtp=False, covariates=[]). El indicador de
+        # Hawkes standalone se conserva; solo sale del logit.
+        titular_returns, titular_X = returns, None
+        news_layer_list = []
+    elif covariate_active:
         titular_returns, titular_X = sample_returns, X_all[list(X_tech.columns) + ["lambda_N_z"]]
         news_layer_list = ["lambda_N_z"]
     elif single_regime:
@@ -683,6 +695,13 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
             f"transicion), innovaciones {'t de Student' if distt == 't' else 'Normales'}. "
             "lambda_N_z fuera por construccion; branching ratio de Hawkes standalone."
         )
+    elif publish_m1:
+        spec = (
+            f"MS-GJR-GARCH (Haas et al. 2004), K={Kt}, matriz de transicion CONSTANTE "
+            f"(M1: solo regimenes de volatilidad, SIN covariables de transicion; A4 "
+            f"bias-variance), innovaciones {'t de Student' if distt == 't' else 'Normales'}. "
+            "Branching ratio de Hawkes standalone (fuera del logit)."
+        )
     else:
         spec = (
             f"MS-GJR-GARCH (Haas et al. 2004), TVTP (tecnico"
@@ -700,7 +719,7 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
         converged=(today_run.fit.n_converged >= max(1, today_run.fit.n_starts // 3)),
         r_pct=r_pct_hist, argmax_idx=argmax_hist,
         asset=ASSET_NAME, validation_ref=f"reports/validation_v3{REPORT_SUFFIX}.md",
-        warnings=warnings_list, spec=spec, tvtp=(not single_regime),
+        warnings=warnings_list, spec=spec, tvtp=(titular_X is not None),
         covariates=(list(titular_X.columns) if titular_X is not None else []),
         transition_matrix_today=P_today,
         bootstrap_n_boot=base.v2.bootstrap.n_boot, bootstrap_block_len=base.v2.bootstrap.block_len,
@@ -1078,9 +1097,13 @@ def main() -> None:
     ap.add_argument("--asset", default=None,
                     help="Nombre del activo en config/assets.yaml (p.ej. BTC). "
                          "Sin este flag, comportamiento identico al historico (SPY).")
+    ap.add_argument("--publish-m1", action="store_true",
+                    help="Publica M1 (K=2, matriz de transicion CONSTANTE, sin covariables "
+                         "de transicion; A4 bias-variance) en vez de M2. No cambia la "
+                         "estimacion: solo enruta que spec se publica.")
     args = ap.parse_args()
     _configure_asset(BaseConfig.load(), args.asset)
-    full_run(quick=args.quick, no_capture=args.no_capture)
+    full_run(quick=args.quick, no_capture=args.no_capture, publish_m1=args.publish_m1)
 
 
 if __name__ == "__main__":
