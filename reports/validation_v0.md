@@ -1,6 +1,6 @@
 # Validacion V0 - IRF-N (SPY)
 
-run_id: `939a5202794d`  |  generado: 2026-08-16 06:13 UTC
+run_id: `7f462912a8eb`  |  generado: 2026-08-16 23:52 UTC
 
 Especificacion: MS-GJR-GARCH K=2, matriz de transicion CONSTANTE, innovaciones Normales. Sin TVTP, sin noticias (V1+).
 
