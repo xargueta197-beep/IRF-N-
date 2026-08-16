@@ -1,0 +1,157 @@
+{
+  "version": "V1",
+  "quick_provisional": false,
+  "generated_at": "2026-07-22T22:38:14.732367+00:00",
+  "asof": "2026-07-10",
+  "n_obs": 3400,
+  "sample_start": "2013-01-02",
+  "covariates_titular": [
+    "sma_gap",
+    "bb_width_z"
+  ],
+  "macro_blocker": "hy_oas_z EXCLUIDA: sin ALFRED_API_KEY y HY OAS (BAMLH0A0HYM2) limitado a ventana rodante de 3 anios en FRED/ALFRED, insuficiente para el walk-forward (reports/data_audit.md). Titular corre tecnico-solo; jamas se rellena con FRED revisado (R4). Retomar cuando haya fuente vintage con cobertura.",
+  "config": {
+    "k_candidates": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "dist_candidates": [
+      "normal",
+      "t"
+    ],
+    "bic_n_starts": 20,
+    "boot_n": 49,
+    "boot_starts": 6,
+    "seed": 42
+  },
+  "bic_table": [
+    {
+      "K": 1,
+      "dist": "normal",
+      "loglik": -4201.638690246882,
+      "k_free": 5,
+      "bic": 8443.935034046786,
+      "aic": 8413.277380493764,
+      "n_converged": 20,
+      "n_starts": 20,
+      "nu": null
+    },
+    {
+      "K": 2,
+      "dist": "normal",
+      "loglik": -4049.1252947753374,
+      "k_free": 12,
+      "bic": 8195.828958077926,
+      "aic": 8122.250589550675,
+      "n_converged": 10,
+      "n_starts": 20,
+      "nu": null
+    },
+    {
+      "K": 3,
+      "dist": "normal",
+      "loglik": -4024.856093577921,
+      "k_free": 21,
+      "bic": 8220.474332078531,
+      "aic": 8091.712187155842,
+      "n_converged": 1,
+      "n_starts": 20,
+      "nu": null
+    },
+    {
+      "K": 4,
+      "dist": "normal",
+      "loglik": -4011.262159216784,
+      "k_free": 32,
+      "bic": 8282.733301172904,
+      "aic": 8086.524318433568,
+      "n_converged": 1,
+      "n_starts": 20,
+      "nu": null
+    },
+    {
+      "K": 1,
+      "dist": "t",
+      "loglik": -4083.423995652483,
+      "k_free": 6,
+      "bic": 8215.637175568592,
+      "aic": 8178.847991304966,
+      "n_converged": 20,
+      "n_starts": 20,
+      "nu": [
+        5.853330398676928
+      ]
+    },
+    {
+      "K": 2,
+      "dist": "t",
+      "loglik": -4046.4864208258937,
+      "k_free": 14,
+      "bic": 8206.814271600248,
+      "aic": 8120.972841651787,
+      "n_converged": 1,
+      "n_starts": 20,
+      "nu": [
+        16.367680305361006,
+        358.838639678373
+      ]
+    },
+    {
+      "K": 3,
+      "dist": "t",
+      "loglik": -4024.9842934545786,
+      "k_free": 24,
+      "bic": 8245.125323963659,
+      "aic": 8097.968586909157,
+      "n_converged": 1,
+      "n_starts": 20,
+      "nu": [
+        11.419281317395173,
+        3312.4146550564446,
+        11.391751227998771
+      ]
+    },
+    {
+      "K": 4,
+      "dist": "t",
+      "loglik": -4013.227932682473,
+      "k_free": 36,
+      "bic": 8319.190970946698,
+      "aic": 8098.455865364946,
+      "n_converged": 1,
+      "n_starts": 20,
+      "nu": [
+        250.10596585386003,
+        7180.248581901654,
+        37.71160910646366,
+        3.8001058819275384
+      ]
+    }
+  ],
+  "bic_seconds": 0.0,
+  "winner": {
+    "K": 2,
+    "dist": "normal",
+    "bic": 8195.828958077926
+  },
+  "bootstrap_ladder": [
+    {
+      "K_null": 1,
+      "K_alt": 2,
+      "dist": "normal",
+      "lr_obs": 305.0267909430895,
+      "loglik_null": -4201.638690246882,
+      "loglik_alt": -4049.1252947753374,
+      "n_boot": 49,
+      "n_boot_ok": 49,
+      "n_boot_failed": 0,
+      "p_value": 0.02,
+      "lr_boot_q50": 8.424492545156681,
+      "lr_boot_q95": 18.381272560419518,
+      "method": "bootstrap parametrico (LR estandar invalido: Davies/parametros no identificados bajo H0; Hansen 1992 exacto descartado por costo, decision documentada en validation/tests_stat.py)",
+      "seconds": 39.1
+    }
+  ]
+}

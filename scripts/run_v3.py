@@ -495,6 +495,7 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
             train_years=base.walkforward.train_years, test_months=base.walkforward.test_months,
             n_blocks_min=base.walkforward.n_blocks, l1_grid=[0.0],
             checkpoint_dir=ARTIFACTS.parent / "checkpoints" / "v3_ablation",
+            n_jobs=-1,  # paraleliza por bloque; determinista bit-identico al serial (R2)
         )
         log.info("    peldanos corridos: %s", runnable_names)
 
@@ -721,6 +722,7 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
             train_years=base.walkforward.train_years, test_months=base.walkforward.test_months,
             n_blocks_min=base.walkforward.n_blocks, dist=distt,
             checkpoint_path=ARTIFACTS.parent / "checkpoints" / f"v3_wf_pub_k1{REPORT_SUFFIX}.pkl",
+            n_jobs=-1,  # paraleliza por bloque; determinista bit-identico al serial (R2)
         )
         published_spec_name = "K=1 (regimen unico)"
     else:
