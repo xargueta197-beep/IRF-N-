@@ -1,0 +1,28 @@
+#!/bin/sh
+# Hook de pre-commit de IRF-N: impide commitear si artifacts/latest/ tiene
+# violaciones DURAS del contrato (la regresion de publicacion V0/mezclada).
+# Instalar: cp scripts/git-hooks/pre-commit .git/hooks/pre-commit  (o ver README).
+#
+# Elige el python del venv si existe; si no, cae al python del PATH. Si no hay
+# ninguno, avisa y NO bloquea (no queremos brickear commits por falta de entorno).
+
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PY=".venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then
+    PY=".venv/bin/python"
+elif command -v python >/dev/null 2>&1; then
+    PY="python"
+else
+    echo "pre-commit: no encuentro python; salto el check del contrato." >&2
+    exit 0
+fi
+
+"$PY" scripts/ci_check_latest.py
+status=$?
+if [ "$status" -ne 0 ]; then
+    echo "" >&2
+    echo "pre-commit ABORTA: artifacts/latest/ no pasa el contrato (ver arriba)." >&2
+    echo "Re-promueve un artefacto valido con scripts/promote.py y reintenta." >&2
+    exit 1
+fi
+exit 0

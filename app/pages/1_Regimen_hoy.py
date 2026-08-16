@@ -20,6 +20,7 @@ from components import (  # noqa: E402
     REGIME_COLORS,
     load_audit,
     load_irfn,
+    momentum_5d,
     pit_is_green,
     render_freshness_gap,
     render_header,
@@ -128,6 +129,15 @@ def main():
 
         dur = reg["expected_duration_days"][argmax_idx]
         st.info(f"Este regimen dura en promedio **{dur:.0f} dias** mas (E[D] = 1/(1-p_kk)).")
+
+        # P3-13: momentum 5d de la probabilidad filtrada (publicado en el artefacto).
+        mom = momentum_5d(irfn)
+        if mom:
+            partes = ", ".join(f"{lbl} {pp:+.1f} pp" for lbl, pp in mom)
+            st.caption(
+                f"Momentum 5 días hábiles (cambio de la probabilidad filtrada): {partes}. "
+                "En puntos porcentuales; la suma es 0 (lo que gana un régimen lo pierde otro)."
+            )
 
     with col_der:
         st.subheader("Entropia (confianza)")

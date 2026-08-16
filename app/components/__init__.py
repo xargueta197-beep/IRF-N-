@@ -237,6 +237,20 @@ def se_unreliable(irfn: dict | None) -> bool:
 DEGENERATE_DURATION_DAYS = 2.0
 
 
+def momentum_5d(irfn: dict | None) -> list[tuple[str, float]]:
+    """(label, delta en puntos porcentuales) del cambio en la probabilidad filtrada
+    a 5 dias habiles: regime.xi_momentum_5d = ξ_{t|t}(k) − ξ_{t−5|t−5}(k) (lo calcula
+    el pipeline, P3-13). Se expresa en PUNTOS PORCENTUALES de probabilidad (x100).
+    Propiedad: la suma sobre regimenes es 0 (ambos son distribuciones que suman 1),
+    salvo redondeo -- la app solo formatea el numero publicado, no lo recalcula (R9)."""
+    if not irfn:
+        return []
+    reg = irfn.get("regime", {})
+    labels = reg.get("labels", [])
+    mom = reg.get("xi_momentum_5d", [])
+    return [(labels[k], 100.0 * float(mom[k])) for k in range(min(len(labels), len(mom)))]
+
+
 def degenerate_regimes(irfn: dict | None) -> list[tuple[str, float]]:
     """(label, E[D]) de los regimenes con duracion esperada < DEGENERATE_DURATION_DAYS.
     Disparado por regime.expected_duration_days del artefacto (P1-4), no hardcodeado."""
@@ -269,7 +283,7 @@ def render_freshness_gap(irfn: dict | None = None) -> None:
         st.info(
             f"La serie histórica out-of-sample llega hasta **{last}**, mientras que "
             f"el estado de hoy es de **{asof}** ({gap} días después). No es un dato "
-            "viejo: el walk-forward evalúa fuera de muestra por bloques y el último "
-            "tramo (~{gap} días) aún no forma un bloque de test completo, así que no "
-            "se grafica. El 'Régimen hoy' sí usa toda la muestra hasta asof."
+            "viejo: el walk-forward evalúa fuera de muestra por bloques y ese último "
+            "tramo aún no forma un bloque de test completo, así que no se grafica. "
+            "El 'Régimen hoy' sí usa toda la muestra hasta asof."
         )

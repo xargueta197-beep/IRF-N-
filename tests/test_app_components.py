@@ -48,6 +48,15 @@ def test_artifact_coherent(tmp_path, monkeypatch):
     assert components.artifact_coherent(irfn, None, None)
 
 
+def test_momentum_5d(tmp_path):
+    irfn = {"regime": {"labels": ["baja", "alta"], "xi_momentum_5d": [0.021, -0.021]}}
+    mom = components.momentum_5d(irfn)
+    assert mom == [("baja", 2.1), ("alta", -2.1)]
+    # invariante: suma de cambios = 0 (dos distribuciones que suman 1)
+    assert abs(sum(pp for _, pp in mom)) < 1e-9
+    assert components.momentum_5d(None) == []
+
+
 def test_load_manifest(tmp_path, monkeypatch):
     monkeypatch.setattr(components, "ARTIFACTS", tmp_path)
     assert components.load_manifest() is None
