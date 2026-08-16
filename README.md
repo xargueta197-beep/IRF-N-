@@ -37,6 +37,13 @@ covariable de transición añade valor OOS distinguible.
 | **V2 / M4** (sorpresa) | Índice de sorpresa SI_t (consenso point-in-time) | **CERRADO POR RESTRICCIÓN DE DATOS** | No existe fuente gratuita de consenso histórico point-in-time (4 fuentes descartadas con evidencia, `reports/data_audit.md`). Congelado por decisión del director; se reabre solo si se paga Trading Economics. |
 | **M5** (GDELT/Hawkes como covariable) | λ_N(t) del Hawkes en el logit de transición | **CERRADO POR RESTRICCIÓN DE DATOS** | El corpus GDELT (240/998 días) no alcanza para el walk-forward pre-registrado (~7 años). La capa Hawkes SÍ se publica como **indicador standalone** (n, cascada, KS), no como covariable `lambda_N_z` del logit. |
 
+**Nota de transición (A4).** El contrato permite M1 como modelo de producción válido
+(bias-variance) desde el commit `cd0e45b`. El artefacto actualmente vivo en
+`artifacts/latest/` (`7c44a7fac16d`) sigue siendo **M2**, generado bajo el contrato
+previo a la enmienda. La migración del artefacto publicado a M1 es una acción de
+**re-publicación separada, pendiente de decisión explícita** — no ejecutar sin
+autorización previa.
+
 **A1 (kernel Hawkes).** El sesgo de "días fantasma" está **cerrado**: el Hawkes se
 ajusta sobre tiempo observado (decisión del director 2026-08-15; `run_v3.py`,
 μ_N corregido, n=0.7388). El único eje abierto es kernel exponencial vs power-law:
