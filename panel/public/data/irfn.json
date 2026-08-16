@@ -1,8 +1,8 @@
 {
-  "run_id": "58077981ed78",
-  "generated_at": "2026-08-16T21:46:48.137787Z",
-  "git_commit": "dba8384",
-  "config_hash": "747dcba8c2c5",
+  "run_id": "7c44a7fac16d",
+  "generated_at": "2026-08-16T22:23:15.144248Z",
+  "git_commit": "f786c84",
+  "config_hash": "c151e5b865d8",
   "asof": "2026-08-14",
   "version": "V3",
   "model": {
@@ -247,7 +247,7 @@
     "M3 (macro): NO es el bloqueante: ALFRED_API_KEY esta configurada y la ablacion M3 con L1 ya se corrio (M3 vs M2 DM=1.038, p=0.299 -> la macro NO aporta; reports/ablation_m3_l1.md). El bloqueante real de M5 vs M4 es M4 (sorpresa): sin consenso historico. M5 depende de M4 por diseno de la escalera. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba (por M4/sorpresa y la cobertura de lambda_N_z, NO por la macro); ver reports/ablation_news.md.",
     "Diagnostico M2+H bloqueado: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).",
     "10 dia(s) del corpus censurados por el cap del API de GDELT: lambda_N esta subestimada en esos picos (censura contada, no oculta).",
-    "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre TODO el span (origen 2023-11-18): el compensador Lambda(T)=mu_N*T integra sobre esos dias fantasma, por lo que mu_N (tasa de fondo) queda SESGADA A LA BAJA y el branching ratio n INFLADO. Decision del director (2026-08-14): ajustar sobre el span completo y documentar el sesgo. Leer n y lambda_N como COTA SUPERIOR de la excitacion, no como estimacion insesgada.",
+    "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre el TIEMPO OBSERVADO (origen 2023-11-18; los dias fantasma se excinden del reloj), decision del director (2026-08-15) que REVIERTE la de ajustar sobre el span completo: mu_N y n son estimaciones sobre soporte observado, NO cotas superiores infladas por integrar mu_N sobre dias fantasma (trazabilidad antes/despues en validation_v3.md). Caveat vigente: el corpus es una muestra acotada (~240 dias) y el KS rechaza el kernel exponencial (D pequeno, ver aviso KS), asi que n/lambda_N reflejan ese ajuste exponencial sobre la ventana observada.",
     "El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados). Se aplico dithering intra-bin (ruido U(0,15min) por evento, semilla fija) para identificar el Hawkes continuo, bajo el supuesto de LLEGADA UNIFORME dentro del bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera.",
     "KS de re-escalamiento RECHAZA el kernel exponencial (D=0.0289, p=2.0e-69, n=95084): el ajuste del Hawkes es imperfecto y se reporta tal cual. El TAMANO DE EFECTO D es pequeno; el rechazo lo domina el n enorme del corpus (~10^5 titulares), no un desajuste grande de forma. Candidato power-law en version futura (guia 6.6).",
     "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
