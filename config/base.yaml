@@ -75,6 +75,10 @@ v2:
     block_len: 20
     ci_level: 0.90
     min_obs: 30
+    # E[D]=1/(1-p_kk) por debajo de esto => regimen 'absorbe-outliers': se publica
+    # el punto de sus estadisticas condicionales pero NO su IC (bootstrap sobre
+    # dias sueltos = precision espuria, F4). Igual al umbral de la app (2.0).
+    degenerate_duration_days: 2.0
   delta_mle:
     # Fit dedicado que estima delta por MLE del modelo completo (R7): 1 sola
     # covariable (surprise_index), multistart reducido porque la superficie es

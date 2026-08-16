@@ -1,6 +1,6 @@
 # Validacion V3 (SPY) — Hawkes y branching ratio
 
-generado: 2026-08-16T04:49:29.056994+00:00  |  run_id: `7773faae4863`
+generado: 2026-08-16T21:47:31.491516+00:00  |  run_id: `58077981ed78`
 
 ## Criterios de aceptacion de V3 (guia, checklist)
 

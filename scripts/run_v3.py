@@ -662,9 +662,13 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
             "bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera."
         )
     if hawkes_indicator_active and hawkes["ks"]["passed"] is False:
+        ks = hawkes["ks"]
         warnings_list.append(
-            "KS de re-escalamiento RECHAZA el kernel exponencial: el ajuste del Hawkes es "
-            "imperfecto y se reporta tal cual; candidato power-law en version futura (guia 6.6)."
+            f"KS de re-escalamiento RECHAZA el kernel exponencial (D={ks['ks_stat']:.4f}, "
+            f"p={ks['p_value']:.1e}, n={ks['n']}): el ajuste del Hawkes es imperfecto y se "
+            "reporta tal cual. El TAMANO DE EFECTO D es pequeno; el rechazo lo domina el n "
+            "enorme del corpus (~10^5 titulares), no un desajuste grande de forma. Candidato "
+            "power-law en version futura (guia 6.6)."
         )
     if quick:
         warnings_list.append(
@@ -699,6 +703,7 @@ def full_run(quick: bool = False, no_capture: bool = False) -> None:
         transition_matrix_today=P_today,
         bootstrap_n_boot=base.v2.bootstrap.n_boot, bootstrap_block_len=base.v2.bootstrap.block_len,
         bootstrap_ci_level=base.v2.bootstrap.ci_level, bootstrap_min_obs=base.v2.bootstrap.min_obs,
+        bootstrap_degenerate_duration_days=base.v2.bootstrap.degenerate_duration_days,
         news_layer=news_layer_list, news_block=news_block,
         news_layer_params=news_layer_params, hawkes_layer_params=hawkes_layer_params,
     )

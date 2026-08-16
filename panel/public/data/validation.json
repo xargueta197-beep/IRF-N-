@@ -37,5 +37,8 @@
       "verdict": "⚠"
     }
   ],
-  "source": "reports/validation_v4.md"
+  "source": "reports/validation_v4.md",
+  "validates_run_id": "02db03d3d6d3",
+  "published_run_id": "58077981ed78",
+  "stale": true
 }

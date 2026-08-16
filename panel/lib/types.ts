@@ -66,4 +66,11 @@ export interface ValidationSummary {
   generated_at: string | null;
   rows: ValidationRow[];
   source: string;
+  // Coherencia con el indicador publicado (F6). El reporte de validacion valida
+  // un run concreto (`validates_run_id`); si difiere del run publicado hoy
+  // (`published_run_id`), `stale` es true y quien renderice esta validacion DEBE
+  // avisar que describe una corrida distinta a la de "hoy".
+  validates_run_id: string | null;
+  published_run_id: string | null;
+  stale: boolean;
 }

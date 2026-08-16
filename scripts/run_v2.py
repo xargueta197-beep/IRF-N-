@@ -593,6 +593,7 @@ def full_run(quick: bool = False, n_jobs: int = 1) -> None:
         transition_matrix_today=P_today,
         bootstrap_n_boot=base.v2.bootstrap.n_boot, bootstrap_block_len=base.v2.bootstrap.block_len,
         bootstrap_ci_level=base.v2.bootstrap.ci_level, bootstrap_min_obs=base.v2.bootstrap.min_obs,
+        bootstrap_degenerate_duration_days=base.v2.bootstrap.degenerate_duration_days,
         news_layer=([base.v2.news_covariate_name] if news_active else []),
         news_block=news_block, news_layer_params=news_layer_params,
     )

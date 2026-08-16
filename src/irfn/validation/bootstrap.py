@@ -63,6 +63,15 @@ STATISTICS: dict[str, Callable[[np.ndarray], float]] = {
     "maxdd": max_drawdown,
 }
 
+# Estadisticos para los que el bootstrap estacionario NO produce un IC valido: se
+# publica el PUNTO pero ci_low/ci_high = None. maxdd es un funcional de VALOR
+# EXTREMO (el minimo de la trayectoria de equity acumulada): el remuestreo por
+# bloques rompe la trayectoria de la que depende ese minimo y el IC percentil
+# resultante finge una precision que no existe (Auditoria 2026-08-16, F3). El
+# punto sigue siendo el descriptivo de siempre; simplemente no se le adjunta un IC
+# que el metodo no sostiene -- misma politica honesta que "pocas observaciones".
+_CI_INVALID_STATISTICS: frozenset[str] = frozenset({"maxdd"})
+
 
 # --------------------------------------------------------------------------- #
 # Bootstrap estacionario
@@ -136,14 +145,25 @@ def bootstrap_regime_stats(
     min_obs: int,
 ) -> dict[str, tuple[float, float | None, float | None]]:
     """Los 4 estadisticos condicionales (mean_ann, vol_ann, sharpe, maxdd) con su
-    IC, sobre la MISMA serie de retornos diarios `r` (decimal) de un regimen."""
-    return {
-        name: stationary_bootstrap_ci(
-            r, fn, n_boot=n_boot, block_len=block_len, ci_level=ci_level,
-            seed=seed, min_obs=min_obs,
-        )
-        for name, fn in STATISTICS.items()
-    }
+    IC, sobre la MISMA serie de retornos diarios `r` (decimal) de un regimen.
+
+    Los estadisticos en `_CI_INVALID_STATISTICS` (maxdd) devuelven (punto, None,
+    None): el bootstrap estacionario no es valido sobre ellos (F3), asi que se
+    reporta el punto sin IC en vez de un intervalo espurio.
+    """
+    x = np.asarray(r, dtype=float)
+    x = x[np.isfinite(x)]
+    out: dict[str, tuple[float, float | None, float | None]] = {}
+    for name, fn in STATISTICS.items():
+        if name in _CI_INVALID_STATISTICS:
+            point = float(fn(x)) if len(x) >= 2 else float("nan")
+            out[name] = (point, None, None)
+        else:
+            out[name] = stationary_bootstrap_ci(
+                r, fn, n_boot=n_boot, block_len=block_len, ci_level=ci_level,
+                seed=seed, min_obs=min_obs,
+            )
+    return out
 
 
 # --------------------------------------------------------------------------- #

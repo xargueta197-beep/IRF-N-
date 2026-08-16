@@ -90,6 +90,13 @@ class BootstrapConfig(BaseModel):
     block_len: int = Field(gt=0, description="longitud media del bloque geometrico, en dias")
     ci_level: float = Field(gt=0.0, lt=1.0)
     min_obs: int = Field(ge=2, description="minimo de dias en el regimen para intentar el bootstrap")
+    degenerate_duration_days: float = Field(
+        gt=0.0,
+        description="E[D]=1/(1-p_kk) por debajo de esto => regimen 'absorbe-outliers' "
+                    "(no persiste): se publica el PUNTO de sus estadisticas condicionales "
+                    "pero NO su IC. El bootstrap sobre ~dias sueltos finge precision (F4). "
+                    "Mismo criterio que la app (DEGENERATE_DURATION_DAYS).",
+    )
 
 
 class DeltaMLEConfig(BaseModel):

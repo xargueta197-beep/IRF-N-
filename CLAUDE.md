@@ -193,6 +193,48 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-16 (Sprint de honestidad — A2 + A3 + A5; código, sin metodología):**
+  - Ejecutada la Fase 1 del `reports/plan_desarrollo_2026-08-16.md` (reconciliación de las
+    dos auditorías de hoy). Objetivo: dejar de publicar precisión que el método no sostiene,
+    sin tocar ningún número del modelo. **CÓDIGO HECHO Y VERIFICADO (149 passed, 0 failed);
+    PENDIENTE de re-publicar el artefacto para que A2/A3 lleguen al `latest/` vivo.**
+  - **A2 — dos IC apagados (se reporta el punto, ci=None):**
+    - **maxdd (F3):** `validation/bootstrap.py::bootstrap_regime_stats` ya no calcula IC para
+      `maxdd` (funcional de valor extremo; el bootstrap estacionario no es válido). Constante
+      `_CI_INVALID_STATISTICS`.
+    - **Régimen degenerado (F4):** `outputs/publish.py::conditional_stats` suprime el IC de
+      TODAS las métricas de un régimen con `E[D] < degenerate_duration_days` (mismo criterio
+      que la app, `components.DEGENERATE_DURATION_DAYS=2.0`). Umbral en config
+      (`v2.bootstrap.degenerate_duration_days: 2.0`), threading por `build_payload` + los 4
+      orquestadores (`run_v1/v2/v3/pipeline`). `E[D]` se calcula una sola vez y se reutiliza.
+  - **A3 — tamaño de efecto del KS:** `scripts/run_v3.py` enriquece el warning del KS con
+    `D=ks_stat`, `p` y `n`, encuadrando D como efecto PEQUEÑO (el rechazo lo domina n≈95k, no
+    un desajuste grande de forma). El `ks_stat` ya viajaba al artefacto y la app ya lo mostraba.
+  - **A5 — coherencia del panel público (F6):** `scripts/export_panel_data.py` estampa en
+    `validation.json` `validates_run_id` / `published_run_id` / `stale`, y añade
+    `assert_panel_coherent` (chequeo espejo de `contract.py`): **ABORTA** si la validación no
+    comparte run_id con el indicador publicado, salvo `--allow-stale-validation` (patrón de
+    `--allow-provisional`; deja pasar pero el dato lleva `stale=true` para que la página lo
+    avise, nunca lo oculta). Verificado en vivo: la validación publica valida
+    `02db03d3d6d3` mientras el indicador es `7773faae4863` → guardarraíl dispara (exit 1);
+    re-exportado con el flag (exit 0, `stale=true`). Tipo `ValidationSummary` del frontend
+    sincronizado. **NOTA:** ninguna página del panel renderiza hoy `validation.json`
+    (`loadValidation` está definido pero sin uso); la resolución REAL de F6 es re-correr la
+    validación formal sobre el run publicado (heavy; decisión aparte).
+  - **Tests nuevos:** `test_bootstrap.py` (+2: maxdd sin IC, régimen degenerado sin IC),
+    `test_panel_export_coherence.py` (+6: parseo de run_id, guardarraíl aborta/permite/OK).
+    **pytest `-m "not slow"`: 149 passed, 0 failed.**
+  - **Reconciliación doc↔realidad (Fase 0 del plan):** BTC ya es R6 + tubería atómica
+    (`run_id=ece4ad3df66f`); el kernel power-law YA se comparó (`_compare_kernels.log`:
+    power-law gana AIC ΔAIC+180, ninguno pasa KS → confirma que el KS está sobre-apoderado a
+    n=95k, F1); `src/irfn/models/hawkes_powerlaw.py` + `tests/test_hawkes_powerlaw.py` en
+    producción. Conteo real de tests hoy: **149** (subió de 141 por los 8 nuevos).
+  - **PENDIENTE para materializar A2/A3 en producción:** commit (R5 exige árbol limpio) →
+    `run_v3.py --no-capture` (~37 min, R6) → `scripts/promote.py runs/<id> --repo-root .`
+    (atómico) → re-exportar el panel del nuevo run. El swap atómico protege `latest/` si el
+    proceso muere a mitad. **Bloque de decisiones del director (A1 Hawkes-soporte, A4 M1-vs-M2,
+    A6 régimen degenerado) NO tocado: son metodología.**
+
 - **Sesión 2026-08-16 (remediación de la regresión de publicación + auditoría de mejoras):**
   - **PROBLEMA:** `artifacts/latest/` era una **mezcla** — `irfn.json`/`audit.json` V0
     (`run_id=f5e37a1b0d02`, `git=nogit`, multistart 12) con parquets Hawkes huérfanos de

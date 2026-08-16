@@ -39,11 +39,13 @@ OUT_DIR = ROOT / "panel" / "public" / "data"
 VERDICT_ICONS = {"✓", "✗", "⚠", "—"}
 
 
-def export_irfn_json(artifacts: Path, out_dir: Path) -> None:
+def export_irfn_json(artifacts: Path, out_dir: Path) -> str | None:
     src = artifacts / "irfn.json"
     payload = json.loads(src.read_text(encoding="utf-8"))
     (out_dir / "irfn.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"irfn.json: run_id={payload.get('run_id')} version={payload.get('version')}")
+    run_id = payload.get("run_id")
+    print(f"irfn.json: run_id={run_id} version={payload.get('version')}")
+    return run_id
 
 
 def export_history_json(artifacts: Path, out_dir: Path) -> None:
@@ -98,13 +100,28 @@ def _parse_markdown_table(lines: list[str]) -> list[dict]:
     return rows
 
 
-def export_validation_json(out_dir: Path, *, required: bool = True) -> None:
+def _validated_run_id(text: str) -> str | None:
+    """run_id del INDICADOR que valida el reporte V4 (linea 'run_id (indicador
+    publicado): `<hash>`'). Es el run al que se refieren los 7 tests; puede
+    diferir del run publicado hoy -- por eso se estampa y se compara (F6)."""
+    m = re.search(r"run_id \(indicador publicado\):[^\n]*?([0-9a-fA-F]{8,})", text)
+    return m.group(1) if m else None
+
+
+def export_validation_json(out_dir: Path, *, required: bool = True,
+                           published_run_id: str | None = None) -> None:
     """required=False (usado con --asset): reports/validation_v4.md es SIEMPRE
     el reporte de SPY (sin sufijo por activo; V4 nunca se ha corrido sobre BTC
     ni sobre ningun otro activo). Copiarlo tal cual dentro de la carpeta de
     otro activo seria enganoso -- se documenta el hueco en consola y se sigue
     sin escribir validation.json, en vez de fingir una validacion V4 que ese
-    activo no tiene (R8)."""
+    activo no tiene (R8).
+
+    Estampa `validates_run_id` (el run que el reporte realmente valida),
+    `published_run_id` (el run que se publica hoy) y `stale` (difieren). Asi la
+    pagina publica 'Validacion' no puede describir en silencio un modelo mas
+    viejo que la pagina 'hoy' (F6); la incoherencia queda explicita en el dato y
+    el chequeo espejo de main() la bloquea salvo --allow-stale-validation."""
     if not required:
         print("validation.json: omitido -- V4 solo existe para SPY (reports/validation_v4.md); "
               "este activo aun no tiene su propia validacion estadistica formal.")
@@ -117,6 +134,9 @@ def export_validation_json(out_dir: Path, *, required: bool = True) -> None:
     m = re.search(r"^Fecha:\s*(.+)$", text, re.MULTILINE)
     if m:
         generated_at = m.group(1).strip()
+    validates_run_id = _validated_run_id(text)
+    stale = (published_run_id is not None and validates_run_id is not None
+             and validates_run_id != published_run_id)
 
     # Bloque "## Resumen ejecutivo" hasta el siguiente "## "
     try:
@@ -140,9 +160,55 @@ def export_validation_json(out_dir: Path, *, required: bool = True) -> None:
     if len(rows) != 7:
         raise ValueError(f"{src}: se esperaban 7 filas en el resumen ejecutivo, se encontraron {len(rows)}.")
 
-    payload = {"generated_at": generated_at, "rows": rows, "source": "reports/validation_v4.md"}
+    payload = {
+        "generated_at": generated_at,
+        "rows": rows,
+        "source": "reports/validation_v4.md",
+        "validates_run_id": validates_run_id,
+        "published_run_id": published_run_id,
+        "stale": stale,
+    }
     (out_dir / "validation.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"validation.json: {len(rows)} filas extraidas de {src.relative_to(ROOT)}")
+    flag = " [STALE: no coincide con el run publicado]" if stale else ""
+    print(f"validation.json: {len(rows)} filas de {src.relative_to(ROOT)}; "
+          f"valida run_id={validates_run_id}, publicado={published_run_id}{flag}")
+
+
+def assert_panel_coherent(out_dir: Path, published_run_id: str | None, *, allow_stale: bool) -> None:
+    """Chequeo espejo del contrato de publicacion (contract.py) pero para el panel
+    publico: los tres JSON del panel deben describir el MISMO run. history.json e
+    irfn.json comparten run por construccion (mismo artifacts/latest). El unico que
+    puede divergir es validation.json (sale de un reporte hecho a mano sobre un run
+    concreto). Si su `validates_run_id` != run publicado, la pagina 'Validacion'
+    describiria un modelo distinto al de 'hoy' (F6): se ABORTA salvo
+    --allow-stale-validation, que deja pasar pero exige que el dato ya lleve
+    stale=true + ambos run_id (para que la pagina muestre el aviso, no lo oculte).
+    """
+    vpath = out_dir / "validation.json"
+    if not vpath.exists():
+        print("chequeo espejo: sin validation.json (activo sin V4 propia); "
+              "irfn/history coherentes por construccion.")
+        return
+    v = json.loads(vpath.read_text(encoding="utf-8"))
+    validates = v.get("validates_run_id")
+    if validates is None:
+        print("chequeo espejo: validation.json sin validates_run_id (no se pudo "
+              "leer del reporte); no se puede afirmar coherencia.")
+        return
+    if validates == published_run_id:
+        print(f"chequeo espejo: OK, los 3 JSON comparten run_id={published_run_id}.")
+        return
+    msg = (f"chequeo espejo FALLA (F6): la validacion publica describe run_id={validates} "
+           f"pero el indicador publicado es {published_run_id}. La pagina 'Validacion' "
+           "quedaria describiendo un modelo distinto al de 'hoy'.")
+    if not allow_stale:
+        raise SystemExit(
+            msg + "\n  -> Resuelve re-corriendo la validacion formal sobre el run publicado, "
+            "o pasa --allow-stale-validation para publicar el panel con el aviso explicito "
+            "(stale=true + ambos run_id ya quedan en validation.json)."
+        )
+    print("ADVERTENCIA -- " + msg + "\n  (permitido por --allow-stale-validation; "
+          "validation.json lleva stale=true y ambos run_id para que la pagina lo avise.)")
 
 
 def main() -> None:
@@ -151,6 +217,10 @@ def main() -> None:
                     help="Nombre del activo (p.ej. BTC). Sin este flag, comportamiento "
                          "identico al historico: lee artifacts/latest/, escribe en "
                          "panel/public/data/ (SPY).")
+    ap.add_argument("--allow-stale-validation", action="store_true",
+                    help="Deja publicar aunque validation.json no comparta run_id con el "
+                         "indicador publicado (F6). No lo oculta: el dato lleva stale=true "
+                         "y ambos run_id. Sin este flag, la incoherencia ABORTA el export.")
     args = ap.parse_args()
 
     if args.asset is None:
@@ -162,9 +232,10 @@ def main() -> None:
         required_validation = False
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    export_irfn_json(artifacts, out_dir)
+    run_id = export_irfn_json(artifacts, out_dir)
     export_history_json(artifacts, out_dir)
-    export_validation_json(out_dir, required=required_validation)
+    export_validation_json(out_dir, required=required_validation, published_run_id=run_id)
+    assert_panel_coherent(out_dir, run_id, allow_stale=args.allow_stale_validation)
 
 
 if __name__ == "__main__":
