@@ -71,9 +71,14 @@ def test_promueve_v3_conforme_y_latest_es_independiente(tmp_path):
 
 @pytest.mark.skipif(not QUARANTINE.is_dir(), reason="cuarentena no presente")
 def test_promover_v0_de_hoy_es_rechazado(tmp_path):
+    # copiar la cuarentena a tmp: promote_run escribe manifest.json en el run_dir,
+    # y el backup de cuarentena debe quedar pristino (no se muta un respaldo).
+    import shutil
+    run_copy = tmp_path / "q_copy"
+    shutil.copytree(QUARANTINE, run_copy)
     latest = tmp_path / "artifacts" / "latest"
     with pytest.raises(ContractViolation):
-        pub.promote_run(QUARANTINE, latest_dir=latest, triggered_by="test")
+        pub.promote_run(run_copy, latest_dir=latest, triggered_by="test")
     # no se creo ningun latest a medias
     assert not (latest / "irfn.json").exists()
 
