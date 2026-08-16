@@ -1,6 +1,6 @@
 # Ablacion de la capa de noticias: M3 vs M4 (V2) y M4 vs M5 (V3)
 
-generado: 2026-08-16T21:47:31.491516+00:00  |  run_id: `58077981ed78`  |  K=2, dist=normal
+generado: 2026-08-16T22:23:59.072840+00:00  |  run_id: `7c44a7fac16d`  |  K=2, dist=normal
 
 > Compromiso pre-registrado (V3, guia 8.1): la pregunta titular es M5 vs M4 (el flujo de noticias aporta POR ENCIMA de la sorpresa calendarizada?). Si M5 no mejora la log-loss OOS de M4 de forma distinguible (DM p < 0.10), el indicador se publica sin lambda_N_z en el logit.
 
