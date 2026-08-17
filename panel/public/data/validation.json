@@ -3,42 +3,42 @@
   "rows": [
     {
       "test": "1. Número de regímenes",
-      "result": "BIC elige K=2 normal de forma inequívoca (8195.8, mínimo claro); Hansen R6 (`v1_kselect.json`, B=49): K=2 vs K=1 p=0.02 — se rechaza K=1. Estructural, compartido entre runs.",
+      "result": "BIC elige K=2 normal (8195.8, mínimo claro); Hansen R6 (`v1_kselect.json`, B=49): K=2 vs K=1 p=0.02. Estructural.",
       "verdict": "✓"
     },
     {
       "test": "2. Calibración",
-      "result": "Bien calibrado y **sub-confiado** (acierto empírico > confianza en todos los bins). Contra la **climatología marginal** (frecuencias marginales de régimen) gana en Brier (0.125 vs 0.356) y log-loss (0.243 vs 0.541). Baseline DISTINTO al del reporte viejo — ver nota.",
-      "verdict": "✓/⚠"
+      "result": "Bien calibrado y sub-confiado; contra la climatología MARGINAL gana en Brier (0.071 vs 0.232) y log-loss (0.169 vs 0.394).",
+      "verdict": "✓"
     },
     {
       "test": "3. Precisión direccional (PT)",
-      "result": "Sin señal: hit 52.9% vs 53.8% esperado, PT=−1.27, **p=0.90**. El modelo predice \"sube\" el 84% de los días; la dirección es de segundo orden en un modelo de volatilidad. (El p=0.048 viejo venía de un walk-forward superado.)",
+      "result": "Marginal, sin señal al 5%: hit 55.2% vs 54.3% esperado, p=0.086. El modelo predice \"sube\" la mayoría de días; dirección de segundo orden.",
       "verdict": "⚠"
     },
     {
       "test": "4. Comparación con benchmark (DM)",
-      "result": "Vence al GARCH de un régimen en densidad predictiva (M1 vs M0, DM=−3.21, **p=0.001**); el TVTP técnico (M2 vs M1) no es distinguible (DM=+1.62, p=0.106).",
+      "result": "M1 vence al GARCH de un régimen (M1 vs M0, DM=−3.21, p=0.001); añadir TVTP técnico (M2 vs M1) NO aporta (DM=+1.62, p=0.106) — por eso se publica M1.",
       "verdict": "✓/⚠"
     },
     {
       "test": "5. Walk-forward económico",
-      "result": "Regla pre-registrada de des-riesgo: Sharpe de la diferencia vs buy-and-hold −0.502, IC95 [−1.301, 0.031] → **NO supera** (a 5 pb el IC ya excluye 0 por abajo). Reduce drawdown (23.3% vs 33.7%).",
+      "result": "Regla pre-registrada de des-riesgo: Sharpe de la diferencia vs buy-and-hold −0.323, IC95 [−1.070, 0.274] → **NO supera**. Reduce drawdown levemente (32.5% vs 33.7%).",
       "verdict": "⚠"
     },
     {
       "test": "6. Sharpe real (bootstrap)",
-      "result": "El IC 95% del Sharpe del estado predicho baja-vol excluye 0 [0.20, 1.62] pero es cercano al de comprar y mantener SPY (0.78 [0.17, 1.40]): el modelo no aporta Sharpe atribuible.",
+      "result": "El IC del Sharpe del estado predicho baja-vol excluye 0 [0.15, 1.48] pero es cercano al buy-and-hold SPY (0.78 [0.17, 1.40]): sin Sharpe atribuible.",
       "verdict": "⚠"
     },
     {
-      "test": "7. Ablación de noticias",
-      "result": "M0→M1 aporta (regímenes, DM p=0.001, robusto). M2 (TVTP técnico) no distinguible (p=0.106). M3 (macro) con L1 NO aporta (DM=+1.04, p=0.299). Único aporte robusto: los regímenes. M4/M5 bloqueados por datos.",
+      "test": "7. Ablación",
+      "result": "M0→M1 aporta (regímenes, DM p=0.001, robusto). M2 (TVTP técnico) no aporta (p=0.106); M3 (macro) p=0.299. Único aporte robusto: los regímenes → publicar M1.",
       "verdict": "⚠"
     }
   ],
   "source": "reports/validation_v4.md",
-  "validates_run_id": "7c44a7fac16d",
-  "published_run_id": "7c44a7fac16d",
+  "validates_run_id": "3b4f1e39b59c",
+  "published_run_id": "3b4f1e39b59c",
   "stale": false
 }

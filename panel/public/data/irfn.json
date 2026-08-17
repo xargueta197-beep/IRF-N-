@@ -1,18 +1,15 @@
 {
-  "run_id": "7c44a7fac16d",
-  "generated_at": "2026-08-16T22:23:15.144248Z",
-  "git_commit": "f786c84",
+  "run_id": "3b4f1e39b59c",
+  "generated_at": "2026-08-16T23:52:28.105914Z",
+  "git_commit": "428b91b",
   "config_hash": "c151e5b865d8",
   "asof": "2026-08-14",
   "version": "V3",
   "model": {
     "K": 2,
-    "spec": "MS-GJR-GARCH (Haas et al. 2004), TVTP (tecnico), innovaciones Normales [lambda_N_z fuera del logit: ver warnings]",
-    "tvtp": true,
-    "covariates": [
-      "sma_gap",
-      "bb_width_z"
-    ],
+    "spec": "MS-GJR-GARCH (Haas et al. 2004), K=2, matriz de transicion CONSTANTE (M1: solo regimenes de volatilidad, SIN covariables de transicion; A4 bias-variance), innovaciones Normales. Branching ratio de Hawkes standalone (fuera del logit).",
+    "tvtp": false,
+    "covariates": [],
     "news_layer": [],
     "estimation": {
       "method": "MLE L-BFGS-B multistart",
@@ -145,7 +142,7 @@
         "n_censored_days": 10
       },
       "reflexive_threshold": 0.8,
-      "blocker": "covariable lambda_N_z inactiva en el logit: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8)."
+      "blocker": "covariable lambda_N_z inactiva en el logit: M1 (A4, bias-variance): sin covariables de transicion en el logit."
     }
   },
   "regime": {
@@ -154,30 +151,30 @@
       "alta volatilidad"
     ],
     "xi_filtered": [
-      0.9682694938636893,
-      0.03173050613631068
+      0.949195191705485,
+      0.05080480829451499
     ],
-    "entropy": 0.14070705580330412,
+    "entropy": 0.20087816857090107,
     "entropy_max": 0.6931471805599453,
     "confidence": "alta",
     "expected_duration_days": [
-      13.177434028755197,
-      1.000000000000001
+      10.166673410731029,
+      1.1710891867176938
     ],
     "argmax": "baja volatilidad",
     "xi_momentum_5d": [
-      0.004722012504467132,
-      -0.004722012504467077
+      -0.004703055284831392,
+      0.004703055284831399
     ]
   },
   "transition_matrix_today": [
     [
-      0.9375151442528242,
-      0.06248485574717576
+      0.9016394095098511,
+      0.0983605904901489
     ],
     [
-      0.9999999999999993,
-      5.881187990927692e-16
+      0.853905929063166,
+      0.14609407093683396
     ]
   ],
   "news": {
@@ -190,7 +187,7 @@
     "expected_cascade": 3.828948096027439,
     "expected_cascade_bounded": true,
     "attribution": {
-      "price": 1.0,
+      "price": 0.0,
       "surprise": 0.0,
       "hawkes": 0.0
     }
@@ -199,19 +196,19 @@
     "SPY": {
       "baja volatilidad": {
         "mean_ann": {
-          "value": 0.3036624369143356,
-          "ci_low": 0.25136773528223044,
-          "ci_high": 0.35908649034289825
+          "value": 0.27842290556742627,
+          "ci_low": 0.2146581102735894,
+          "ci_high": 0.33456910717171084
         },
         "vol_ann": {
-          "value": 0.15397247175411977,
-          "ci_low": 0.12581842150887979,
-          "ci_high": 0.1853969608824236
+          "value": 0.1592982623848418,
+          "ci_low": 0.1325243314229134,
+          "ci_high": 0.18954769124398377
         },
         "sharpe": {
-          "value": 1.9721865438339996,
-          "ci_low": 1.4397618986788645,
-          "ci_high": 2.6518450685204416
+          "value": 1.7478088046861202,
+          "ci_low": 1.196504461103232,
+          "ci_high": 2.3943123389524845
         },
         "maxdd": {
           "value": -0.31443585645631256,
@@ -221,22 +218,22 @@
       },
       "alta volatilidad": {
         "mean_ann": {
-          "value": -1.3871880810018946,
+          "value": -4.13812025493596,
           "ci_low": null,
           "ci_high": null
         },
         "vol_ann": {
-          "value": 0.2492720898731167,
+          "value": 0.21676668653153836,
           "ci_low": null,
           "ci_high": null
         },
         "sharpe": {
-          "value": -5.564955473787678,
+          "value": -19.090203947615755,
           "ci_low": null,
           "ci_high": null
         },
         "maxdd": {
-          "value": -0.8397232867687059,
+          "value": -0.8289749075395809,
           "ci_low": null,
           "ci_high": null
         }
