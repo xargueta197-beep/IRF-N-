@@ -42,19 +42,18 @@ def main():
         "Estadisticas sobre ventanas donde argmax(ξ) = k. Con ξ filtrada, no suavizada."
     )
 
-    # Fase 6 (P1-4): banner sobre regimenes degenerados (absorbe-outliers). El
-    # retorno condicional de un estado que dura ~1 dia NO es un retorno esperado.
+    # Fase 6 (P1-4): banner sobre regimenes degenerados (absorbe-outliers).
     degen = degenerate_regimes(irfn)
     if degen:
         detalle = ", ".join(f"**{lbl}** (dura ~{edd:.0f} día)" for lbl, edd in degen)
         st.warning(
             f"Ojo: {detalle}. Es un estado **absorbe-outliers**, no un régimen "
             "persistente: aparece un día suelto para capturar un movimiento extremo y "
-            "desaparece (E[D] = 1/(1−p_kk) ≈ 1 día). Sus estadísticas de abajo "
-            "(retorno anual, Sharpe, caída máxima) **no son interpretables como el "
-            "rendimiento esperado** de un régimen — son el promedio de puñados de días "
-            "atípicos anualizados. Limitación conocida del modelo (K=2/Normal), avisada "
-            "en el artefacto; no es un error de datos."
+            "desaparece (E[D] = 1/(1−p_kk) ≈ 1 día). Sus métricas anualizadas de abajo "
+            "(retorno anual, Sharpe, caída máxima) se muestran como **no anualizable** — "
+            "anualizar (×252) un estado que por diseño no persiste no tiene sentido, sin "
+            "importar cuántas veces se haya visitado. Limitación conocida del modelo "
+            "(K=2/Normal), avisada en el artefacto; no es un error de datos."
         )
     if se_unreliable(irfn):
         st.caption(
@@ -64,6 +63,8 @@ def main():
 
     def _fmt_cell(m: dict, pct: bool) -> str:
         v = m["value"]
+        if v is None:
+            return f"no anualizable — {m['n_obs']} obs"
         val_s = f"{v:.1%}" if pct else f"{v:.2f}"
         if m["ci_low"] is None or m["ci_high"] is None:
             return val_s
@@ -89,7 +90,11 @@ def main():
         "IC al 90% (config v2.bootstrap.ci_level) por bootstrap estacionario "
         "(Politis-Romano, validation/bootstrap.py). Celda sin corchetes = menos "
         "observaciones que v2.bootstrap.min_obs en ese regimen: se muestra el "
-        "punto, no se inventa un intervalo."
+        "punto, no se inventa un intervalo. 'No anualizable' (retorno anual, Sharpe, "
+        "caída máxima) = E[D] del régimen < v2.bootstrap.degenerate_duration_days "
+        "(no persiste) o n_obs < v2.bootstrap.min_obs (poca precisión) — el punto no "
+        "se imprime, no se avisa al lado (F2.c, auditoría 2026-08-18). vol anual no "
+        "se suprime: no implica persistencia de la misma forma."
     )
 
 

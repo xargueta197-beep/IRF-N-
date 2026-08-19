@@ -145,11 +145,19 @@ class MetricWithCI(_Strict):
     ci_low/ci_high son None cuando no hay suficientes observaciones en el
     regimen para intentar el bootstrap (config v2.bootstrap.min_obs): la celda
     se muestra vacia en pantalla 4, no se inventa un intervalo de dos datos.
+
+    value es None cuando la metrica es una anualizada (mean_ann/sharpe/maxdd)
+    y el regimen no es anualizable de forma honesta (F2.c, auditoria
+    2026-08-18): E[D] < degenerate_duration_days (no persiste, "un anio" no
+    tiene sentido) O n_obs < bootstrap_min_obs (muy poca precision). n_obs
+    siempre viaja, anualizable o no, para que la pantalla pueda mostrar
+    "no anualizable -- N obs" en vez de imprimir un punto sin contexto.
     """
 
-    value: float
+    value: float | None
     ci_low: float | None
     ci_high: float | None
+    n_obs: int
 
 
 class ConditionalStatsEntry(_Strict):

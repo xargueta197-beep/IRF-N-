@@ -136,8 +136,47 @@ def test_conditional_stats_suppresses_degenerate_regime_ci():
     )["SPY"]
     # persistente: IC presente en las metricas validas (Sharpe)
     assert out["persistente"]["sharpe"]["ci_low"] is not None
-    # degenerado: TODAS las metricas sin IC (incluida Sharpe), pero con punto
+    # degenerado: TODAS las metricas sin IC (incluida Sharpe)
     for metric in ("mean_ann", "vol_ann", "sharpe", "maxdd"):
         assert out["degenerado"][metric]["ci_low"] is None
         assert out["degenerado"][metric]["ci_high"] is None
         assert "value" in out["degenerado"][metric]
+    # degenerado (F2.c): las 3 metricas anualizadas suprimen tambien el PUNTO
+    # (E[D]=1.3 < 2.0 -- no persiste, anualizar no tiene sentido aunque haya
+    # 300 dias). vol_ann NO se suprime: no implica persistencia.
+    for metric in ("mean_ann", "sharpe", "maxdd"):
+        assert out["degenerado"][metric]["value"] is None
+    assert out["degenerado"]["vol_ann"]["value"] is not None
+    # persistente: no degenerado y con >= min_obs -> punto SI se publica
+    for metric in ("mean_ann", "sharpe", "maxdd", "vol_ann"):
+        assert out["persistente"][metric]["value"] is not None
+    # n_obs viaja siempre, anualizable o no
+    assert out["degenerado"]["sharpe"]["n_obs"] == 300
+    assert out["persistente"]["sharpe"]["n_obs"] == 300
+
+
+def test_conditional_stats_suppresses_low_occupancy_even_if_not_degenerate():
+    """F2.c: un regimen con E[D] alta (persistente) pero pocas observaciones
+    totales tambien suprime el PUNTO anualizado -- son dos criterios
+    independientes (semantica vs. precision), ninguno sustituye al otro."""
+    from irfn.outputs.publish import conditional_stats
+
+    rng = np.random.default_rng(7)
+    n = 100
+    r_pct = rng.normal(0.03, 1.0, size=n)
+    argmax = np.zeros(n, dtype=int)
+    argmax[:20] = 1                                 # regimen 1: solo 20 obs, < min_obs=30
+    labels = ["normal", "escaso"]
+    out = conditional_stats(
+        r_pct, argmax, labels, "SPY",
+        bootstrap_n_boot=200, bootstrap_block_len=20, bootstrap_ci_level=0.90,
+        bootstrap_min_obs=30, bootstrap_seed=1,
+        expected_durations=[10.0, 15.0],            # ambos con E[D] alta: NINGUNO degenerado
+        degenerate_duration_days=2.0,
+    )["SPY"]
+    assert out["escaso"]["sharpe"]["n_obs"] == 20
+    for metric in ("mean_ann", "sharpe", "maxdd"):
+        assert out["escaso"][metric]["value"] is None       # cae por ocupacion, no por E[D]
+    assert out["escaso"]["vol_ann"]["value"] is not None
+    for metric in ("mean_ann", "sharpe", "maxdd", "vol_ann"):
+        assert out["normal"][metric]["value"] is not None   # 80 obs >= min_obs: se publica

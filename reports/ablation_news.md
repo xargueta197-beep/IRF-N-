@@ -1,6 +1,6 @@
 # Ablacion de la capa de noticias: M3 vs M4 (V2) y M4 vs M5 (V3)
 
-generado: 2026-08-16T23:52:43.711063+00:00  |  run_id: `3b4f1e39b59c`  |  K=2, dist=normal
+generado: 2026-08-19T04:06:07.965783+00:00  |  run_id: `dda4c831cdfe`  |  K=2, dist=normal  |  **corrida --quick (multistart reducido, NO cumple R6; provisional)**
 
 > Compromiso pre-registrado (V3, guia 8.1): la pregunta titular es M5 vs M4 (el flujo de noticias aporta POR ENCIMA de la sorpresa calendarizada?). Si M5 no mejora la log-loss OOS de M4 de forma distinguible (DM p < 0.10), el indicador se publica sin lambda_N_z en el logit.
 
@@ -29,15 +29,15 @@ Peldanos corridos: `['M0', 'M1', 'M2']` (M0..M5 declarados en validation/ablatio
 | modelo | descripcion | covs | bloques | n_oos | log-loss OOS/obs |
 | :-- | :-- | :-- | --: | --: | --: |
 | M0 | GARCH un solo regimen (piso) | - | 19 | 2386 | 1.2940 |
-| M1 | HMM K=2 P constante | - | 19 | 2386 | 1.2583 |
-| M2 | +TVTP tecnico ['sma_gap', 'bb_width_z'] | ['sma_gap', 'bb_width_z'] | 19 | 2386 | 1.2672 |
+| M1 | HMM K=2 P constante | - | 19 | 2386 | 1.2572 |
+| M2 | +TVTP tecnico ['sma_gap', 'bb_width_z'] | ['sma_gap', 'bb_width_z'] | 19 | 2386 | 1.2696 |
 
 ## Diebold-Mariano entre peldanos consecutivos (perdida OOS)
 
 | A vs B | DM stat | p-value | dif. media |
 | :-- | --: | --: | --: |
-| M1 vs M0 | -3.210 | 0.001 | -0.03579 |
-| M2 vs M1 | 1.617 | 0.106 | 0.00892 |
+| M1 vs M0 | -3.327 | 0.001 | -0.03687 |
+| M2 vs M1 | 2.210 | 0.027 | 0.01246 |
 
 > DM<0 => el primer modelo (A) tiene MENOR perdida (mejor). HAC Newey-West + correccion Harvey-Leybourne-Newbold.
 

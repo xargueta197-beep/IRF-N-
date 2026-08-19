@@ -187,16 +187,16 @@ def _hawkes_params_table(h: dict) -> None:
     for col in ("valor", "SE"):
         df[col] = df[col].map(lambda v: "-" if v is None else f"{v:.4f}")
     st.dataframe(df, width="stretch", hide_index=True)
-    n_lo, n_hi = h.get("branching_ratio_ci_low"), h.get("branching_ratio_ci_high")
-    n_ci = f" IC95 [{n_lo:.3f}, {n_hi:.3f}]" if (n_lo is not None and n_hi is not None) else ""
+    alpha_beta = h["alpha"] / h["beta"] if h.get("beta") else None
     n_val = f"{h['branching_ratio']:.4f}" if h.get("branching_ratio") is not None else "-"
+    ab_str = f"{alpha_beta:.4f}" if alpha_beta is not None else "-"
     st.caption(
         f"E[s] = {h['mean_mark']:.3f} sobre {h['n_events']:,} titulares | "
         f"multistart {h['starts_at_best']}/{h['n_starts']} arranques en el mismo optimo (R6). "
-        f"n = alpha*E[s]/beta = {n_val}{n_ci} (correccion por marcas; NO es alpha/beta; "
-        f"IC por metodo delta). Ajuste sobre TIEMPO OBSERVADO (dias fantasma excindidos) para "
-        f"que n no se infle hacia la frontera; cascada 1/(1-n) se censura a 'no acotada' si el "
-        f"IC superior de n alcanza el disparador."
+        f"n = alpha*E[s]/beta = {n_val} (correccion por marcas; NO alpha/beta = {ab_str}, que "
+        "seria explosivo sin corregir). n NO lleva IC95 aqui a proposito -- ver 'Archivo de "
+        "decisiones' para la banda de sensibilidad de ventana (0.7388-0.9994), que es la "
+        "incertidumbre que de verdad importa sobre este numero."
     )
     ks_p = h.get("ks_pvalue")
     if h.get("ks_passed") is None or ks_p is None:
@@ -207,11 +207,13 @@ def _hawkes_params_table(h: dict) -> None:
             f"(stat={h['ks_stat']:.4f}, p={ks_p:.3f}). El kernel exponencial es consistente."
         )
     else:
-        st.warning(
+        st.info(
             f"Bondad de ajuste (re-escalamiento temporal): KS RECHAZA Exp(1) "
-            f"(stat={h['ks_stat']:.4f}, p={ks_p:.2e}). El kernel exponencial es insuficiente; "
-            "candidato: kernel power-law en una version futura. Se reporta tal cual, "
-            "no se maquilla (guia 6.6)."
+            f"(stat={h['ks_stat']:.4f}, p={ks_p:.2e}, D pequeño dominado por n≈95k titulares). "
+            "**Cerrado (A1):** se comparó contra un kernel power-law -- gana AIC pero TAMPOCO "
+            "pasa el KS en esa comparación; cambiar de kernel no resuelve el rechazo, solo lo "
+            "mueve. Se mantiene el exponencial con este caveat. Detalle en 'Archivo de "
+            "decisiones'."
         )
 
 
@@ -233,6 +235,13 @@ def _hawkes_section(irfn: dict) -> None:
         )
         return
 
+    st.caption(
+        "Este indicador SÍ está activo y publicado (standalone). Distinto de "
+        "**M5** (λ_N como covariable del logit de transición): **CERRADO** por "
+        "corpus insuficiente para el walk-forward pre-registrado — ver "
+        "Archivo de decisiones."
+    )
+
     cov = h["coverage"]
     if cov.get("n_missing_days") or cov.get("n_censored_days"):
         st.info(
@@ -244,38 +253,43 @@ def _hawkes_section(irfn: dict) -> None:
 
     n = news["branching_ratio"]
     thr = h.get("reflexive_threshold")
-    # IC del branching ratio y cascada censurada (Parte B): se leen ya calculados
-    # del artefacto (R9: la app no calcula nada). cascada None = "no acotada".
-    n_lo = news.get("branching_ratio_ci_low")
-    n_hi = news.get("branching_ratio_ci_high")
     cascade = news.get("expected_cascade")
-    cascade_str = "no acotada" if cascade is None else f"{cascade:.2f}"
-    c1, c2, c3 = st.columns(3)
-    c1.metric(
-        "branching ratio n = alpha*E[s]/beta", f"{n:.3f}",
-        delta=(f"IC95 [{n_lo:.3f}, {n_hi:.3f}]" if n_lo is not None and n_hi is not None else None),
-        delta_color="off",
-    )
-    c2.metric("cascada esperada E[hijos] = 1/(1-n)", cascade_str)
-    c3.metric("lambda_N hoy (titulares/dia)", f"{news['lambda_N']:.1f}")
 
-    _criticality_bar(n, thr)
-    if thr is not None and n >= thr:
-        cola = (f"cada titular genera en promedio {cascade:.1f} titulares descendientes."
-                if cascade is not None
-                else "la cascada esperada es NO ACOTADA (el IC de n toca la frontera n = 1).")
-        st.error(
-            "Mercado en modo reflexivo — las noticias se estan autoalimentando. "
-            f"n = {n:.3f} se acerca a la criticidad (n = 1): " + cola
-        )
-    st.caption(
-        "n < 1: cada noticia genera en promedio n noticias hijas y las cascadas mueren. "
-        "n -> 1: el sistema se acerca a la criticidad y las cascadas se alargan sin limite. "
-        "Este numero es el indicador de fragilidad del flujo informativo."
+    # KPIs principales: SIN branching ratio n (F3, auditoria 2026-08-18). n es
+    # el numero mas vistoso y el menos robusto del panel (cambia ~1300x segun
+    # la ventana de integracion elegida, ver 'Archivo de decisiones') -- no
+    # pertenece a un bloque de KPIs que implica "publicado con confianza".
+    c1, c2 = st.columns(2)
+    c1.metric("lambda_N hoy (titulares/dia)", f"{news['lambda_N']:.1f}")
+    c2.metric(
+        "cobertura del corpus (dias con datos / span)",
+        f"{cov.get('n_days', '-')} / {cov.get('n_days', 0) + cov.get('n_missing_days', 0)}",
     )
 
     _lambda_chart(load_hawkes_history(), load_headline_rug())
     _hawkes_params_table(h)
+
+    with st.expander("Branching ratio n (fragilidad del flujo, NO es un KPI) y cascada esperada"):
+        cascade_str = "no acotada" if cascade is None else f"{cascade:.2f}"
+        st.metric("branching ratio n = alpha*E[s]/beta", f"{n:.3f}")
+        st.metric("cascada esperada E[hijos] = 1/(1-n)", cascade_str)
+        st.caption(
+            "n < 1: cada noticia genera en promedio n noticias hijas y las cascadas mueren. "
+            "n -> 1: el sistema se acerca a la criticidad y las cascadas se alargan sin limite. "
+            "Se saco del bloque de KPIs porque su valor depende fuertemente de una decision "
+            "metodologica (ventana de integracion) que se tomo y se revirtio en 24 horas -- "
+            "ver 'Archivo de decisiones' para la banda de sensibilidad real (0.7388-0.9994)."
+        )
+        _criticality_bar(n, thr)
+        if thr is not None and n >= thr:
+            cola = (f"cada titular genera en promedio {cascade:.1f} titulares descendientes."
+                    if cascade is not None
+                    else "la cascada esperada es NO ACOTADA (n toca la frontera n = 1).")
+            st.warning(
+                f"Con la ventana vigente, n = {n:.3f} se acerca al umbral de criticidad "
+                f"({thr:.2f}): " + cola + " Leer junto con la banda de sensibilidad de "
+                "arriba, no como una alerta aislada."
+            )
 
 
 def main():
@@ -286,16 +300,26 @@ def main():
         st.info("No hay artefactos todavia. Corre `python scripts/run_v2.py` (o V0/V1 primero).")
         return
 
-    news = irfn["news"]
     layer = irfn["model"]["news_layer_params"]
 
     if not layer["active"]:
-        st.warning(
-            "Capa de sorpresa INACTIVA: " + (layer.get("blocker") or
-            "surprise_layer=false en config/news.yaml.") +
-            " La atribucion de hoy es 100% precio, no por medicion de una sorpresa real."
+        # V2/M4 CERRADO por restriccion de datos (no "en curso" -- F3, auditoria
+        # 2026-08-18). Sin metricas vacias (indice de sorpresa=0.00, delta="sin
+        # estimar", atribucion en ceros): esta capa no existe hoy, no se dibuja
+        # a medias. Detalle completo en 'Archivo de decisiones'.
+        st.info(
+            "**Capa de sorpresa (V2/M4): CERRADA por restriccion de datos**, no en "
+            "curso. No existe fuente gratuita de consenso historico point-in-time "
+            "(5 fuentes investigadas y descartadas). Sin SI_t no hay sorpresa que "
+            "medir; esta seccion no muestra metricas vacias a proposito. Detalle, "
+            "evidencia y condicion de reapertura en **Archivo de decisiones**."
         )
+        st.divider()
+        _hawkes_section(irfn)
+        return
 
+    # Capa activa (reapertura futura): comportamiento completo, sin recortar.
+    news = irfn["news"]
     if layer.get("surprise_start_date"):
         st.info(
             f"El indice de sorpresa arranca en {layer['surprise_start_date']} por "
@@ -311,8 +335,7 @@ def main():
         "Atribucion del dia (3 vias): "
         + ", ".join(f"{k}={v:.0%}" for k, v in news["attribution"].items())
         + ". surprise = sorpresa calendarizada; hawkes = flujo de titulares; "
-        "price = covariables de precio. Componentes inactivos aportan 0 y estan "
-        "avisados arriba."
+        "price = covariables de precio."
     )
 
     st.divider()

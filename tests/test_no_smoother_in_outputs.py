@@ -84,10 +84,10 @@ VALID_PAYLOAD = {
     },
     "conditional_stats": {
         "BTC": {"risk_on": {
-            "mean_ann": {"value": 0.71, "ci_low": 0.55, "ci_high": 0.88},
-            "vol_ann": {"value": 0.48, "ci_low": 0.40, "ci_high": 0.57},
-            "sharpe": {"value": 1.48, "ci_low": 1.10, "ci_high": 1.90},
-            "maxdd": {"value": -0.22, "ci_low": None, "ci_high": None},
+            "mean_ann": {"value": 0.71, "ci_low": 0.55, "ci_high": 0.88, "n_obs": 210},
+            "vol_ann": {"value": 0.48, "ci_low": 0.40, "ci_high": 0.57, "n_obs": 210},
+            "sharpe": {"value": 1.48, "ci_low": 1.10, "ci_high": 1.90, "n_obs": 210},
+            "maxdd": {"value": -0.22, "ci_low": None, "ci_high": None, "n_obs": 210},
         }},
     },
     "warnings": [],

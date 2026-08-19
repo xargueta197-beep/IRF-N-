@@ -24,6 +24,13 @@ def _badge(passed: bool) -> str:
     return "VERDE" if passed else "ROJA"
 
 
+def _na(motivo: str) -> None:
+    """Chequeo vacuo: N/A gris, NUNCA 'VERDE'. El motivo va al lado, no en un
+    tooltip (hallazgo F2.c, auditoria 2026-08-18: un vacuo etiquetado VERDE
+    comunica robustez que no existe)."""
+    st.info(f"N/A -- sin filas evaluables. {motivo}")
+
+
 def main():
     st.title("Auditoria point-in-time")
     render_header()
@@ -35,6 +42,31 @@ def main():
     pit = audit["prefix_invariance"]
     ledger = audit["lag_ledger"]
     reest = audit["block_reestimation"]
+    vintage = audit.get("consensus_vintage_ledger")
+    ew = audit.get("expanding_window_check")
+    ht = audit.get("headline_timestamp_check")
+
+    # --- Encabezado: cuantos de los 7 chequeos se EVALUARON de verdad, no cuantos
+    # dieron VERDE (F2.c). Los 3 primeros siempre se evaluan (corren sobre el
+    # retorno, que siempre hay). Los otros 4 dependen de datos que hoy pueden
+    # estar vacios (V2/V3 bloqueados por falta de consenso/backfill).
+    checks_evaluados = 3  # 1. prefijo, 2. ledger de rezagos, 3. re-estimacion
+    if vintage is not None and vintage.get("n_events", 0) > 0:
+        checks_evaluados += 1
+    if ew is not None and not ew.get("vacuous", True):
+        checks_evaluados += 1
+    if ht is not None:
+        if not ht["titular_vs_evento"].get("vacuous", True):
+            checks_evaluados += 1
+        if ht["resolucion_feed"].get("n_headlines", 0) > 0:
+            checks_evaluados += 1
+    st.metric("Chequeos evaluados", f"{checks_evaluados} de 7")
+    st.caption(
+        "7 chequeos = 1 (prefijo) + 2 (ledger) + 3 (re-estimacion) + 4 (vintages) + "
+        "5 (expanding window) + 6a (titular vs evento) + 6b (resolucion del feed). "
+        "'Evaluado' = tuvo al menos una fila real que revisar; un chequeo vacuo "
+        "(0 filas) no cuenta aqui aunque su estado tecnico sea 'passed'."
+    )
 
     # --- Invarianza de prefijo ---
     st.subheader("1. Invarianza de prefijo")
@@ -84,16 +116,14 @@ def main():
 
     # --- Ledger de vintages del calendario (V2) ---
     st.subheader("4. Ledger de vintages del calendario macro (V2)")
-    vintage = audit.get("consensus_vintage_ledger")
     if vintage is None:
         st.info("Sin datos: corre scripts/run_v2.py para generar este chequeo.")
     else:
         if vintage["n_events"] == 0:
-            st.warning(
-                "VERDE (vacuo): 0 eventos en el calendario todavia -- ver "
-                "reports/data_audit.md secciones 4 y 7 (sin fuente gratuita de "
-                "consenso historico hoy). No hay ninguna fila que contradiga la "
-                "propiedad porque no hay ninguna fila."
+            _na(
+                "0 eventos en el calendario todavia -- ver reports/data_audit.md secciones "
+                "4 y 7 (sin fuente gratuita de consenso historico hoy). No hay ninguna fila "
+                "que contradiga la propiedad porque no hay ninguna fila."
             )
         elif vintage["passed"]:
             st.success(
@@ -117,15 +147,14 @@ def main():
 
     # --- Chequeo de expanding window (V2) ---
     st.subheader("5. Chequeo de expanding window: sigma_i no usa datos futuros (V2)")
-    ew = audit.get("expanding_window_check")
     if ew is None:
         st.info("Sin datos: corre scripts/run_v2.py para generar este chequeo.")
     else:
         if ew.get("vacuous"):
-            st.warning(
-                f"VERDE (vacuo): solo {ew['n_events_con_consenso']} release(s) con consenso "
-                "-- no hay nada que truncar de forma no trivial todavia. Se activa de verdad "
-                "en cuanto haya >= 2 releases con consenso."
+            _na(
+                f"solo {ew['n_events_con_consenso']} release(s) con consenso -- no hay nada "
+                "que truncar de forma no trivial todavia. Se activa de verdad en cuanto haya "
+                ">= 2 releases con consenso."
             )
         elif ew["passed"]:
             st.success(
@@ -145,17 +174,16 @@ def main():
 
     # --- Timestamps de titulares (V3, Trampa 3) ---
     st.subheader("6. Alineacion de timestamps de titulares (V3)")
-    ht = audit.get("headline_timestamp_check")
     if ht is None:
         st.info("Sin datos: corre scripts/run_v3.py para generar este chequeo.")
     else:
         a = ht["titular_vs_evento"]
         if a.get("vacuous"):
-            st.warning(
-                "VERDE (vacuo): 0 titulares emparejados con releases del calendario "
-                "macro -- el calendario de consenso sigue vacio (ver seccion 4), asi "
-                "que no hay pares (hora_titular - hora_evento) que auditar. El chequeo "
-                "se vuelve sustantivo en cuanto ambos feeds acumulen datos."
+            _na(
+                "0 titulares emparejados con releases del calendario macro -- el calendario "
+                "de consenso sigue vacio (ver seccion 4), asi que no hay pares "
+                "(hora_titular - hora_evento) que auditar. El chequeo se vuelve sustantivo "
+                "en cuanto ambos feeds acumulen datos."
             )
         elif a["passed"]:
             st.success(

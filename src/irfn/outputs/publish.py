@@ -277,25 +277,46 @@ def conditional_stats(
     bootstrap por bloques finge una precision que no existe. Mismo criterio que
     la app (components.DEGENERATE_DURATION_DAYS). degenerate_duration_days=0.0
     (default) desactiva la supresion (compat V0/V1 sin el umbral configurado).
+
+    No anualizable (F2.c, auditoria 2026-08-18): ademas del IC, el PUNTO de
+    mean_ann/sharpe/maxdd se suprime (value=None) cuando el regimen falla
+    CUALQUIERA de dos condiciones independientes -- no son lo mismo y una no
+    sustituye a la otra:
+      - semantica: E[D] < degenerate_duration_days (arriba). Anualizar (x252,
+        compounding implicito de "esto se sostuvo un anio") no tiene sentido
+        para un estado que por construccion no persiste, sin importar cuantas
+        veces se haya visitado.
+      - precision: n_obs < bootstrap_min_obs. Aunque el estado persista, con
+        pocas observaciones el punto es demasiado ruidoso para publicarse solo
+        (mismo umbral que ya usa el IC, config v2.bootstrap.min_obs).
+    vol_ann NO se suprime: no implica persistencia de la misma forma. Cuando se
+    suprime, "value" es None y la app debe mostrar "no anualizable -- N obs",
+    nunca un punto con un aviso al lado (R8: no maquillar, no esconder).
     """
     r_dec = np.asarray(r_pct, dtype=float) / 100.0
     idx = np.asarray(argmax_idx)
     edd = expected_durations if expected_durations is not None else []
     out: dict[str, dict] = {}
+    _NOT_ANNUALIZABLE = {"mean_ann", "sharpe", "maxdd"}
     for k, label in enumerate(labels):
         sel = idx == k
         rk = r_dec[sel]
+        n_obs = int(sel.sum())
         stats = bootstrap_regime_stats(
             rk, n_boot=bootstrap_n_boot, block_len=bootstrap_block_len,
             ci_level=bootstrap_ci_level, seed=bootstrap_seed + k, min_obs=bootstrap_min_obs,
         )
         degenerate = k < len(edd) and edd[k] < degenerate_duration_days
+        not_annualizable = degenerate or n_obs < bootstrap_min_obs
         entry: dict[str, dict] = {}
         for name, (point, lo, hi) in stats.items():
+            point_ok = point if np.isfinite(point) else 0.0
+            suppress_point = not_annualizable and name in _NOT_ANNUALIZABLE
             entry[name] = {
-                "value": point if np.isfinite(point) else 0.0,
+                "value": None if suppress_point else point_ok,
                 "ci_low": None if degenerate else lo,
                 "ci_high": None if degenerate else hi,
+                "n_obs": n_obs,
             }
         out[label] = entry
     return {asset: out}

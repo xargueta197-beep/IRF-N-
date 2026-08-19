@@ -58,12 +58,19 @@ def _semaforo_pit(audit: dict | None) -> bool:
 def _correr_pipeline_ui() -> None:
     st.subheader("Correr pipeline")
     st.caption(
-        "Ejecuta scripts/run_pipeline.py en un subproceso. Descarga SPY, re-estima "
-        "el walk-forward y regenera los artefactos. Puede tardar varios minutos."
+        "Ejecuta scripts/run_v3.py --publish-m1 --no-capture en un subproceso: descarga "
+        "SPY fresco, re-estima la escalera M0..M5 y ajusta Hawkes sobre el corpus GDELT ya "
+        "en disco (--no-capture omite solo el top-up de titulares, no los precios). Puede "
+        "tardar bastante mas que un run V0 (carga el corpus + ajusta Hawkes + escalera). "
+        "Escribe SOLO en artifacts/runs/<run_id>/ -- NO promueve a latest/ (eso sigue siendo "
+        "manual con scripts/promote.py, con su guardarrail intacto)."
     )
     quick = st.checkbox("Modo rapido (menos arranques, para probar)", value=True)
     if st.button("Correr pipeline ahora", type="primary"):
-        cmd = [sys.executable, str(ROOT / "scripts" / "run_pipeline.py")]
+        cmd = [
+            sys.executable, str(ROOT / "scripts" / "run_v3.py"),
+            "--publish-m1", "--no-capture",
+        ]
         if quick:
             cmd.append("--quick")
         log_box = st.empty()
@@ -78,7 +85,12 @@ def _correr_pipeline_ui() -> None:
                 log_box.code("\n".join(lines[-30:]))
             proc.wait()
         if proc.returncode == 0:
-            st.success("Pipeline terminado. Recarga la pagina para ver los artefactos nuevos.")
+            st.success(
+                "Pipeline terminado. Escribio un artefacto nuevo en artifacts/runs/ -- "
+                "revisa el log de arriba para el run_id. Recargar esta pagina NO lo va a "
+                "mostrar: sigue en runs/, no en latest/. Para publicarlo, promuevelo a mano "
+                "desde la terminal: python scripts/promote.py artifacts/runs/<run_id>."
+            )
         else:
             st.error(
                 f"El pipeline termino con codigo {proc.returncode}. Revisa el log de arriba: "
