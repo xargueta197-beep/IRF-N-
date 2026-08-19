@@ -193,6 +193,26 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-16 (Migración a M1 en producción — A4, Ruta B1 autorizada):**
+  - **Artefacto publicado cambia de M2 a M1.** Con el contrato ya desvinculado (`V1+⇒tvtp`
+    ya no es obligatorio, commit `cd0e45b`) y la autorización explícita del director, se
+    ejecutó la migración real: `run_v3.py --publish-m1` + `promote.py` (atómico).
+    `artifacts/latest/` pasa de `7c44a7fac16d` (M2) a **`3b4f1e39b59c`** (M1: K=2, matriz
+    de transición CONSTANTE, `covariates=[]`, `tvtp=false`, capa Hawkes standalone intacta).
+  - **Comparación M1 vs M2 (sin sorpresas vs A4):** densidad OOS M1=1.2583 < M2=1.2672 (M1
+    mejor, coherente con bias-variance: mismo sesgo, menor varianza sin covariables de
+    transición que no aportaban). Calibración: M1 gana a la climatología marginal. Test 3
+    (direccional) marginal, p=0.086, sin señal. Test 5 (económico): NO SUPERA (diff −0.323,
+    IC95 [−1.070, 0.274]). Segundo régimen sigue degenerado en ambos modelos (A6, ya
+    documentado y aceptado como óptimo global, sin parches).
+  - `reports/validation_v4.md` reescrito sobre M1; panel re-exportado (`stale=false`);
+    triplete `irfn.json`/`validation.json`/`manifest.json` comparte `run_id=3b4f1e39b59c`.
+    `README.md` actualizado: tabla "Estado de módulos" + nota de transición A4 marcada
+    **MIGRACIÓN COMPLETADA**.
+  - **pytest `-m "not slow"`: 154 passed, 0 failed.**
+  - Commits: `6bb8ae1` (migración) + merge `7b7c5a9`. Ambos ya pusheados a
+    `origin/master` (confirmado en auditoría de estado del 2026-08-18: 0 ahead/0 behind).
+
 - **Sesión 2026-08-16 (Re-validación formal F6 + Bloque 2: cierre documental, A4, freshness):**
   - **Diagnóstico del salto del Test 3 (p=0.048→0.90): H2 benigno, NO A1.** El modelo
     publicado usa `covariates=[sma_gap, bb_width_z]`, `news_layer=[]`, `lambda_N_z` inactiva
