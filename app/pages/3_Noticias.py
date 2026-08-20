@@ -285,15 +285,23 @@ def _hawkes_section(irfn: dict) -> None:
                 f"**(a) IC del MLE en la ventana observada:** [{ci_lo:.3f}, {ci_hi:.3f}] — "
                 "ruido de estimacion del valor publicado (incluye el aporte del de-empate por Rubin)."
             )
-        # (b) Sensibilidad a la ELECCION de ventana. NO es un IC.
+        # (b) Impacto de la CENSURA de dias sin corpus. NO es un IC NI un rango de
+        # la verdad: el span-calendario es un estimador SESGADO (integra mu_N sobre
+        # dias fantasma), el que el proyecto DESCARTO el 2026-08-15 (auditoria A.1
+        # lo llama 'inflado'). Se muestra para cuantificar cuanto sesga ignorar la
+        # censura, no para sugerir que la verdadera n pueda estar cerca de 1.
         if n_span is not None:
+            miss = cov.get("n_missing_days", 0)
             casc_span_str = "no acotada" if casc_span is None else f"~{casc_span:.0f}"
             st.caption(
-                f"**(b) Banda de eleccion de ventana (NO es un IC):** observado {n:.3f} "
-                f"(cascada {cascade_str}) **vs** span-calendario {n_span:.4f} "
-                f"(cascada {casc_span_str}). El span-calendario integra sobre los dias SIN corpus: "
-                "es una **cota superior diagnostica**, cruza el umbral reflexivo y por eso NUNCA "
-                "es el indicador publicado (decision del director 2026-08-19)."
+                f"**(b) Impacto de la censura de dias sin corpus (NO es un IC ni un rango de la "
+                f"verdad):** el valor publicado {n:.3f} usa el TIEMPO OBSERVADO (correccion de "
+                f"censura, decision 2026-08-15). Ajustar en cambio sobre el span-calendario "
+                f"--integrando sobre {miss} dias SIN datos-- daria {n_span:.4f} (cascada "
+                f"{casc_span_str}): un estimador **SESGADO AL ALZA**, el que el proyecto DESCARTO. "
+                f"La verdadera n es ~{n:.2f}, **NO** un valor entre {n:.2f} y {n_span:.2f}; el "
+                f"0.99 solo mide cuanto sesga ignorar la censura (auditoria A.1: span 'inflado' "
+                "vs verdad ~0.74). Por eso cruza el umbral reflexivo SIN ser una alerta."
             )
         st.caption(
             "Las dos incertidumbres NO se funden: (a) es azar de muestreo; (b) es una decision "
