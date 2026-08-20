@@ -1,0 +1,234 @@
+{
+  "C1_filas_P_suman_1_(2000_thetas_aleatorios,+TVTP)": {
+    "ok": true,
+    "detail": {
+      "peor_desvio": 3.3306690738754696e-16
+    }
+  },
+  "C1_P_en_[0,1]": {
+    "ok": true,
+    "detail": {
+      "peor_exceso": 0.0
+    }
+  },
+  "C1_P_today_filas_suman_1": {
+    "ok": true,
+    "detail": {
+      "P": [
+        [
+          0.9016394095098511,
+          0.0983605904901489
+        ],
+        [
+          0.853905929063166,
+          0.14609407093683396
+        ]
+      ]
+    }
+  },
+  "C1_P_today_sin_0_ni_1_exactos": {
+    "ok": true
+  },
+  "C1_xi0_es_estacionaria_y_coincide_con_prod": {
+    "ok": true,
+    "detail": {
+      "ll_prod": -3762.6309994934263,
+      "ll_estacionaria": -3762.6309994934263
+    }
+  },
+  "C1_sensibilidad_xi0": {
+    "ll_estacionaria": -3762.6309994934263,
+    "delta_uniforme": 0.6061358035703961,
+    "delta_e1": -19.423982852815243,
+    "nota": "Delta-LL en unidades absolutas sobre T=2000; efecto acotado al transitorio inicial."
+  },
+  "C1_R3_shift1_real_en_indice_(hawkes_feature)": {
+    "ok": true
+  },
+  "C2_xi_filtered_sin_NaN": {
+    "ok": true
+  },
+  "C2_xi_predicted_sin_NaN": {
+    "ok": true
+  },
+  "C2_xi_filtered_en_[0,1]_suma_1": {
+    "ok": true,
+    "detail": {
+      "peor_suma": 2.220446049250313e-16
+    }
+  },
+  "C2_xi_predicted_en_[0,1]_suma_1": {
+    "ok": true,
+    "detail": {
+      "peor_suma": 3.3306690738754696e-16
+    }
+  },
+  "C2_orientacion_transpuesta_en_artefacto": {
+    "ok": true,
+    "detail": {
+      "max_err_con_P_transpuesta": 1.1102230246251565e-16,
+      "max_err_con_P_SIN_transponer_(control)": 0.9126848747693381,
+      "nota": "si la version sin transponer diera error ~0, la orientacion seria ambigua; debe ser grande"
+    }
+  },
+  "C2_R1_publish_rechaza_clave_anidada": {
+    "ok": true
+  },
+  "C3_restricciones_GARCH_por_construccion_(2000_thetas)": {
+    "ok": true,
+    "detail": {
+      "p_max": 0.999991703484169,
+      "min_omega": 2.6769874876626614e-06
+    }
+  },
+  "C3_kappa_bloques_publicados": {
+    "max_kappa": 0.9999999999999999,
+    "min_kappa": 0.30423153730743685,
+    "dist_a_1_minima": 1.1102230246251565e-16,
+    "nota": "kappa < 1 estricto en todos los bloques; cercania a 1 = persistencia alta tipica GARCH"
+  },
+  "C4_brier_vs_proxy_proyecto": {
+    "brier": 0.035361502349828475,
+    "reliability": 0.0062875648521879,
+    "resolution": 0.08732406439524448,
+    "uncertainty": 0.11612866055061342,
+    "check_identity": 0.03509216100755684,
+    "base_rate": 0.13411567476948869,
+    "curve": [
+      {
+        "bin": 0,
+        "n": 1386,
+        "mean_p": 0.07021817701148472,
+        "freq_obs": 0.025252525252525252
+      },
+      {
+        "bin": 1,
+        "n": 643,
+        "mean_p": 0.1354539203522716,
+        "freq_obs": 0.027993779160186624
+      },
+      {
+        "bin": 2,
+        "n": 47,
+        "mean_p": 0.2340865262639674,
+        "freq_obs": 0.0851063829787234
+      },
+      {
+        "bin": 3,
+        "n": 25,
+        "mean_p": 0.35134149502642537,
+        "freq_obs": 0.04
+      },
+      {
+        "bin": 4,
+        "n": 9,
+        "mean_p": 0.43863469297958585,
+        "freq_obs": 0.3333333333333333
+      },
+      {
+        "bin": 5,
+        "n": 14,
+        "mean_p": 0.5388076228987303,
+        "freq_obs": 0.35714285714285715
+      },
+      {
+        "bin": 6,
+        "n": 7,
+        "mean_p": 0.6246299498225308,
+        "freq_obs": 0.7142857142857143
+      },
+      {
+        "bin": 7,
+        "n": 7,
+        "mean_p": 0.7507016310920999,
+        "freq_obs": 1.0
+      },
+      {
+        "bin": 8,
+        "n": 3,
+        "mean_p": 0.8814237734360955,
+        "freq_obs": 1.0
+      },
+      {
+        "bin": 9,
+        "n": 245,
+        "mean_p": 0.9460403480612508,
+        "freq_obs": 0.9755102040816327
+      }
+    ]
+  },
+  "C4_brier_vs_proxy_observable_quintil|r|": {
+    "brier": 0.23022828974632953,
+    "reliability": 0.07270671911345972,
+    "resolution": 0.0030046718739941457,
+    "uncertainty": 0.15994969959578403,
+    "check_identity": 0.2296517468352496,
+    "base_rate": 0.19991617770326908,
+    "curve": [
+      {
+        "bin": 0,
+        "n": 1386,
+        "mean_p": 0.07021817701148472,
+        "freq_obs": 0.2077922077922078
+      },
+      {
+        "bin": 1,
+        "n": 643,
+        "mean_p": 0.1354539203522716,
+        "freq_obs": 0.15863141524105753
+      },
+      {
+        "bin": 2,
+        "n": 47,
+        "mean_p": 0.2340865262639674,
+        "freq_obs": 0.3191489361702128
+      },
+      {
+        "bin": 3,
+        "n": 25,
+        "mean_p": 0.35134149502642537,
+        "freq_obs": 0.28
+      },
+      {
+        "bin": 4,
+        "n": 9,
+        "mean_p": 0.43863469297958585,
+        "freq_obs": 0.5555555555555556
+      },
+      {
+        "bin": 5,
+        "n": 14,
+        "mean_p": 0.5388076228987303,
+        "freq_obs": 0.5714285714285714
+      },
+      {
+        "bin": 6,
+        "n": 7,
+        "mean_p": 0.6246299498225308,
+        "freq_obs": 0.7142857142857143
+      },
+      {
+        "bin": 7,
+        "n": 7,
+        "mean_p": 0.7507016310920999,
+        "freq_obs": 0.2857142857142857
+      },
+      {
+        "bin": 8,
+        "n": 3,
+        "mean_p": 0.8814237734360955,
+        "freq_obs": 0.0
+      },
+      {
+        "bin": 9,
+        "n": 245,
+        "mean_p": 0.9460403480612508,
+        "freq_obs": 0.1836734693877551
+      }
+    ]
+  },
+  "C4_pit_densidad": {
+    "ok": null,
+    "nota": "NO VERIFICABLE desde el artefacto: walkforward.json no persiste theta por bloque, la densidad predictiva OOS no es reconstruible sin re-correr el walk-forward (computo pesado, fuera del presupuesto de esta pasada). El PIT del bloque reconstruido en F.4 cubre parcialmente este hueco."
+  }
+}

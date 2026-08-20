@@ -575,6 +575,14 @@ def full_run(quick: bool = False, no_capture: bool = False, publish_m1: bool = F
         )
     else:
         cascade_val, cascade_bounded = None, None
+    # Banda de sensibilidad de VENTANA (aviso #12, decision director 2026-08-19): el
+    # ajuste sobre el span-CALENDARIO (dias fantasma incluidos) da un n mucho mayor.
+    # Es una COTA SUPERIOR diagnostica de la eleccion de ventana, NO el indicador
+    # publicado (ese es fith.branching_ratio, sobre tiempo observado). Se emite aparte
+    # para que la app la muestre como banda sin fundirla con el IC del MLE.
+    n_span = hawkes.get("n_before_span")
+    br_span = _none_if_nan(n_span) if n_span is not None else None
+    casc_span = (1.0 / (1.0 - br_span)) if (br_span is not None and br_span < 1.0) else None
     if hawkes_indicator_active:
         hawkes_layer_params = {
             "active": True,
@@ -586,6 +594,8 @@ def full_run(quick: bool = False, no_capture: bool = False, publish_m1: bool = F
             "branching_ratio_ci_low": _none_if_nan(fith.branching_ratio_ci_low),
             "branching_ratio_ci_high": _none_if_nan(fith.branching_ratio_ci_high),
             "expected_cascade": cascade_val, "expected_cascade_bounded": cascade_bounded,
+            "branching_ratio_span_calendar": br_span,
+            "expected_cascade_span_calendar": casc_span,
             "stationary": fith.stationary,
             "ks_stat": _none_if_nan(hawkes["ks"]["ks_stat"]),
             "ks_pvalue": _none_if_nan(hawkes["ks"]["p_value"]),

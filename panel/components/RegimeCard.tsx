@@ -1,4 +1,4 @@
-import { colors, regimeColor } from "@/lib/theme";
+import { colors, regimeColor, textOn } from "@/lib/theme";
 import { HatchDefs } from "./HatchPattern";
 
 export interface RegimeCardProps {
@@ -67,18 +67,18 @@ export function RegimeCard({ regime, xi, confidence, expected_duration, momentum
   return (
     <div className="flex min-h-[220px] flex-col justify-between gap-4 rounded-lg p-8" style={{ backgroundColor: bg }}>
       <div>
-        <p className="font-display text-5xl leading-tight" style={{ color: colors.background }}>
+        <p className="font-display text-5xl leading-tight" style={{ color: textOn(bg) }}>
           {regime}
         </p>
-        <p className="font-body mt-2 text-sm" style={{ color: colors.background, opacity: 0.85 }}>
+        <p className="font-body mt-2 text-sm" style={{ color: textOn(bg), opacity: 0.85 }}>
           Este régimen dura en promedio {expected_duration.toFixed(1)} días más.
         </p>
       </div>
       <div className="flex items-center justify-between">
-        <span className="font-body text-xs uppercase tracking-wide" style={{ color: colors.background, opacity: 0.7 }}>
+        <span className="font-body text-xs uppercase tracking-wide" style={{ color: textOn(bg), opacity: 0.7 }}>
           momentum por régimen (5d)
         </span>
-        <MomentumBars values={momentum} barColor={colors.background} />
+        <MomentumBars values={momentum} barColor={textOn(bg)} />
       </div>
     </div>
   );

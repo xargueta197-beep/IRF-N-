@@ -2,24 +2,26 @@
  * Design system del panel IRF-N. Fuente unica de colores y tipografia:
  * ningun componente hardcodea un hex fuera de aqui.
  *
- * Los tres colores de regimen (risk_on/transicion/risk_off) se ajustaron desde
- * la paleta de marca original para que fueran distinguibles en escala de
- * grises (verificado con la formula de luminancia relativa sRGB): grises
- * aproximados 94 / 133 / 45 sobre 255, separacion minima de 39 puntos entre
- * cualquier par. El matiz (verde desaturado / naranja / azul-tinta) se
- * conserva; solo cambio la luminosidad.
+ * Paleta del dashboard IRF-N (tema oscuro). El chrome viene de CHROME; el
+ * acento azul (#5B8DEF) NO codifica dato; verde/rojo quedan reservados al
+ * signo del precio (ausentes en este panel). Los tres colores de regimen
+ * salen de la escala viridis del indice IRF-N, de menor a mayor varianza
+ * (indice bajo -> teal; indice extremo -> amarillo), asi el color del regimen
+ * y la escala del indice hablan el mismo idioma. Siguen siendo distinguibles
+ * en escala de grises (luminancia aprox 95 / 130 / 220 sobre 255).
  */
 export const colors = {
-  background: "#F7F6F2",
-  foreground: "#1A1A1A",
-  accent: "#E8570A",
+  background: "#0E1117",
+  surface: "#161A23",
+  foreground: "#D7DCE5",
+  accent: "#5B8DEF",
   regimes: {
-    risk_on: "#336849",
-    transicion: "#E8570A",
-    risk_off: "#132A46",
+    risk_on: "#31688E",
+    transicion: "#1F9E89",
+    risk_off: "#FDE725",
   },
-  muted: "#6B6B6B",
-  border: "#E2E1DC",
+  muted: "#8B93A5",
+  border: "#262C38",
 } as const;
 
 export const typography = {
@@ -71,4 +73,17 @@ export function regimeColor(index: number, K: number): string {
   if (K === 2) return index === 0 ? colors.regimes.risk_on : colors.regimes.risk_off;
   if (K === 3) return REGIME_PALETTE[index] ?? colors.muted;
   return interpolatePalette(index / (K - 1));
+}
+
+/**
+ * Color de texto legible SOBRE un relleno `bg`: near-black en rellenos claros,
+ * near-white en rellenos oscuros. Necesario porque la escala viridis de los
+ * regimenes va de teal oscuro (baja vol) a amarillo brillante (alta vol): un
+ * solo color de texto no contrasta con ambos extremos. Umbral por luminancia
+ * percibida (0.299R+0.587G+0.114B).
+ */
+export function textOn(bg: string): string {
+  const [r, g, b] = hexToRgb(bg);
+  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luma > 140 ? colors.background : colors.foreground;
 }

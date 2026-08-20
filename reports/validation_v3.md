@@ -1,6 +1,6 @@
 # Validacion V3 (SPY) — Hawkes y branching ratio
 
-generado: 2026-08-19T04:06:07.967781+00:00  |  run_id: `dda4c831cdfe`  |  **corrida --quick (provisional, no cumple R6)**
+generado: 2026-08-19T23:50:33.700729+00:00  |  run_id: `9d30960c94cc`
 
 ## Criterios de aceptacion de V3 (guia, checklist)
 
@@ -33,7 +33,7 @@ El Hawkes se ajusta sobre el TIEMPO OBSERVADO, no sobre el span calendario (deci
 | ANTES (span calendario, sesgado) | 1003.0 | 0.0807 | 0.9992 |
 | DESPUES (tiempo observado) | 242.0 | 102.9185 | 0.7385 |
 
-Multistart (R6): 6/8 arranques convergieron al mismo optimo (tolerancia 1e-4 en log-verosimilitud). Pocos arranques en el optimo indicarian un problema de identificacion; no es el caso.
+Multistart (R6): 28/30 arranques convergieron al mismo optimo (tolerancia 1e-4 en log-verosimilitud). Pocos arranques en el optimo indicarian un problema de identificacion; no es el caso.
 
 ### Bondad de ajuste (teorema de re-escalamiento temporal)
 
@@ -56,4 +56,3 @@ resolucion del feed: 95,234 titulares; 1.48% con timestamp de medianoche exacta 
 - Backfill de GDELT hasta headlines.start_date (2017): en curso, reanudable (scripts/capture_headlines.py); la cobertura actual viaja en el artefacto.
 - M5 vs M4: requiere ALFRED_API_KEY (gratis, minutos) y consenso historico (Trading Economics de pago o acumulacion hacia adelante).
 - Invarianza de prefijo del titular: VERDE en esta corrida (pantalla 6).
-- Re-correr sin --quick para cumplir R6 (multistart completo) antes de dar por cerrada la version.

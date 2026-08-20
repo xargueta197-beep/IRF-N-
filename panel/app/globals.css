@@ -4,8 +4,8 @@
 
 html,
 body {
-  background-color: #f7f6f2;
-  color: #1a1a1a;
+  background-color: #0E1117;
+  color: #D7DCE5;
 }
 
 /* Tipografia de docs/metodologia.md renderizado (app/metodologia/page.tsx).
@@ -15,7 +15,7 @@ body {
   font-size: 1.75rem;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
-  color: #1a1a1a;
+  color: #D7DCE5;
 }
 
 .prose-metodologia h3 {
@@ -23,13 +23,13 @@ body {
   font-size: 1.35rem;
   margin-top: 2rem;
   margin-bottom: 0.5rem;
-  color: #1a1a1a;
+  color: #D7DCE5;
 }
 
 .prose-metodologia p {
   margin-bottom: 1rem;
   line-height: 1.7;
-  color: #1a1a1a;
+  color: #D7DCE5;
 }
 
 .prose-metodologia strong {
@@ -60,12 +60,12 @@ body {
 
 .prose-metodologia th,
 .prose-metodologia td {
-  border: 1px solid #e2e1dc;
+  border: 1px solid #262C38;
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .prose-metodologia th {
-  color: #6b6b6b;
+  color: #8B93A5;
   font-weight: 500;
 }

@@ -1,0 +1,8 @@
+[D2] n recalc=0.7388316647 pub=0.7388316647 ok=True
+[D7] D_obs=0.0289 D_crit(5%)=0.00440 ratio=6.6
+[D5] eventos=95234 empatados pre-dither=0.832 post-dither unicos=95234/95234 (prep 12s)
+[D1] refit mu=102.9185 alpha=329.4885 beta=283.8530 n=0.738473 (pub 103.0426/329.6631/283.9588/0.738832) match=False
+[D6] IC delta=[0.7311,0.7465] perfilado=[0.7328,0.7448] (6.0s)
+[D4_borde_kernel_lento] n_true=0.85 full=0.8475 borde=0.8403 delta=-0.0072
+[D4_borde_escala_prod] n_true=0.74 full=0.7424 borde=0.7421 delta=-0.0004
+FASE D completa -> audits/probes/out/d_results.json

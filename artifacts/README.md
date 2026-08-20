@@ -41,6 +41,60 @@ escribe por promocion atomica**. Ninguna corrida escribe `latest/` directamente.
      `.latest.trash.*` si el proceso muere a la mitad): `latest/` nunca queda en un
      estado intermedio ni mezclado.
 
+## Runbook completo de re-publicacion (verificado 2026-08-19)
+
+Pasos exactos, en orden, para regenerar y publicar el artefacto **SPY M1** (el
+publicado hoy). Ajusta el comando de la corrida para otra linea/spec.
+
+```sh
+# 1. Regenerar la corrida (NO toca latest/, escribe en runs/<run_id>/).
+#    --no-capture: usa precios en cache (fresco <7d) + corpus GDELT en disco =>
+#    reproduce el mismo asof y ajuste; solo cambian los fixes ya commiteados.
+python scripts/run_v3.py --publish-m1 --no-capture      # SPY M1
+#   variantes: --asset BTC  |  sin --publish-m1 = M2  |  --quick = provisional (R6 no)
+# Anota el run_id que imprime al final: "Listo V3. run_id=<NEW>".
+
+# 2. ARBOL DE GIT LIMPIO (contrato R5). promote.py exige `git status --porcelain`
+#    VACIO (cuenta tracked + untracked). artifacts/ esta gitignored, asi que
+#    publicar no ensucia git; el problema es cualquier OTRO cambio sin commitear.
+#    Si el arbol tiene WIP que NO quieres commitear, usa un stash reversible:
+git status --porcelain > /tmp/_pre.txt                  # snapshot para verificar
+git stash push -u -m "wip-temporal-promover-<NEW>"      # guarda tracked + untracked
+git status --porcelain                                   # debe salir VACIO
+
+# 3. Promover atomicamente.
+python scripts/promote.py artifacts/runs/<NEW>           # PROMOVIDO: run_id=<NEW>
+
+# 4. Restaurar el WIP INMEDIATAMENTE y verificar que el arbol quedo identico.
+git stash pop
+diff <(git status --porcelain | sort) <(sort /tmp/_pre.txt) && echo "arbol OK"
+git rev-parse HEAD                                        # HEAD no se movio
+
+# 5. Re-exportar el panel publico (lee latest/ -> panel/public/data/).
+python scripts/export_panel_data.py
+#   Si la validacion formal (validation_v4.md) valida un run ANTERIOR, el
+#   guardarrail F6 aborta. El modelo puede ser identico (p.ej. un fix que solo
+#   toca presentacion): entonces re-exporta divulgando el desfase --
+python scripts/export_panel_data.py --allow-stale-validation   # deja stale=true + ambos run_id
+
+# 6. Verificar coherencia final (todo debe compartir <NEW>).
+python - <<'PY'
+import json
+r=lambda p: json.load(open(p)).get("run_id")
+for p in ("artifacts/latest/irfn.json","artifacts/latest/audit.json",
+          "artifacts/latest/manifest.json","panel/public/data/irfn.json"):
+    print(p, r(p))
+PY
+```
+
+Notas:
+- **No commitear WIP ajeno.** El artefacto queda en `latest/` (gitignored), no
+  necesita commit. `git_commit` del artefacto = HEAD al momento de la corrida; el
+  modelo publicado es reproducible desde ese commit aunque el arbol tenga cambios
+  de UI/reportes sin commitear (no afectan al modelo).
+- La resolucion **limpia** de F6 (evitar `stale=true`) es re-correr la validacion
+  formal (`validation_v4.md`) sobre el run publicado antes del paso 5.
+
 ## Red de seguridad (CI / pre-commit)
 
 `scripts/ci_check_latest.py` valida `artifacts/latest/` y falla ante violaciones

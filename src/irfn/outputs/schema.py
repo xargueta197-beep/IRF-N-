@@ -90,6 +90,18 @@ class HawkesLayerParams(_Strict):
     branching_ratio_ci_high: float | None
     expected_cascade: float | None
     expected_cascade_bounded: bool | None
+    # Sensibilidad de VENTANA (aviso #12, decision del director 2026-08-19). El
+    # branching ratio depende del soporte sobre el que el compensador integra.
+    # Se publican DOS incertidumbres SEPARADAS, jamas fundidas (colapsarlas seria
+    # un error de categoria: la de arriba es ruido de MUESTREO; esta es una ELECCION
+    # estructural de definicion):
+    #   (a) IC del MLE en la ventana OBSERVADA -> branching_ratio_ci_low/high (arriba).
+    #   (b) ajuste span-CALENDARIO (dias fantasma incluidos) -> n mucho mayor, COTA
+    #       SUPERIOR diagnostica, NUNCA el indicador publicado. Cruza el umbral
+    #       reflexivo, por eso viaja aparte para que la app lo muestre como banda.
+    # None cuando la capa esta inactiva o no se computo el ajuste span.
+    branching_ratio_span_calendar: float | None
+    expected_cascade_span_calendar: float | None
     stationary: bool | None
     ks_stat: float | None
     ks_pvalue: float | None

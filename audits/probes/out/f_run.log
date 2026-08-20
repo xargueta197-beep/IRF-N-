@@ -1,0 +1,24 @@
+[F4] alineacion train 1006/1006 test 127/127
+  start 0: ll=-1034.2490
+  start 1: ll=-1034.2499
+  start 2: ll=-1047.4057
+  start 3: ll=-1034.2491
+  start 4: ll=-1034.2586
+  start 5: ll=-1034.2490
+  start 6: ll=-1034.2491
+  start 7: ll=-1034.2493
+  start 8: ll=-1034.2492
+  start 9: ll=-1034.2490
+  start 10: ll=-1034.2543
+  start 11: ll=-1034.2543
+  start 12: ll=-1034.2491
+  start 13: ll=-1037.9439
+  start 14: ll=-1047.4060
+  start 15: ll=-1034.2491
+  start 16: ll=-1034.2490
+  start 17: ll=-1034.2545
+  start 18: ll=-1034.2492
+  start 19: ll=-1034.2591
+[F4] train mio=-1.028081 art=-1.028048 | test mio=-0.968269 art=-0.968256 (1057.2s)
+[F4b] PIT: KS=0.0747 p=0.455 ac1=-0.011 (2se=0.177)
+FASE F (probe) completa -> audits/probes/out/f_results.json

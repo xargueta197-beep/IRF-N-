@@ -1,0 +1,14 @@
+[E1] BIC kselect: OK ganador={'K': 2, 'dist': 'normal', 'bic': 8195.828958077926}
+[E3] DM propio: {"lags_0": {"dm": 1.5966018925644507, "p": 0.11048695617227051}, "lags_5": {"dm": 1.6477797149975508, "p": 0.09952960572145816}, "lags_20": {"dm": 1.6165982820851066, "p": 0.1060972732326115}, "lags_40": {"dm": 1.539491890081389, "p": 0.12381691163602661}} (reportado 1.617/0.106, T=2386)
+[E2] muestra reconstruida n=3400 (kselect 3400)
+[E2] replica 0: LR(6)=8.185 LR(20)=8.191 delta=+0.005
+MULTISTART: solo 1 de 6 arranques alcanzaron el optimo global (loglik=-4140.0974, tol=0.034). Superficie multimodal con maximos locales inferiores; considerar mas arranques y revisar la estabilidad del punto.
+MULTISTART: solo 1 de 20 arranques alcanzaron el optimo global (loglik=-4139.0980, tol=0.034). Superficie multimodal con maximos locales inferiores; considerar mas arranques y revisar la estabilidad del punto.
+[E2] replica 1: LR(6)=6.561 LR(20)=8.560 delta=+1.999
+MULTISTART: solo 1 de 6 arranques alcanzaron el optimo global (loglik=-4178.8353, tol=0.034). Superficie multimodal con maximos locales inferiores; considerar mas arranques y revisar la estabilidad del punto.
+MULTISTART: solo 1 de 20 arranques alcanzaron el optimo global (loglik=-4177.8565, tol=0.034). Superficie multimodal con maximos locales inferiores; considerar mas arranques y revisar la estabilidad del punto.
+[E2] replica 2: LR(6)=19.275 LR(20)=21.233 delta=+1.958
+[E2] replica 3: LR(6)=8.821 LR(20)=8.821 delta=+0.000
+[E4] cobertura IC95 sharpe_ci = 90/100 (5s)
+[E4] supresion A2 en artefacto: {'maxdd_sin_ic_en_todos': True, 'degenerado_sin_ic_en_nada': True}
+FASE E completa -> audits/probes/out/e_results.json

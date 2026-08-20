@@ -21,8 +21,12 @@ ARTIFACTS = ROOT / "artifacts" / "latest"
 INTERIM = ROOT / "data" / "interim"
 REPORTS = ROOT / "reports"
 
-# Paleta fija por rol (no por marca): el indice 0 es el regimen de menor varianza.
-REGIME_COLORS = ["#2E7D32", "#C62828", "#F9A825", "#1565C0", "#6A1B9A"]
+# Paleta del dashboard: fuente unica de verdad en theme/. El indice 0 es el
+# regimen de menor varianza (extremo BAJO del indice IRF-N). Verde/rojo quedan
+# reservados al signo del precio (theme.DIRECTIONAL); los regimenes salen de la
+# escala viridis del indice. Importar theme registra ademas el template oscuro
+# de Plotly (se aplica a toda figura de las pantallas).
+from theme import REGIME_COLORS, apply_layout  # noqa: E402,F401
 
 # Umbral de frescura de fuentes (presentacion, no modelo). 4 dias tolera fines de
 # semana y feriados de un activo diario; el intento del contrato es "reciente".

@@ -1,0 +1,39 @@
+{
+  "F4_alineacion": {
+    "n_train_mio": 1006,
+    "n_train_artefacto": 1006,
+    "n_test_mio": 127,
+    "n_test_artefacto": 127,
+    "coincide": true
+  },
+  "F1_no_solape": {
+    "train": [
+      "2015-07-02 00:00:00",
+      "2019-07-02 00:00:00"
+    ],
+    "test": [
+      "2019-07-02 00:00:00",
+      "2020-01-02 00:00:00"
+    ],
+    "solape": false,
+    "nota": "perdida h=1 sin etiquetas solapadas; embargo no aplica"
+  },
+  "F4_reconstruccion_bloque5": {
+    "ll_train_per_obs_mio": -1.0280805465188816,
+    "ll_train_per_obs_artefacto": -1.0280482647834608,
+    "delta_train": -3.2281735420802704e-05,
+    "ll_test_per_obs_mio": -0.9682687953447894,
+    "ll_test_per_obs_artefacto": -0.9682556465620827,
+    "delta_test": -1.3148782706640105e-05,
+    "n_starts_en_mi_optimo": 16,
+    "wall_s": 1057.2
+  },
+  "F4b_pit_bloque5": {
+    "n": 127,
+    "ks_stat": 0.07473003028834824,
+    "ks_p": 0.45541367479736883,
+    "autocorr_lag1": -0.01093613920422418,
+    "se_autocorr": 0.08873565094161139,
+    "nota": "PIT un-paso-adelante del tramo OOS del bloque 5; con autocorr(u) dentro de +-2/sqrt(n), el KS sobre u_t es interpretable sin correccion"
+  }
+}

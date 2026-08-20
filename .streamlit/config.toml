@@ -1,0 +1,9 @@
+# Chrome de la interfaz IRF-N (modulo de paleta, tema oscuro). Solo presentacion
+# (R9): esto colorea el marco de la app; los graficos toman el mismo chrome via
+# app/theme.apply_layout y el template 'irfn_dark' de Plotly.
+[theme]
+base = "dark"
+backgroundColor = "#0E1117"          # CHROME.bg  -- lienzo
+secondaryBackgroundColor = "#161A23"  # CHROME.surface -- sidebar, tarjetas, inputs
+textColor = "#D7DCE5"                 # CHROME.text
+primaryColor = "#5B8DEF"              # CHROME.accent_ui -- botones, foco, sliders (no dato)

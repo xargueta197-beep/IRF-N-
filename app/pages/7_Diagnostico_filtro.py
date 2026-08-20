@@ -27,10 +27,10 @@ def _reliability_fig(rows):
     df = pd.DataFrame(rows).dropna(subset=["mean_confidence", "empirical_accuracy"])
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines",
-                             line=dict(color="#B0BEC5", dash="dash"), name="autoconsistencia perfecta"))
+                             line=dict(color="#8B93A5", dash="dash"), name="autoconsistencia perfecta"))
     fig.add_trace(go.Scatter(
         x=df["mean_confidence"], y=df["empirical_accuracy"], mode="markers+lines",
-        marker=dict(size=8 + df["count"] / df["count"].max() * 16, color="#1565C0"),
+        marker=dict(size=8 + df["count"] / df["count"].max() * 16, color="#5B8DEF"),
         name="modelo",
     ))
     fig.update_layout(

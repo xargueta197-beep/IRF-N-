@@ -1,0 +1,7 @@
+[single n=0.25] N=20188 n_hat=0.2627 (true 0.25) mu=0.4962(0.5) alpha=0.4747(0.4714) beta=1.1586(1.2) within3se={'mu': True, 'alpha': True, 'beta': True} n_ok=True t=4.1s
+[single n=0.85] N=18266 n_hat=0.8443 (true 0.85) mu=0.4744(0.5) alpha=1.6091(1.6028) beta=1.2080(1.2) within3se={'mu': True, 'alpha': True, 'beta': True} n_ok=True t=4.2s
+[censura escala prod] true n=0.74 | naive(T=span) n=0.9973 mu=0.266 | prod(T_obs) n=0.7302 mu=104.723 (mu true 100.0) | prod ok=True
+[censura beta lenta] true n=0.85 | naive(T=span) n=0.7351 mu=0.346 | prod(T_obs) n=0.7727 mu=0.744 (mu true 0.5) | prod ok=False
+[replicas n=0.25] replicas=50 bias%: mu=-0.04 alpha=0.61 beta=0.42 n=0.32 | RMSE n=0.0085 | cobertura IC95(n)=0.94 | t=79.3s
+[replicas n=0.85] replicas=50 bias%: mu=0.32 alpha=0.02 beta=0.09 n=-0.10 | RMSE n=0.0081 | cobertura IC95(n)=0.96 | t=73.0s
+OK -> audits/probes/out/a1_results.json

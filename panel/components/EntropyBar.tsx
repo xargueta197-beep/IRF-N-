@@ -1,4 +1,4 @@
-import { colors } from "@/lib/theme";
+import { colors, textOn } from "@/lib/theme";
 import { HatchDefs } from "./HatchPattern";
 
 export interface EntropyBarProps {
@@ -50,7 +50,7 @@ export function EntropyBar({ entropy, entropy_max, color = colors.foreground }: 
           {/* overlay: hachurado, mas presente hacia la derecha (mascara del gradiente) */}
           <rect x="0" y="0" width="100" height="24" fill={`url(#${HATCH_ID})`} mask="url(#entropybar-mask)" />
           {/* marcador de la posicion actual de H */}
-          <rect x={Math.max(0, markerX - 0.6)} y="0" width="1.2" height="24" fill={colors.background} />
+          <rect x={Math.max(0, markerX - 0.6)} y="0" width="1.2" height="24" fill={textOn(color)} />
         </svg>
       </div>
       {warn && (

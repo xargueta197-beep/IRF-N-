@@ -49,6 +49,7 @@ VALID_PAYLOAD = {
             "mean_mark": 0.55, "branching_ratio": 0.68,
             "branching_ratio_se": 0.03, "branching_ratio_ci_low": 0.62, "branching_ratio_ci_high": 0.74,
             "expected_cascade": 3.12, "expected_cascade_bounded": True,
+            "branching_ratio_span_calendar": 0.94, "expected_cascade_span_calendar": 16.7,
             "stationary": True,
             "ks_stat": 0.021, "ks_pvalue": 0.14, "ks_passed": True,
             "n_events": 41250, "n_starts": 30, "starts_at_best": 27,
@@ -109,3 +110,31 @@ def test_no_smoother_in_outputs(tmp_path, forbidden_key):
 
     with pytest.raises(LookAheadViolation):
         publish(payload, tmp_path / "irfn.json")
+
+
+def test_default_hawkes_params_carries_window_sensitivity_keys():
+    """Aviso #12 (decision director 2026-08-19): la banda de sensibilidad de
+    ventana viaja en el artefacto como dos campos aparte del IC del MLE."""
+    from irfn.outputs.publish import default_hawkes_layer_params
+
+    d = default_hawkes_layer_params()
+    assert "branching_ratio_span_calendar" in d
+    assert "expected_cascade_span_calendar" in d
+    # Inactiva => None (no se inventa una banda cuando no hay ajuste).
+    assert d["branching_ratio_span_calendar"] is None
+    assert d["expected_cascade_span_calendar"] is None
+
+
+def test_window_sensitivity_survives_publish(tmp_path):
+    """Los dos campos de la banda (b) sobreviven el contrato/escritura y NO se
+    funden con el IC del MLE (a)."""
+    import json
+
+    out = tmp_path / "irfn.json"
+    publish(copy.deepcopy(VALID_PAYLOAD), out)
+    h = json.loads(out.read_text(encoding="utf-8"))["model"]["hawkes_layer_params"]
+    # (a) IC del MLE en ventana observada, y (b) banda de ventana: coexisten y difieren.
+    assert h["branching_ratio_ci_low"] == 0.62 and h["branching_ratio_ci_high"] == 0.74
+    assert h["branching_ratio_span_calendar"] == 0.94
+    assert h["expected_cascade_span_calendar"] == 16.7
+    assert h["branching_ratio_span_calendar"] > h["branching_ratio"]  # (b) es cota superior

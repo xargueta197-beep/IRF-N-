@@ -5,7 +5,7 @@
  * la franja de entropia de RegimeHistory. Deliberadamente SVG <pattern>, no un
  * repeating-linear-gradient de CSS.
  */
-export function HatchDefs({ id, color = "#1A1A1A" }: { id: string; color?: string }) {
+export function HatchDefs({ id, color = "#8B93A5" }: { id: string; color?: string }) {
   return (
     <defs>
       <pattern id={id} width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">

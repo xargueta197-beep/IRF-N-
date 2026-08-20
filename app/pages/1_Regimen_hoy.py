@@ -46,15 +46,19 @@ def _barras_xi(labels, xi):
 
 def _medidor_entropia(H, H_max, mid, high):
     norm = H / H_max if H_max > 0 else 0.0
+    # Zonas de entropia en la paleta del dashboard (verde/rojo quedan reservados
+    # al signo del precio): confiado = teal oscuro del indice bajo, medio = gris
+    # sin-dato, sin senal = amarillo oscuro del indice alto. El indicador viridis.
     fig = go.Figure(go.Indicator(
-        mode="gauge+number", value=norm, number={"valueformat": ".2f"},
+        mode="gauge+number", value=norm, number={"valueformat": ".2f", "font": {"color": "#D7DCE5"}},
         gauge={
-            "axis": {"range": [0, 1]},
-            "bar": {"color": "#37474F"},
+            "axis": {"range": [0, 1], "tickcolor": "#8B93A5"},
+            "bar": {"color": "#5B8DEF"},
+            "bordercolor": "#262C38",
             "steps": [
-                {"range": [0, mid], "color": "#C8E6C9"},
-                {"range": [mid, high], "color": "#FFE0B2"},
-                {"range": [high, 1], "color": "#FFCDD2"},
+                {"range": [0, mid], "color": "#17323A"},
+                {"range": [mid, high], "color": "#2A2F3B"},
+                {"range": [high, 1], "color": "#3E3A17"},
             ],
         },
     ))
@@ -110,7 +114,7 @@ def main():
         st.subheader("Estado del mercado")
         if confidence == "el modelo no distingue":
             st.markdown(
-                "<div style='font-size:2.4rem;font-weight:700;color:#B71C1C;'>Sin senal clara</div>",
+                "<div style='font-size:2.4rem;font-weight:700;color:#FDE725;'>Sin senal clara</div>",
                 unsafe_allow_html=True,
             )
             st.caption(

@@ -1,0 +1,5 @@
+[main] loglik=-9165.76 conv=9/20 P_est=[[0.9692, 0.0308], [0.0957, 0.9043]] rank_est={'sv_ratio': 0.8589949625095735, 'row_gap_p11_p21': 0.8734857558205795} hit=0.823 auc=0.866 within3se={'mu': [True, True], 'v': [True, True], 'alpha': [True, True], 'gamma': [True, True], 'beta': [True, True]} P_ok=[[True, True], [True, True]] t=27.5s
+MULTISTART: solo 2 de 12 arranques alcanzaron el optimo global (loglik=-6012.3517, tol=0.05). Superficie multimodal con maximos locales inferiores; considerar mas arranques y revisar la estabilidad del punto.
+[absorbing] occup2=0.0214 P_est=[[0.9867, 0.0133], [0.0098, 0.9902]] hit=0.399 auc=0.884 t=33.3s
+[replicas] p11 0.9725+-0.0059 (0.97) p22 0.9266+-0.0097 (0.92) v1 0.682 (0.64) v2 8.839 (9.0) auc=0.863 t=89.6s
+OK -> audits/probes/out/a2_results.json

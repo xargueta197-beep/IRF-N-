@@ -1,7 +1,7 @@
 {
-  "run_id": "3b4f1e39b59c",
-  "generated_at": "2026-08-16T23:52:28.105914Z",
-  "git_commit": "428b91b",
+  "run_id": "9d30960c94cc",
+  "generated_at": "2026-08-19T23:50:20.513512Z",
+  "git_commit": "e01e0f8",
   "config_hash": "c151e5b865d8",
   "asof": "2026-08-14",
   "version": "V3",
@@ -114,31 +114,31 @@
     },
     "hawkes_layer_params": {
       "active": true,
-      "mu_N": 103.0425648697413,
-      "alpha": 329.66305611857194,
-      "beta": 283.95884101524234,
-      "se_mu_N": 1.1611677006771122,
-      "se_alpha": 3.554260061136355,
-      "se_beta": 3.2036754496297717,
-      "mean_mark": 0.6364006500994613,
-      "branching_ratio": 0.7388316647495151,
-      "branching_ratio_se": 0.003932624564379086,
-      "branching_ratio_ci_low": 0.7311238622386146,
-      "branching_ratio_ci_high": 0.7465394672604156,
-      "expected_cascade": 3.828948096027439,
+      "mu_N": 102.91849217286405,
+      "alpha": 329.4885050353979,
+      "beta": 283.85299892038233,
+      "se_mu_N": 1.1576345303819024,
+      "se_alpha": 3.5524805737684697,
+      "se_beta": 3.2035183350455196,
+      "mean_mark": 0.636191477434121,
+      "branching_ratio": 0.7384730110772059,
+      "branching_ratio_se": 0.003929178489910927,
+      "branching_ratio_ci_low": 0.7307719627481509,
+      "branching_ratio_ci_high": 0.7461740594062608,
+      "expected_cascade": 3.823697141617808,
       "expected_cascade_bounded": true,
       "stationary": true,
-      "ks_stat": 0.02890070620698454,
-      "ks_pvalue": 1.984058749646675e-69,
+      "ks_stat": 0.03058988727696399,
+      "ks_pvalue": 7.469571270479896e-78,
       "ks_passed": false,
-      "n_events": 95085,
+      "n_events": 95234,
       "n_starts": 30,
-      "starts_at_best": 30,
+      "starts_at_best": 28,
       "coverage": {
         "first_day": "2023-11-18",
-        "last_day": "2026-08-11",
-        "n_days": 240,
-        "n_missing_days": 758,
+        "last_day": "2026-08-16",
+        "n_days": 241,
+        "n_missing_days": 762,
         "n_censored_days": 10
       },
       "reflexive_threshold": 0.8,
@@ -179,12 +179,12 @@
   ],
   "news": {
     "surprise_index": 0.0,
-    "lambda_N": 154.25024538575678,
-    "lambda_N_z": -0.5466385695290454,
-    "branching_ratio": 0.7388316647495151,
-    "branching_ratio_ci_low": 0.7311238622386146,
-    "branching_ratio_ci_high": 0.7465394672604156,
-    "expected_cascade": 3.828948096027439,
+    "lambda_N": 102.91849217286405,
+    "lambda_N_z": -0.6492702385124884,
+    "branching_ratio": 0.7384730110772059,
+    "branching_ratio_ci_low": 0.7307719627481509,
+    "branching_ratio_ci_high": 0.7461740594062608,
+    "expected_cascade": 3.823697141617808,
     "expected_cascade_bounded": true,
     "attribution": {
       "price": 0.0,
@@ -198,44 +198,52 @@
         "mean_ann": {
           "value": 0.27842290556742627,
           "ci_low": 0.2146581102735894,
-          "ci_high": 0.33456910717171084
+          "ci_high": 0.33456910717171084,
+          "n_obs": 3319
         },
         "vol_ann": {
           "value": 0.1592982623848418,
           "ci_low": 0.1325243314229134,
-          "ci_high": 0.18954769124398377
+          "ci_high": 0.18954769124398377,
+          "n_obs": 3319
         },
         "sharpe": {
           "value": 1.7478088046861202,
           "ci_low": 1.196504461103232,
-          "ci_high": 2.3943123389524845
+          "ci_high": 2.3943123389524845,
+          "n_obs": 3319
         },
         "maxdd": {
           "value": -0.31443585645631256,
           "ci_low": null,
-          "ci_high": null
+          "ci_high": null,
+          "n_obs": 3319
         }
       },
       "alta volatilidad": {
         "mean_ann": {
-          "value": -4.13812025493596,
+          "value": null,
           "ci_low": null,
-          "ci_high": null
+          "ci_high": null,
+          "n_obs": 106
         },
         "vol_ann": {
           "value": 0.21676668653153836,
           "ci_low": null,
-          "ci_high": null
+          "ci_high": null,
+          "n_obs": 106
         },
         "sharpe": {
-          "value": -19.090203947615755,
+          "value": null,
           "ci_low": null,
-          "ci_high": null
+          "ci_high": null,
+          "n_obs": 106
         },
         "maxdd": {
-          "value": -0.8289749075395809,
+          "value": null,
           "ci_low": null,
-          "ci_high": null
+          "ci_high": null,
+          "n_obs": 106
         }
       }
     }
@@ -244,9 +252,9 @@
     "M3 (macro): NO es el bloqueante: ALFRED_API_KEY esta configurada y la ablacion M3 con L1 ya se corrio (M3 vs M2 DM=1.038, p=0.299 -> la macro NO aporta; reports/ablation_m3_l1.md). El bloqueante real de M5 vs M4 es M4 (sorpresa): sin consenso historico. M5 depende de M4 por diseno de la escalera. La comparacion pre-registrada M5 vs M4 sigue infranqueable aguas arriba (por M4/sorpresa y la cobertura de lambda_N_z, NO por la macro); ver reports/ablation_news.md.",
     "Diagnostico M2+H bloqueado: cobertura de lambda_N_z insuficiente para el walk-forward pre-registrado: muestra alineada de 1.7 anios y se requieren >= 7.0 (train 4a + 6 bloques de 6m). El backfill de GDELT sigue creciendo hacia atras; re-correr cuando alcance. NO se encoge la malla de bloques (R8).",
     "10 dia(s) del corpus censurados por el cap del API de GDELT: lambda_N esta subestimada en esos picos (censura contada, no oculta).",
-    "El corpus cubre 240 dias dentro de un span de 998 (758 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre el TIEMPO OBSERVADO (origen 2023-11-18; los dias fantasma se excinden del reloj), decision del director (2026-08-15) que REVIERTE la de ajustar sobre el span completo: mu_N y n son estimaciones sobre soporte observado, NO cotas superiores infladas por integrar mu_N sobre dias fantasma (trazabilidad antes/despues en validation_v3.md). Caveat vigente: el corpus es una muestra acotada (~240 dias) y el KS rechaza el kernel exponencial (D pequeno, ver aviso KS), asi que n/lambda_N reflejan ese ajuste exponencial sobre la ventana observada.",
+    "El corpus cubre 241 dias dentro de un span de 1003 (762 dias NO capturados, no genuinamente vacios). El Hawkes se ajusta sobre el TIEMPO OBSERVADO (origen 2023-11-18; los dias fantasma se excinden del reloj), decision del director (2026-08-15) que REVIERTE la de ajustar sobre el span completo: mu_N y n son estimaciones sobre soporte observado, NO cotas superiores infladas por integrar mu_N sobre dias fantasma (trazabilidad antes/despues en validation_v3.md). Caveat vigente: el corpus es una muestra acotada (~241 dias) y el KS rechaza el kernel exponencial (D pequeno, ver aviso KS), asi que n/lambda_N reflejan ese ajuste exponencial sobre la ventana observada.",
     "El seendate de GDELT esta cuantizado a 15 min (~83% de titulares empatados). Se aplico dithering intra-bin (ruido U(0,15min) por evento, semilla fija) para identificar el Hawkes continuo, bajo el supuesto de LLEGADA UNIFORME dentro del bin observado. Decision del director (2026-08-14). Sin el dithering el MLE degenera.",
-    "KS de re-escalamiento RECHAZA el kernel exponencial (D=0.0289, p=2.0e-69, n=95084): el ajuste del Hawkes es imperfecto y se reporta tal cual. El TAMANO DE EFECTO D es pequeno; el rechazo lo domina el n enorme del corpus (~10^5 titulares), no un desajuste grande de forma. Candidato power-law en version futura (guia 6.6).",
+    "KS de re-escalamiento RECHAZA el kernel exponencial (D=0.0306, p=7.5e-78, n=95233): el ajuste del Hawkes es imperfecto y se reporta tal cual. El TAMANO DE EFECTO D es pequeno; el rechazo lo domina el n enorme del corpus (~10^5 titulares), no un desajuste grande de forma. Candidato power-law en version futura (guia 6.6).",
     "Capa de noticias (V2) inactiva: solo 0 evento(s) valido(s) de consenso acumulados (se necesitan >= 30); sin SI_t no hay capa de sorpresa. Mismo bloqueante que V2 (reports/data_audit.md)."
   ],
   "validation_ref": "reports/validation_v3.md",

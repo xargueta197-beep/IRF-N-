@@ -1,0 +1,184 @@
+{
+  "E1_bic_kselect": {
+    "n_obs": 3400,
+    "rows": [
+      {
+        "K": 1,
+        "dist": "normal",
+        "k_free": 5,
+        "k_manual": 5,
+        "k_ok": true,
+        "bic_archivo": 8443.935034046786,
+        "bic_recalc": 8443.935034046786,
+        "bic_ok": true,
+        "n_converged": 20
+      },
+      {
+        "K": 2,
+        "dist": "normal",
+        "k_free": 12,
+        "k_manual": 12,
+        "k_ok": true,
+        "bic_archivo": 8195.828958077926,
+        "bic_recalc": 8195.828958077926,
+        "bic_ok": true,
+        "n_converged": 10
+      },
+      {
+        "K": 3,
+        "dist": "normal",
+        "k_free": 21,
+        "k_manual": 21,
+        "k_ok": true,
+        "bic_archivo": 8220.474332078531,
+        "bic_recalc": 8220.474332078531,
+        "bic_ok": true,
+        "n_converged": 1
+      },
+      {
+        "K": 4,
+        "dist": "normal",
+        "k_free": 32,
+        "k_manual": 32,
+        "k_ok": true,
+        "bic_archivo": 8282.733301172904,
+        "bic_recalc": 8282.733301172904,
+        "bic_ok": true,
+        "n_converged": 1
+      },
+      {
+        "K": 1,
+        "dist": "t",
+        "k_free": 6,
+        "k_manual": 6,
+        "k_ok": true,
+        "bic_archivo": 8215.637175568592,
+        "bic_recalc": 8215.637175568592,
+        "bic_ok": true,
+        "n_converged": 20
+      },
+      {
+        "K": 2,
+        "dist": "t",
+        "k_free": 14,
+        "k_manual": 14,
+        "k_ok": true,
+        "bic_archivo": 8206.814271600248,
+        "bic_recalc": 8206.814271600248,
+        "bic_ok": true,
+        "n_converged": 1
+      },
+      {
+        "K": 3,
+        "dist": "t",
+        "k_free": 24,
+        "k_manual": 24,
+        "k_ok": true,
+        "bic_archivo": 8245.125323963659,
+        "bic_recalc": 8245.125323963659,
+        "bic_ok": true,
+        "n_converged": 1
+      },
+      {
+        "K": 4,
+        "dist": "t",
+        "k_free": 36,
+        "k_manual": 36,
+        "k_ok": true,
+        "bic_archivo": 8319.190970946698,
+        "bic_recalc": 8319.190970946698,
+        "bic_ok": true,
+        "n_converged": 1
+      }
+    ],
+    "todo_ok": true,
+    "ganador_archivo": {
+      "K": 2,
+      "dist": "normal",
+      "bic": 8195.828958077926
+    }
+  },
+  "E3_dm_m2_vs_m1": {
+    "n_obs_emparejadas": 2386,
+    "mean_diff_loss": 0.008917011891700686,
+    "reportado": {
+      "dm": 1.617,
+      "p": 0.106
+    },
+    "recomputo": {
+      "lags_0": {
+        "dm": 1.5966018925644507,
+        "p": 0.11048695617227051
+      },
+      "lags_5": {
+        "dm": 1.6477797149975508,
+        "p": 0.09952960572145816
+      },
+      "lags_20": {
+        "dm": 1.6165982820851066,
+        "p": 0.1060972732326115
+      },
+      "lags_40": {
+        "dm": 1.539491890081389,
+        "p": 0.12381691163602661
+      }
+    },
+    "lag_regla_proyecto": 20,
+    "nota": "perdida = -loglik predictiva por observacion, h=1 (sin ventanas solapadas: la premisa 'h>1' del encargo no aplica a este pipeline); d>0 => M2 pierde mas que M1"
+  },
+  "E2_muestra": {
+    "n": 3400,
+    "n_esperado_kselect": 3400,
+    "coincide": true
+  },
+  "E2_asimetria_multistart": {
+    "replicas": [
+      {
+        "replica": 0,
+        "lr_6starts": 8.185486008616863,
+        "lr_20starts": 8.190520040252522,
+        "delta": 0.00503403163565963
+      },
+      {
+        "replica": 1,
+        "lr_6starts": 6.561268715206097,
+        "lr_20starts": 8.560106955525043,
+        "delta": 1.9988382403189462
+      },
+      {
+        "replica": 2,
+        "lr_6starts": 19.275038309051524,
+        "lr_20starts": 21.232765673723407,
+        "delta": 1.9577273646718822
+      },
+      {
+        "replica": 3,
+        "lr_6starts": 8.820700654012398,
+        "lr_20starts": 8.820700654012398,
+        "delta": 0.0
+      }
+    ],
+    "delta_medio": 0.990399909156622,
+    "p_minimo_alcanzable_B49": 0.02,
+    "p_reportado": 0.02,
+    "nota": "delta>0 => las replicas con 6 arranques subestiman el LR nulo => la cola nula queda corta => p sesgado a la BAJA (anti-conservador). Ademas p=0.02 = p minimo alcanzable con B=49: LR_obs supero a las 49 replicas; la evidencia es 'p<=0.02', no un p fino.",
+    "wall_s": 212.1
+  },
+  "E4_cobertura_sharpe_ci": {
+    "modelo": "AR(1) phi=0.2, Sharpe anual verdadero",
+    "sharpe_true": 0.4762352359916263,
+    "coverage_95": 0.9,
+    "n_rep": 100,
+    "n_boot": 299,
+    "wall_s": 4.8
+  },
+  "E4_supresion_A2_artefacto": {
+    "maxdd_sin_ic_en_todos": true,
+    "degenerado_sin_ic_en_nada": true,
+    "expected_durations": [
+      10.166673410731029,
+      1.1710891867176938
+    ],
+    "ok": true
+  }
+}

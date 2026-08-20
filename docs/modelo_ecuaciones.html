@@ -1,0 +1,653 @@
+<title>IRF-N — Especificación matemática completa</title>
+<style>
+  /* ── Paleta IRF-N (tema oscuro comprometido). El chrome, el acento UI azul
+     (#5B8DEF, NO codifica dato) y la escala viridis del índice provienen del
+     módulo de paleta del dashboard. Verde/rojo quedan reservados al signo del
+     precio y NO se usan aquí. La página se compromete a un solo mundo visual
+     oscuro: el toggle claro/oscuro resuelve al mismo tema a propósito. ── */
+  :root, :root[data-theme="light"], :root[data-theme="dark"]{
+    --paper:#0E1117;      /* CHROME.bg — lienzo */
+    --surface:#161A23;    /* CHROME.surface — tarjetas/paneles */
+    --surface-2:#1C222E;  /* CHROME.grid — realce de fila */
+    --ink:#D7DCE5;        /* CHROME.text */
+    --ink-soft:#8B93A5;   /* CHROME.text_dim */
+    --ink-faint:#6E7688;
+    --rule:#262C38;       /* CHROME.border */
+    --rule-soft:#1C222E;  /* CHROME.grid */
+    --accent:#5B8DEF;     /* CHROME.accent_ui — enlaces, foco, nav (no dato) */
+    --accent-soft:#17233A;
+    --no-data:#3A4150;    /* CHROME.no_data — NaN, capas inactivas */
+    --calm:#26828E;       /* IRFN_SCALE bajo — régimen de baja volatilidad */
+    --stress:#FDE725;     /* IRFN_SCALE alto — régimen de alta volatilidad */
+    --eq-bg:#12161F; --eq-rule:#5B8DEF;
+    /* progresión viridis del índice (0→1), para numerar las capas del modelo */
+    --v1:#443A83; --v2:#3E4A89; --v3:#31688E; --v4:#26828E; --v5:#1F9E89;
+    --v6:#35B779; --v7:#6ECE58; --v8:#B5DE2B; --v9:#FDE725;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --sans:system-ui,"Segoe UI",-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono","Cascadia Code","JetBrains Mono","SF Mono","Fira Mono",Consolas,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.62; font-size:17px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- shell ---------- */
+  .shell{display:grid; grid-template-columns:262px minmax(0,1fr); max-width:1180px; margin:0 auto;}
+  @media (max-width:920px){ .shell{grid-template-columns:1fr} }
+
+  /* ---------- sidebar / index ---------- */
+  .nav{
+    position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+    padding:2.2rem 1.1rem 2rem 1.6rem; border-right:1px solid var(--rule);
+    background:var(--paper);
+  }
+  @media (max-width:920px){
+    .nav{position:static; height:auto; border-right:none; border-bottom:1px solid var(--rule)}
+  }
+  .brand{font-family:var(--serif); font-weight:600; font-size:1.32rem; letter-spacing:.01em; margin:0 0 .15rem}
+  .brand .n{color:var(--accent)}
+  .brand-sub{font-size:.74rem; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-faint); margin:0 0 1.4rem}
+  .nav ol{list-style:none; margin:0; padding:0; counter-reset:sec}
+  .nav a{
+    display:flex; gap:.6rem; align-items:baseline; text-decoration:none; color:var(--ink-soft);
+    padding:.28rem .5rem; border-radius:6px; font-size:.9rem; line-height:1.3;
+  }
+  .nav a .num{font-family:var(--mono); font-size:.76rem; color:var(--ink-faint); min-width:1.5em}
+  .nav a:hover{background:var(--surface-2); color:var(--ink)}
+  .nav a.active{background:var(--accent-soft); color:var(--accent); font-weight:600}
+  .nav a.active .num{color:var(--accent)}
+
+  /* ---------- main ---------- */
+  main{padding:2.6rem clamp(1.1rem,4vw,3.4rem) 6rem; min-width:0;}
+  .lede{max-width:70ch}
+  header.masthead{border-bottom:1px solid var(--rule); padding-bottom:1.7rem; margin-bottom:2.4rem}
+  header.masthead h1{
+    font-family:var(--serif); font-weight:600; font-size:clamp(1.9rem,4.4vw,2.9rem);
+    line-height:1.08; margin:.2rem 0 .5rem; text-wrap:balance; letter-spacing:-.01em;
+  }
+  .kicker{font-size:.76rem; text-transform:uppercase; letter-spacing:.16em; color:var(--accent); font-weight:700}
+  .masthead p{color:var(--ink-soft); max-width:68ch; margin:.4rem 0 0}
+  .meta{display:flex; flex-wrap:wrap; gap:.5rem .7rem; margin-top:1.3rem; font-family:var(--mono); font-size:.76rem}
+  .chip{background:var(--surface-2); color:var(--ink-soft); border:1px solid var(--rule); border-radius:100px; padding:.22rem .7rem}
+  .chip b{color:var(--ink); font-weight:600}
+
+  .legend{display:flex; gap:1.1rem; flex-wrap:wrap; margin-top:1.1rem; font-size:.82rem; color:var(--ink-soft)}
+  .legend span{display:inline-flex; align-items:center; gap:.42rem}
+  .dot{width:11px; height:11px; border-radius:3px; display:inline-block}
+  .dot.calm{background:var(--calm)} .dot.stress{background:var(--stress)}
+  .calm{color:var(--calm)} .stress{color:var(--stress)}
+
+  section{scroll-margin-top:1.4rem; padding-top:2.4rem; max-width:74ch}
+  section > h2{
+    font-family:var(--serif); font-weight:600; font-size:1.62rem; letter-spacing:-.01em;
+    margin:0 0 .3rem; display:flex; gap:.7rem; align-items:baseline; text-wrap:balance;
+  }
+  section > h2 .snum{font-family:var(--mono); font-size:.95rem; color:var(--accent); font-weight:700}
+  .section-note{color:var(--ink-faint); font-size:.86rem; margin:.1rem 0 1.3rem; font-style:italic}
+  h3{font-family:var(--serif); font-weight:600; font-size:1.18rem; margin:2rem 0 .5rem}
+  p{margin:.7rem 0}
+  a.inl{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--rule)}
+  code{font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:.08em .38em; border-radius:5px; color:var(--ink)}
+  strong{font-weight:650}
+
+  /* ---------- equations ---------- */
+  .eq{
+    position:relative; margin:1.3rem 0; padding:1.05rem 3.2rem 1.05rem 1.3rem;
+    background:var(--eq-bg); border:1px solid var(--rule-soft); border-left:3px solid var(--eq-rule);
+    border-radius:8px; overflow-x:auto;
+  }
+  .eq .row{font-family:var(--serif); font-size:1.14rem; font-style:italic; line-height:2.05; white-space:nowrap; color:var(--ink)}
+  .eq .row + .row{margin-top:.35rem}
+  .eq .tag{
+    position:absolute; right:.9rem; top:50%; transform:translateY(-50%);
+    font-family:var(--mono); font-style:normal; font-size:.74rem; color:var(--ink-faint);
+  }
+  .eq.multi .tag{top:1.15rem; transform:none}
+  .up{font-style:normal}                 /* funciones, dígitos, operadores en redonda */
+  .op{font-style:normal; padding:0 .12em; color:var(--ink-soft)}
+  sub,sup{font-style:normal; font-size:.72em; font-family:var(--serif)}
+  .frac{display:inline-flex; flex-direction:column; vertical-align:-0.55em; text-align:center; margin:0 .18em; font-size:.92em}
+  .frac>.n{padding:0 .45em .05em}
+  .frac>.d{padding:.05em .45em 0; border-top:1.4px solid currentColor}
+  .sqrt{border-top:1.4px solid currentColor; padding:0 .2em; margin-left:.1em}
+  .rad{font-style:normal}
+  .cases{display:inline-flex; align-items:center; gap:.5em}
+  .cases .brace{font-size:2.1em; font-style:normal; color:var(--ink-soft)}
+  .cases .lines{display:inline-flex; flex-direction:column; gap:.2em; font-size:.9em; text-align:left}
+
+  /* ---------- glossary ---------- */
+  dl.terms{
+    display:grid; grid-template-columns:auto 1fr; gap:.35rem 1.1rem; margin:1rem 0 .4rem;
+    padding:.9rem 1.1rem; background:var(--surface); border:1px solid var(--rule-soft); border-radius:8px;
+    font-size:.92rem;
+  }
+  dl.terms dt{font-family:var(--serif); font-style:italic; color:var(--accent); white-space:nowrap; font-size:1.02rem}
+  dl.terms dd{margin:0; color:var(--ink-soft)}
+  dl.terms dd b{color:var(--ink); font-weight:600; font-style:normal}
+
+  /* ---------- callouts ---------- */
+  .note{
+    margin:1.2rem 0; padding:.85rem 1.1rem; border-radius:8px; font-size:.9rem;
+    background:var(--surface-2); border:1px solid var(--rule-soft); color:var(--ink-soft);
+  }
+  .note b{color:var(--ink)}
+  .note.rule{border-left:3px solid var(--accent)}
+  .note.warn{border-left:3px solid var(--stress)}
+  .tag-rule{display:inline-block; font-family:var(--mono); font-size:.7rem; font-weight:700; color:var(--accent);
+    background:var(--accent-soft); padding:.08rem .4rem; border-radius:4px; letter-spacing:.03em; vertical-align:.08em}
+
+  /* ---------- symbol table ---------- */
+  .tablewrap{overflow-x:auto; margin:1.1rem 0}
+  table{border-collapse:collapse; width:100%; font-size:.9rem}
+  th,td{text-align:left; padding:.5rem .8rem; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+  th{font-size:.72rem; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-faint); font-weight:700; border-bottom:1.5px solid var(--rule)}
+  td.sym{font-family:var(--serif); font-style:italic; color:var(--accent); white-space:nowrap; font-size:1.05rem}
+  tbody tr:hover{background:var(--surface)}
+
+  /* ---------- readout: valores del run publicado ---------- */
+  .readout{margin:1.15rem 0; border:1px solid var(--rule); border-radius:9px; overflow:hidden; background:var(--surface)}
+  .readout .rhead{
+    display:flex; align-items:center; gap:.5rem; padding:.42rem .9rem; background:var(--surface-2);
+    border-bottom:1px solid var(--rule-soft); font-size:.68rem; text-transform:uppercase; letter-spacing:.13em;
+    color:var(--ink-faint); font-weight:700;
+  }
+  .readout .rhead::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .rgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.1rem; padding:.2rem}
+  .rgrid > div{display:flex; flex-direction:column; gap:.05rem; padding:.5rem .7rem; border-radius:6px}
+  .rgrid > div:hover{background:var(--surface-2)}
+  .rk{font-family:var(--serif); font-style:italic; font-size:.98rem; color:var(--ink-soft)}
+  .rv{font-family:var(--mono); font-size:.96rem; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+  .rv.calm{color:var(--calm)} .rv.stress{color:var(--stress)}
+  .rnote{font-size:.72rem; color:var(--ink-faint); font-style:normal}
+
+  .regbox{margin:1.1rem 0; overflow-x:auto}
+  table.reg{border-collapse:collapse; width:100%; font-size:.92rem; min-width:420px}
+  table.reg th,table.reg td{padding:.45rem .8rem; border-bottom:1px solid var(--rule-soft); text-align:right; font-variant-numeric:tabular-nums; font-family:var(--mono)}
+  table.reg th:first-child,table.reg td:first-child{text-align:left; font-family:var(--serif); font-style:italic; color:var(--ink-soft); white-space:nowrap}
+  table.reg thead th{font-family:var(--sans); font-style:normal; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); border-bottom:1.5px solid var(--rule)}
+  table.reg thead th.calm{color:var(--calm)} table.reg thead th.stress{color:var(--stress)}
+  table.reg td.hi{color:var(--ink); font-weight:600}
+
+  /* Números de sección: progresión viridis (la escala del índice 0→1 recorre
+     las capas del modelo). */
+  #s1 .snum{color:#443A83} #s2 .snum{color:#3E4A89} #s3 .snum{color:#31688E}
+  #s4 .snum{color:#26828E} #s5 .snum{color:#1F9E89} #s6 .snum{color:#35B779}
+  #s7 .snum{color:#6ECE58} #s8 .snum{color:#8FD744} #s9 .snum{color:#B5DE2B}
+  #s10 .snum{color:#DDE318} #s11 .snum{color:#FDE725}
+
+  /* Escala del índice IRF-N (viridis truncado del módulo de paleta) */
+  .scale{margin-top:1.35rem; max-width:520px}
+  .scale .bar{height:10px; border-radius:5px;
+    background:linear-gradient(90deg,#443A83,#31688E,#26828E,#1F9E89,#35B779,#6ECE58,#B5DE2B,#FDE725)}
+  .scale .ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:.68rem;
+    color:var(--ink-faint); margin-top:.34rem; letter-spacing:.02em}
+  .bands{display:flex; gap:.9rem; flex-wrap:wrap; margin-top:.55rem}
+  .bands .b{display:inline-flex; align-items:center; gap:.4rem; font-size:.73rem; color:var(--ink-soft); font-family:var(--mono)}
+  .bands .sw{width:11px; height:11px; border-radius:3px; flex:none}
+
+  footer{margin:4rem auto 0; max-width:74ch; padding:1.6rem clamp(1.1rem,4vw,3.4rem) 0; border-top:1px solid var(--rule);
+    color:var(--ink-faint); font-size:.82rem}
+  ::selection{background:var(--accent); color:#fff}
+  a:focus-visible,.nav a:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+</style>
+
+<div class="shell">
+  <nav class="nav" aria-label="Índice del modelo">
+    <p class="brand">IRF-<span class="n">N</span></p>
+    <p class="brand-sub">Especificación matemática</p>
+    <ol>
+      <li><a href="#s1"><span class="num">1</span><span>Panorama y notación</span></a></li>
+      <li><a href="#s2"><span class="num">2</span><span>Capa de observación · MS-GJR-GARCH</span></a></li>
+      <li><a href="#s3"><span class="num">3</span><span>Parametrización sin restricciones</span></a></li>
+      <li><a href="#s4"><span class="num">4</span><span>Transiciones variables (TVTP)</span></a></li>
+      <li><a href="#s5"><span class="num">5</span><span>Filtro de Hamilton</span></a></li>
+      <li><a href="#s6"><span class="num">6</span><span>Salidas del régimen</span></a></li>
+      <li><a href="#s7"><span class="num">7</span><span>Capa de noticias · Hawkes</span></a></li>
+      <li><a href="#s8"><span class="num">8</span><span>Capa de noticias · Sorpresa</span></a></li>
+      <li><a href="#s9"><span class="num">9</span><span>Validación e inferencia</span></a></li>
+      <li><a href="#s10"><span class="num">10</span><span>Capa económica</span></a></li>
+      <li><a href="#s11"><span class="num">11</span><span>Glosario de símbolos</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="masthead">
+      <span class="kicker">Índice de Régimen Filtrado con Noticias</span>
+      <h1>Toda la matemática del modelo, ecuación por ecuación</h1>
+      <p class="lede">Referencia completa de las expresiones que estima IRF-N: un <strong>Markov-switching GJR-GARCH</strong> (especificación Haas, Mittnik &amp; Paolella 2004) con probabilidades de transición opcionalmente variables en el tiempo, y una capa de noticias como proceso puntual autoexcitante de Hawkes. Cada ecuación va acompañada del significado de todos sus términos.</p>
+      <div class="meta">
+        <span class="chip"><b>run_id</b> 3b4f1e39b59c</span>
+        <span class="chip"><b>versión</b> V3 · M1</span>
+        <span class="chip"><b>asof</b> 2026-08-14</span>
+        <span class="chip"><b>K</b> 2 regímenes</span>
+      </div>
+      <div class="scale" aria-label="Escala del índice IRF-N">
+        <div class="bar"></div>
+        <div class="ends"><span>0 · calma</span><span>índice IRF-N</span><span>estrés · 1</span></div>
+        <div class="bands">
+          <span class="b"><span class="sw" style="background:#31688E"></span>Base</span>
+          <span class="b"><span class="sw" style="background:#1F9E89"></span>Elevado</span>
+          <span class="b"><span class="sw" style="background:#B5DE2B"></span>Alto</span>
+          <span class="b"><span class="sw" style="background:#FDE725"></span>Extremo</span>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="dot calm"></span> Régimen 1 — baja volatilidad (extremo bajo del índice)</span>
+        <span><span class="dot stress"></span> Régimen 2 — alta volatilidad (extremo alto del índice)</span>
+      </div>
+    </header>
+
+    <!-- ============ 1 ============ -->
+    <section id="s1">
+      <h2><span class="snum">1</span> Panorama y notación</h2>
+      <p class="section-note">Qué estima el índice y con qué convenciones se escribe todo lo demás.</p>
+      <p>Para cada día <i>t</i>, el modelo produce cuatro objetos, todos usando <strong>solo información disponible al cierre de <i>t</i></strong>: la probabilidad de estar en cada régimen de mercado <span class="up">ξ</span><sub>t|t</sub>, la confianza de esa estimación (entropía), la persistencia esperada del régimen (duración), y la atribución del movimiento entre precio y noticias.</p>
+      <p>El estado latente <i>S<sub>t</sub></i> ∈ {1, …, <i>K</i>} indica el régimen activo. El observable es el <strong>log-retorno diario en por ciento</strong>, <i>r<sub>t</sub></i> = 100·log(<i>P<sub>t</sub></i>/<i>P<sub>t−1</sub></i>). La notación <span class="up">ξ</span><sub>t|s</sub> es la distribución sobre regímenes en <i>t</i> condicionada a los datos hasta <i>s</i>: filtrada si <i>s</i>=<i>t</i>, predicha si <i>s</i>=<i>t</i>−1, suavizada si <i>s</i>=<i>T</i>.</p>
+      <div class="note rule"><span class="tag-rule">R1</span> &nbsp;<b>Solo se publica la filtrada ξ<sub>t|t</sub>.</b> La suavizada ξ<sub>t|T</sub> usa el futuro y está prohibida en cualquier ruta que llegue al artefacto o a la interfaz — produce gráficas hermosas y modelos que fallan en producción.</p></div>
+      <p>La arquitectura es en capas, y este documento las recorre en orden de dependencia: la densidad de observación (§2) se parametriza sin restricciones (§3); la dinámica de estados puede depender de covariables (§4); el filtro de Hamilton (§5) combina ambas y produce las salidas (§6); la capa de noticias (§7–8) alimenta covariables; y la validación (§9) y la capa económica (§10) evalúan todo fuera de muestra.</p>
+      <div class="readout">
+        <div class="rhead">Estado de hoy — SPY · asof 2026-08-14</div>
+        <div class="rgrid">
+          <div><span class="rk">ξ<sub>t|t</sub></span><span class="rv">[0.949, 0.051]</span><span class="rnote">argmax = baja volatilidad</span></div>
+          <div><span class="rk">H<sub>t</sub></span><span class="rv">0.201 / 0.693</span><span class="rnote">confianza: alta</span></div>
+          <div><span class="rk">E[D]</span><span class="rv">10.2 d · 1.2 d</span><span class="rnote">por régimen</span></div>
+          <div><span class="rk">K</span><span class="rv">2</span><span class="rnote">Normal · P constante</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section id="s2">
+      <h2><span class="snum">2</span> Capa de observación · MS-GJR-GARCH</h2>
+      <p class="section-note">Haas, Mittnik &amp; Paolella (2004): K recursiones GARCH en paralelo, sin dependencia de trayectoria.</p>
+      <p>La idea que resuelve el <em>path dependence</em>: cada régimen <i>k</i> mantiene su propia recursión de varianza, y las <i>K</i> corren en paralelo alimentadas por el <strong>mismo</strong> retorno observado. El estado latente entra después, en el filtro, no en la varianza. Así la verosimilitud es exacta y de coste <span class="up">O</span>(<i>T·K</i>), en vez de sumar sobre <i>K<sup>T</sup></i> trayectorias.</p>
+
+      <p>Residuo del régimen <i>k</i> y su varianza condicional GJR-GARCH(1,1) con asimetría (efecto apalancamiento):</p>
+      <div class="eq multi"><span class="tag">(2.1)</span>
+        <div class="row">ε<sub>k,t</sub> <span class="op">=</span> r<sub>t</sub> <span class="op">−</span> μ<sub>k</sub></div>
+        <div class="row">σ<span class="up"><sup>2</sup></span><sub>k,t</sub> <span class="op">=</span> ω<sub>k</sub> <span class="op">+</span> α<sub>k</sub> ε<span class="up"><sup>2</sup></span><sub>k,t−1</sub> <span class="op">+</span> γ<sub>k</sub> ε<span class="up"><sup>2</sup></span><sub>k,t−1</sub> <span class="up">·</span> <span class="up">𝟙</span>{ε<sub>k,t−1</sub> <span class="op">&lt;</span> 0} <span class="op">+</span> β<sub>k</sub> σ<span class="up"><sup>2</sup></span><sub>k,t−1</sub></div>
+      </div>
+      <dl class="terms">
+        <dt>μ<sub>k</sub></dt><dd><b>Media del retorno</b> en el régimen <i>k</i> (deriva).</dd>
+        <dt>ω<sub>k</sub></dt><dd><b>Constante de varianza.</b> No es libre: se deriva de la varianza incondicional (§3).</dd>
+        <dt>α<sub>k</sub></dt><dd><b>Reacción</b> a la sorpresa al cuadrado del día anterior (efecto ARCH).</dd>
+        <dt>γ<sub>k</sub></dt><dd><b>Asimetría GJR.</b> Peso extra cuando el retorno anterior fue negativo — las caídas elevan más la volatilidad futura.</dd>
+        <dt>β<sub>k</sub></dt><dd><b>Persistencia</b> de la varianza (efecto GARCH).</dd>
+        <dt>𝟙{·}</dt><dd><b>Indicadora:</b> vale 1 si la condición se cumple, 0 si no.</dd>
+      </dl>
+
+      <p>Inicialización en la varianza incondicional del régimen, σ<span class="up"><sup>2</sup></span><sub>k,0</sub> = <i>v<sub>k</sub></i> — función <strong>solo de parámetros</strong>, nunca de los datos, para no filtrar futuro por la puerta de atrás.</p>
+
+      <h3>Densidad de observación</h3>
+      <p>Condicional al régimen, el retorno es Normal (V0) o t de Student (V1+). La densidad Normal en log:</p>
+      <div class="eq"><span class="tag">(2.2)</span>
+        <div class="row">log <i>f</i>(r<sub>t</sub> | S<sub>t</sub><span class="op">=</span>k) <span class="op">=</span> <span class="op">−</span><span class="frac"><span class="n">1</span><span class="d">2</span></span><span class="up">[</span> log(2π) <span class="op">+</span> log σ<span class="up"><sup>2</sup></span><sub>k,t</sub> <span class="op">+</span> <span class="frac"><span class="n">(r<sub>t</sub> − μ<sub>k</sub>)<span class="up"><sup>2</sup></span></span><span class="d">σ<span class="up"><sup>2</sup></span><sub>k,t</sub></span></span> <span class="up">]</span></div>
+      </div>
+      <p>Para la t de Student con ν<sub>k</sub> grados de libertad, el punto delicado es que <span class="up">σ<sup>2</sup></span> debe seguir siendo la <strong>varianza</strong>. Una t estándar tiene varianza ν/(ν−2), así que la densidad se escala con <i>s</i><span class="up"><sup>2</sup></span> = σ<span class="up"><sup>2</sup></span>(ν−2)/ν, garantizando <span class="up">Var</span>(r | S<sub>t</sub>=k) = σ<span class="up"><sup>2</sup></span><sub>k,t</sub> exacto, y la Normal como límite ν → ∞:</p>
+      <div class="eq multi"><span class="tag">(2.3)</span>
+        <div class="row">log <i>f</i><sub>t</sub>(r<sub>t</sub> | k) <span class="op">=</span> log Γ<span class="up">(</span><span class="frac"><span class="n">ν<sub>k</sub>+1</span><span class="d">2</span></span><span class="up">)</span> <span class="op">−</span> log Γ<span class="up">(</span><span class="frac"><span class="n">ν<sub>k</sub></span><span class="d">2</span></span><span class="up">)</span> <span class="op">−</span> <span class="frac"><span class="n">1</span><span class="d">2</span></span> log(π ν<sub>k</sub> <i>s</i><span class="up"><sup>2</sup></span><sub>k,t</sub>)</div>
+        <div class="row"><span class="op"></span> <span class="op">−</span> <span class="frac"><span class="n">ν<sub>k</sub>+1</span><span class="d">2</span></span> log<span class="up">(</span>1 <span class="op">+</span> <span class="frac"><span class="n">(r<sub>t</sub> − μ<sub>k</sub>)<span class="up"><sup>2</sup></span></span><span class="d">ν<sub>k</sub> <i>s</i><span class="up"><sup>2</sup></span><sub>k,t</sub></span></span><span class="up">)</span>, &nbsp; <i>s</i><span class="up"><sup>2</sup></span><sub>k,t</sub> <span class="op">=</span> σ<span class="up"><sup>2</sup></span><sub>k,t</sub> <span class="frac"><span class="n">ν<sub>k</sub>−2</span><span class="d">ν<sub>k</sub></span></span></div>
+      </div>
+      <div class="note"><b>SPY vs BTC.</b> El BIC elige la Normal con K=2 para SPY, pero la t de Student con K=1 para BTC (colas más pesadas, un solo régimen). Quién decide entre Normal y t es el BIC (§9), no una constante en el código.</div>
+      <div class="regbox">
+        <table class="reg">
+          <thead><tr><th>Coeficiente</th><th class="calm">Régimen 1 · baja vol</th><th class="stress">Régimen 2 · alta vol</th></tr></thead>
+          <tbody>
+            <tr><td>μ<sub>k</sub> (%/día)</td><td>0.106</td><td>−0.623</td></tr>
+            <tr><td>σ<sub>k</sub> = √v<sub>k</sub> (%/día)</td><td class="hi">0.499</td><td class="hi">2.172</td></tr>
+            <tr><td>α<sub>k</sub> (ARCH)</td><td>0.000</td><td>0.010</td></tr>
+            <tr><td>γ<sub>k</sub> (asimetría)</td><td>0.229</td><td>0.026</td></tr>
+            <tr><td>β<sub>k</sub> (persistencia)</td><td>0.822</td><td>0.973</td></tr>
+            <tr><td>κ<sub>k</sub> = α+γ/2+β</td><td class="hi">0.936</td><td class="hi">0.995</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note"><b>Lectura de los números.</b> Los dos regímenes se separan con nitidez en volatilidad incondicional: <b>0.50 %/día</b> (calma) frente a <b>2.17 %/día</b> (estrés) — un factor 4.4×. En el régimen de calma, α = 0: toda la reacción llega por la asimetría γ (las caídas mueven la volatilidad, las subidas casi no). El régimen de estrés tiene κ = 0.995, al borde de IGARCH — su firma numérica de estado <b>absorbe-outliers</b> (§6). <span class="rnote">Coeficientes del re-ajuste reproducible del modelo publicado (K=2, Normal, semilla 42); la matriz P resultante coincide exacto con la del artefacto.</span></div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section id="s3">
+      <h2><span class="snum">3</span> Parametrización sin restricciones</h2>
+      <p class="section-note">El optimizador trabaja en ℝⁿ; todas las restricciones se imponen por transformación, no por penalización ni corrección posterior.</p>
+      <p>En estacionariedad, la varianza incondicional de un GJR-GARCH es <i>v<sub>k</sub></i> = ω<sub>k</sub> / (1 − κ<sub>k</sub>), con persistencia κ<sub>k</sub> = α<sub>k</sub> + γ<sub>k</sub>/2 + β<sub>k</sub> (el γ/2 sale de <span class="up">E</span>[ε<span class="up"><sup>2</sup></span>·𝟙{ε&lt;0}] = ½<span class="up">E</span>[σ<span class="up"><sup>2</sup></span>] para innovaciones simétricas). Se parametriza <strong>directamente</strong> <i>v<sub>k</sub></i> y κ<sub>k</sub>, y ω<sub>k</sub> cae por definición.</p>
+
+      <p>Orden estructural de varianzas — la clave contra el <em>label switching</em>:</p>
+      <div class="eq multi"><span class="tag">(3.1)</span>
+        <div class="row"><i>v</i><sub>1</sub> <span class="op">=</span> <span class="up">exp</span>(a<sub>1</sub>)</div>
+        <div class="row"><i>v<sub>k</sub></i> <span class="op">=</span> <i>v<sub>k−1</sub></i> <span class="op">+</span> <span class="up">exp</span>(a<sub>k</sub>), &nbsp; k <span class="op">=</span> 2 … K</div>
+      </div>
+      <div class="note rule"><span class="tag-rule">R5</span> &nbsp;Como <span class="up">exp</span>(·) &gt; 0, cada <i>v<sub>k</sub></i> es estrictamente mayor que el anterior <b>por construcción</b>: el optimizador no puede proponer un orden inválido porque no existe en el espacio de búsqueda. El régimen de mayor varianza es siempre el último índice, en todos los bloques, sin post-proceso.</div>
+
+      <p>Reparto de la persistencia entre los tres coeficientes GARCH mediante una persistencia acotada y un simplex (softmax con categoría de referencia fija):</p>
+      <div class="eq multi"><span class="tag">(3.2)</span>
+        <div class="row">p<sub>k</sub> <span class="op">=</span> <span class="up">sigmoid</span>(b<sub>k</sub>) ∈ (0,1), &nbsp; (u<sub>a</sub>, u<sub>g</sub>, u<sub>b</sub>) <span class="op">=</span> <span class="up">softmax</span>(c<sub>k1</sub>, c<sub>k2</sub>, 0)</div>
+        <div class="row">α<sub>k</sub> <span class="op">=</span> p<sub>k</sub> u<sub>a</sub>, &nbsp; γ<sub>k</sub> <span class="op">=</span> 2 p<sub>k</sub> u<sub>g</sub>, &nbsp; β<sub>k</sub> <span class="op">=</span> p<sub>k</sub> u<sub>b</sub></div>
+        <div class="row">ω<sub>k</sub> <span class="op">=</span> <i>v<sub>k</sub></i> (1 <span class="op">−</span> p<sub>k</sub>), &nbsp; ν<sub>k</sub> <span class="op">=</span> 2 <span class="op">+</span> <span class="up">exp</span>(g<sub>k</sub>)</div>
+      </div>
+      <dl class="terms">
+        <dt>p<sub>k</sub></dt><dd>La persistencia κ<sub>k</sub>. El factor 2 en γ hace <b>κ<sub>k</sub> = p<sub>k</sub> exacto</b>, de modo que <i>v<sub>k</sub></i> es la varianza incondicional verdadera.</dd>
+        <dt>u<sub>a</sub>,u<sub>g</sub>,u<sub>b</sub></dt><dd>Reparto en el simplex (suman 1). La gauge fija (último logit = 0) hace la representación mínima y única.</dd>
+        <dt>ω<sub>k</sub></dt><dd><b>No es libre:</b> se deriva. Positividad y estacionariedad (κ&lt;1) quedan garantizadas sin restricción de caja.</dd>
+        <dt>ν<sub>k</sub></dt><dd>Grados de libertad de la t; ν&gt;2 garantiza varianza finita.</dd>
+      </dl>
+      <p>Layout del vector que ve el optimizador (los bloques de V0 conservan su posición; lo nuevo se añade al final, para que θ de V0 sea un prefijo válido):</p>
+      <div class="eq"><span class="tag">(3.3)</span>
+        <div class="row"><span class="up" style="font-family:var(--mono);font-size:.82rem">θ = [ μ(K) | a(K) | b(K) | c(2K) | d(K·(K−1)) | g(K si t) | B(K·(K−1)·n_cov) ]</span></div>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section id="s4">
+      <h2><span class="snum">4</span> Transiciones variables en el tiempo (TVTP)</h2>
+      <p class="section-note">La matriz de transición puede depender de covariables rezagadas. El modelo publicado (M1) la mantiene constante; esta es la forma general.</p>
+      <p>La probabilidad de pasar del régimen <i>i</i> al <i>j</i> el día <i>t</i> se modela con un logit multinomial sobre covariables <strong>rezagadas</strong> <i>x<sub>t−1</sub></i>:</p>
+      <div class="eq"><span class="tag">(4.1)</span>
+        <div class="row">p<sub>ij</sub>(t) <span class="op">=</span> <span class="frac"><span class="n"><span class="up">exp</span>(β′<sub>ij</sub> · x<sub>t−1</sub>)</span><span class="d">Σ<sub>m</sub> <span class="up">exp</span>(β′<sub>im</sub> · x<sub>t−1</sub>)</span></span>, &nbsp; β<sub>i,K</sub> <span class="op">=</span> 0 ∀i</div>
+      </div>
+      <dl class="terms">
+        <dt>x<sub>t−1</sub></dt><dd><b>Covariables al cierre de <i>t</i>−1</b>: sma_gap, bb_width_z, slope_2s10y, hy_oas_z, surprise_index, λ<sub>N</sub>_z. Todas rezagadas.</dd>
+        <dt>β<sub>ij</sub></dt><dd>Pesos del logit, <b>estimados por máxima verosimilitud</b> con error estándar (R7), no fijados a mano.</dd>
+        <dt>β<sub>i,K</sub>=0</dt><dd>Categoría de referencia: identifica el logit multinomial (misma gauge que el softmax).</dd>
+      </dl>
+      <div class="note rule"><span class="tag-rule">R3</span> &nbsp;La matriz del paso <i>t</i> se evalúa en <i>x</i>[<i>t</i>−1], <b>nunca</b> en <i>x</i>[<i>t</i>]. Con <i>x</i> = 0 (covariables estandarizadas en su media de entrenamiento) el modelo TVTP colapsa a la matriz constante: V0 está anidado en V1. Penalización L1 sobre β<sub>ij</sub>, con λ elegido por validación cruzada <b>dentro</b> del bloque de entrenamiento.</div>
+      <div class="note warn"><b>M1 (publicado):</b> ninguna covariable de transición aportó valor fuera de muestra (§9), así que el artefacto vivo usa <b>P constante</b> (tvtp = false, sin covariables). La capa Hawkes queda como indicador <em>standalone</em>, no dentro del logit.</div>
+      <div class="readout">
+        <div class="rhead">Matriz de transición publicada (constante) — P</div>
+        <div class="rgrid">
+          <div><span class="rk">p<sub>11</sub> → p<sub>12</sub></span><span class="rv calm">0.902 → 0.098</span><span class="rnote">quedarse en / salir de calma</span></div>
+          <div><span class="rk">p<sub>21</sub> → p<sub>22</sub></span><span class="rv stress">0.854 → 0.146</span><span class="rnote">volver a calma / seguir en estrés</span></div>
+        </div>
+      </div>
+      <div class="note"><b>Casi rango-1.</b> Las dos filas son casi idénticas (diferencia máxima ≈ 0.05): el régimen de mañana depende muy poco del de hoy. Es la misma raíz del estado absorbe-outliers — un rasgo de los datos de SPY, confirmado por auditoría, no un defecto del estimador.</div>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section id="s5">
+      <h2><span class="snum">5</span> Filtro de Hamilton</h2>
+      <p class="section-note">El núcleo. Recursión de predicción y actualización bayesiana; la verosimilitud sale del denominador.</p>
+      <p><strong>Predicción</strong> — un paso de la cadena de Markov sobre la creencia del día anterior:</p>
+      <div class="eq"><span class="tag">(5.1)</span>
+        <div class="row">ξ<sub>t|t−1</sub>(j) <span class="op">=</span> Σ<sub>i</sub> p<sub>ij</sub>(x<sub>t−1</sub>) · ξ<sub>t−1|t−1</sub>(i)</div>
+      </div>
+      <p><strong>Actualización</strong> — regla de Bayes con la densidad de observación del día:</p>
+      <div class="eq"><span class="tag">(5.2)</span>
+        <div class="row">ξ<sub>t|t</sub>(j) <span class="op">=</span> <span class="frac"><span class="n">ξ<sub>t|t−1</sub>(j) · f(r<sub>t</sub> | S<sub>t</sub>=j)</span><span class="d">Σ<sub>m</sub> ξ<sub>t|t−1</sub>(m) · f(r<sub>t</sub> | S<sub>t</sub>=m)</span></span></div>
+      </div>
+      <p><strong>Log-verosimilitud</strong> — el denominador de la actualización, sumado en el tiempo. No existe una función aparte que recorra los datos otra vez:</p>
+      <div class="eq"><span class="tag">(5.3)</span>
+        <div class="row">log <i>L</i> <span class="op">=</span> Σ<sub>t</sub> log<span class="up">[</span> Σ<sub>m</sub> ξ<sub>t|t−1</sub>(m) · f(r<sub>t</sub> | S<sub>t</sub>=m) <span class="up">]</span></div>
+      </div>
+      <dl class="terms">
+        <dt>ξ<sub>t|t−1</sub></dt><dd><b>Predicha</b> (antes de ver <i>r<sub>t</sub></i>). Es la que se evalúa en calibración: preguntarle al modelo si acertó <em>antes</em> de la respuesta.</dd>
+        <dt>ξ<sub>t|t</sub></dt><dd><b>Filtrada</b> (tras ver <i>r<sub>t</sub></i>). <b>Lo único que se publica.</b></dd>
+        <dt>ξ<sub>0|−1</sub></dt><dd>Inicialización: distribución estacionaria π de P, resolviendo π = P′π con Σπ = 1. Función solo de parámetros → invariante de prefijo.</dd>
+      </dl>
+      <div class="note rule"><span class="tag-rule">R2</span> &nbsp;En walk-forward, cada bloque re-estima θ desde cero con solo sus datos de entrenamiento; al empezar el test se <b>arrastra</b> el último ξ<sub>t|t</sub> del entrenamiento, no se reinicia a la estacionaria. Mínimo 6 bloques de test.</div>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section id="s6">
+      <h2><span class="snum">6</span> Salidas del régimen</h2>
+      <p class="section-note">Los descriptores que se publican a diario, todos derivados de ξ<sub>t|t</sub> y de P.</p>
+      <p><strong>Entropía</strong> de la creencia filtrada (confianza), y su versión normalizada a [0,1]:</p>
+      <div class="eq"><span class="tag">(6.1)</span>
+        <div class="row"><i>H<sub>t</sub></i> <span class="op">=</span> <span class="op">−</span> Σ<sub>k</sub> ξ<sub>t|t</sub>(k) log ξ<sub>t|t</sub>(k), &nbsp; <i>H</i><span class="up"><sup>norm</sup></span><sub>t</sub> <span class="op">=</span> <span class="frac"><span class="n"><i>H<sub>t</sub></i></span><span class="d">log K</span></span></div>
+      </div>
+      <p><strong>Duración esperada</strong> del régimen <i>k</i> — media de una geométrica con probabilidad de permanencia p<sub>kk</sub>:</p>
+      <div class="eq"><span class="tag">(6.2)</span>
+        <div class="row"><span class="up">E</span>[D<sub>k</sub>] <span class="op">=</span> <span class="frac"><span class="n">1</span><span class="d">1 − p<sub>kk</sub></span></span></div>
+      </div>
+      <dl class="terms">
+        <dt>H<sub>t</sub></dt><dd>0 cuando el modelo está seguro (toda la masa en un régimen); log&nbsp;K cuando reparte por igual. La entropía mide, no elimina, la incertidumbre de que los regímenes son latentes, no reales.</dd>
+        <dt>E[D<sub>k</sub>]</dt><dd>Días esperados en el régimen. Para SPY, el régimen de baja volatilidad da ≈ 10 días; el de alta volatilidad ≈ 1 día — es un estado <b>absorbe-outliers</b>, no un régimen persistente.</dd>
+      </dl>
+      <div class="readout">
+        <div class="rhead">Estadísticas condicionales por régimen — SPY</div>
+        <div class="rgrid">
+          <div><span class="rk">σ anual</span><span class="rv"><span class="calm">15.9 %</span> · <span class="stress">21.7 %</span></span><span class="rnote">volatilidad realizada</span></div>
+          <div><span class="rk">retorno anual</span><span class="rv"><span class="calm">+27.8 %</span> · <span class="stress">−414 %</span></span><span class="rnote">el 2º, no anualizable</span></div>
+          <div><span class="rk">Sharpe</span><span class="rv"><span class="calm">1.75</span> · <span class="stress">−19.1</span></span><span class="rnote">el 2º, no anualizable</span></div>
+          <div><span class="rk">E[D]</span><span class="rv"><span class="calm">10.2 d</span> · <span class="stress">1.2 d</span></span><span class="rnote">duración esperada</span></div>
+        </div>
+      </div>
+      <div class="note warn"><b>Régimen degenerado (limitación conocida).</b> Con K=2, el segundo estado aparece un día suelto para capturar un movimiento extremo y desaparece (E[D] ≈ 1.2 d). Sus métricas anualizadas (retorno −414 %, Sharpe −19.1, caída máxima) se marcan <b>no anualizables</b>: multiplicar por 252 un estado que por diseño no persiste no tiene sentido. La auditoría confirmó que el estimador recupera rango 2 en datos sintéticos — la degeneración es un rasgo de los datos de SPY, no un defecto.</div>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section id="s7">
+      <h2><span class="snum">7</span> Capa de noticias · Hawkes</h2>
+      <p class="section-note">Las noticias llegan en racimos: una noticia genera más noticias. Proceso puntual autoexcitante con marcas.</p>
+      <p><strong>Intensidad</strong> — un piso basal más el eco decreciente de cada titular pasado, pesado por su relevancia:</p>
+      <div class="eq"><span class="tag">(7.1)</span>
+        <div class="row">λ<sub>N</sub>(t) <span class="op">=</span> μ<sub>N</sub> <span class="op">+</span> Σ<sub>t<sub>i</sub> &lt; t</sub> α · s<sub>i</sub> · <span class="up">exp</span>(<span class="op">−</span>β (t <span class="op">−</span> t<sub>i</sub>))</div>
+      </div>
+      <dl class="terms">
+        <dt>μ<sub>N</sub></dt><dd><b>Intensidad basal:</b> flujo de titulares de un día normal.</dd>
+        <dt>s<sub>i</sub> ∈ [0,1]</dt><dd><b>Marca / relevancia</b> del titular <i>i</i>, = 1 − P(neutral) de FinBERT. Solo relevancia, jamás dirección.</dd>
+        <dt>α</dt><dd><b>Auto-excitación:</b> cuánto cada titular eleva la llegada de los siguientes.</dd>
+        <dt>β</dt><dd><b>Velocidad de olvido</b> del eco (decaimiento exponencial).</dd>
+      </dl>
+
+      <p>La verosimilitud se evalúa con una <strong>recursión</strong> O(n) (no el doble bucle O(n²)), con su compensador:</p>
+      <div class="eq multi"><span class="tag">(7.2)</span>
+        <div class="row">A<sub>1</sub> <span class="op">=</span> 0, &nbsp; A<sub>i</sub> <span class="op">=</span> <span class="up">exp</span>(<span class="op">−</span>β Δt<sub>i</sub>)(A<sub>i−1</sub> <span class="op">+</span> s<sub>i−1</sub>), &nbsp; λ(t<sub>i</sub>) <span class="op">=</span> μ<sub>N</sub> <span class="op">+</span> α A<sub>i</sub></div>
+        <div class="row">Λ(T) <span class="op">=</span> μ<sub>N</sub> T <span class="op">+</span> <span class="frac"><span class="n">α</span><span class="d">β</span></span> Σ<sub>i</sub> s<sub>i</sub> (1 <span class="op">−</span> <span class="up">exp</span>(<span class="op">−</span>β (T <span class="op">−</span> t<sub>i</sub>)))</div>
+        <div class="row">log <i>L</i> <span class="op">=</span> Σ<sub>i</sub> log λ(t<sub>i</sub>) <span class="op">−</span> Λ(T)</div>
+      </div>
+
+      <p><strong>Razón de ramificación</strong> (branching ratio) con la corrección por marcas — <em>esto se equivoca seguido</em>: no es α/β cuando hay marcas — y la cascada esperada:</p>
+      <div class="eq"><span class="tag">(7.3)</span>
+        <div class="row"><i>n</i> <span class="op">=</span> <span class="frac"><span class="n">α · <span class="up">E</span>[s]</span><span class="d">β</span></span>, &nbsp; <span class="up">E</span>[hijos] <span class="op">=</span> <span class="frac"><span class="n">1</span><span class="d">1 − n</span></span>, &nbsp; estacionariedad: <i>n</i> <span class="op">&lt;</span> 1</div>
+      </div>
+      <dl class="terms">
+        <dt>n</dt><dd><b>Número medio de hijos por evento.</b> Cuando <i>n</i> → 1 el sistema está en modo reflexivo: las noticias se autoalimentan, al borde de la criticidad. Publicado a diario, es un indicador de fragilidad.</dd>
+        <dt>E[s]</dt><dd>Media muestral de las marcas (≈ 0.636 en el corpus real).</dd>
+      </dl>
+
+      <p><strong>Bondad de ajuste</strong> — teorema de re-escalamiento temporal: si el modelo es correcto, los tiempos transformados τ<sub>i</sub> = Λ(t<sub>i</sub>) son un Poisson unitario y sus interarribos son Exp(1). Se contrasta con un test de Kolmogórov-Smirnov:</p>
+      <div class="eq"><span class="tag">(7.4)</span>
+        <div class="row">τ<sub>i</sub> <span class="op">=</span> Λ(t<sub>i</sub>), &nbsp; (τ<sub>i</sub> <span class="op">−</span> τ<sub>i−1</sub>) <span class="up">~</span> <span class="up">Exp</span>(1) &nbsp; bajo H₀ &nbsp;<span class="op">⟶</span>&nbsp; <span class="up">KS</span> vs Exp(1)</div>
+      </div>
+      <div class="readout">
+        <div class="rhead">Ajuste del Hawkes sobre el corpus real — SPY</div>
+        <div class="rgrid">
+          <div><span class="rk">μ<sub>N</sub></span><span class="rv">103.0</span><span class="rnote">titulares basales / día</span></div>
+          <div><span class="rk">α</span><span class="rv">329.7</span><span class="rnote">auto-excitación</span></div>
+          <div><span class="rk">β</span><span class="rv">284.0</span><span class="rnote">olvido (1/día)</span></div>
+          <div><span class="rk">E[s]</span><span class="rv">0.636</span><span class="rnote">relevancia media</span></div>
+          <div><span class="rk">n</span><span class="rv">0.739</span><span class="rnote">IC95 [0.731, 0.747]</span></div>
+          <div><span class="rk">E[hijos]</span><span class="rv">3.83</span><span class="rnote">cascada esperada</span></div>
+          <div><span class="rk">KS · D</span><span class="rv">0.0289</span><span class="rnote">p ≈ 2·10⁻⁶⁹ · rechaza</span></div>
+          <div><span class="rk">corpus</span><span class="rv">95 085</span><span class="rnote">titulares · 240/998 d · 10 censurados</span></div>
+        </div>
+      </div>
+      <div class="note warn"><b>El KS rechaza el kernel exponencial</b> (D = 0.0289, p ≈ 2·10⁻⁶⁹, n = 95&nbsp;084). El ajuste es imperfecto y se reporta tal cual. El <b>tamaño de efecto D es pequeño</b> (D crítico al 5% ≈ 0.0044): el rechazo lo domina el enorme <i>n</i> del corpus, no un desajuste grande de forma. Un kernel power-law es candidato para una versión futura (ya comparado: gana AIC pero tampoco pasa el KS).</div>
+      <div class="note"><b>Dos ajustes de datos necesarios.</b> (i) El <em>seendate</em> de GDELT está cuantizado a 15 min (~83% de titulares empatados): se aplica <b>dithering</b> intra-bin U(0, 15min) por evento, semilla fija, para identificar el proceso continuo. (ii) El corpus cubre 240 días dentro de un span de 998; el Hawkes se ajusta sobre el <b>tiempo observado</b> (los días sin captura se excinden del reloj), de modo que μ<sub>N</sub> y <i>n</i> son estimaciones sobre soporte observado, no cotas infladas por integrar μ<sub>N</sub> sobre días fantasma.</div>
+    </section>
+
+    <!-- ============ 8 ============ -->
+    <section id="s8">
+      <h2><span class="snum">8</span> Capa de noticias · Índice de sorpresa</h2>
+      <p class="section-note">Sorpresa macroeconómica con pesos estimados. Especificada en el modelo, hoy inactiva por falta de consenso histórico.</p>
+      <p>Sorpresa estandarizada de cada publicación (dato real menos consenso), su peso estimado por regresión de impacto, y el índice con decaimiento:</p>
+      <div class="eq multi"><span class="tag">(8.1)</span>
+        <div class="row"><i>z<sub>i</sub></i> <span class="op">=</span> <span class="frac"><span class="n">actual<sub>i</sub> − consenso<sub>i</sub></span><span class="d">σ<sub>i</sub></span></span></div>
+        <div class="row">|r<sub>ventana</sub>| <span class="op">=</span> a <span class="op">+</span> w<sub>i</sub> |z<sub>i</sub>| <span class="op">+</span> u &nbsp;<span class="up">(estima w<sub>i</sub> con error estándar)</span></div>
+        <div class="row"><span class="up">SI</span><sub>t</sub> <span class="op">=</span> Σ<sub>t<sub>i</sub> ≤ t</sub> w<sub>i</sub> · z<sub>i</sub> · <span class="up">exp</span>(<span class="op">−</span>δ (t <span class="op">−</span> t<sub>i</sub>))</div>
+      </div>
+      <dl class="terms">
+        <dt>z<sub>i</sub></dt><dd>Sorpresa en unidades de desviación estándar σ<sub>i</sub> específica de <b>ese</b> indicador.</dd>
+        <dt>w<sub>i</sub></dt><dd>Peso <b>estimado</b> (R7), no inventado: cuánto mueve al mercado una sorpresa de ese indicador.</dd>
+        <dt>δ</dt><dd>Tasa de decaimiento del índice, estimada por MLE del modelo completo.</dd>
+      </dl>
+      <div class="note rule">SI<sub>t</sub> y λ<sub>N</sub>(t) entran como <b>covariables separadas</b> en el logit — prohibido colapsarlas en un único "news score" con pesos inventados. La verosimilitud decide cuánto pesa cada una.</div>
+      <div class="note warn"><b>Inactiva hoy:</b> 0 eventos de consenso histórico acumulados (se necesitan ≥ 30). Sin consenso no hay índice de sorpresa. Es un bloqueante de datos, no de matemática: la capa está especificada y se activará cuando haya datos.</div>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section id="s9">
+      <h2><span class="snum">9</span> Validación e inferencia</h2>
+      <p class="section-note">Cómo se decide qué modelo se publica y si aporta, todo fuera de muestra.</p>
+
+      <h3>Selección de modelo — BIC / AIC</h3>
+      <div class="eq"><span class="tag">(9.1)</span>
+        <div class="row"><span class="up">BIC</span> <span class="op">=</span> <span class="op">−</span>2 log <i>L</i> <span class="op">+</span> k log T, &nbsp; <span class="up">AIC</span> <span class="op">=</span> <span class="op">−</span>2 log <i>L</i> <span class="op">+</span> 2k</div>
+      </div>
+      <p>con <i>k</i> = número de parámetros libres y <i>T</i> = observaciones. Para elegir el número de regímenes <i>K</i>, el LR estándar <strong>no</strong> es válido (parámetros no identificados bajo H₀, problema de Davies); se usa un <strong>bootstrap paramétrico</strong>: se simulan B series del modelo nulo ajustado y el p-valor es</p>
+      <div class="eq"><span class="tag">(9.2)</span>
+        <div class="row"><i>p</i> <span class="op">=</span> <span class="frac"><span class="n">1 + #{ LR<sub>b</sub> ≥ LR<sub>obs</sub> }</span><span class="d">B + 1</span></span></div>
+      </div>
+
+      <h3>Comparación de modelos — Diebold-Mariano</h3>
+      <p>Sobre la <strong>pérdida predictiva</strong> emparejada por fecha (−log-verosimilitud predictiva por observación), con varianza HAC de Newey-West y corrección de muestra pequeña de Harvey-Leybourne-Newbold:</p>
+      <div class="eq multi"><span class="tag">(9.3)</span>
+        <div class="row">d<sub>t</sub> <span class="op">=</span> ℓ<sub>A,t</sub> <span class="op">−</span> ℓ<sub>B,t</sub>, &nbsp; <span class="up">V̂</span> <span class="op">=</span> γ̂<sub>0</sub> <span class="op">+</span> 2 Σ<sub>j=1</sub><span class="up"><sup>L</sup></span> (1 <span class="op">−</span> <span class="frac"><span class="n">j</span><span class="d">L+1</span></span>) γ̂<sub>j</sub></div>
+        <div class="row"><span class="up">DM</span> <span class="op">=</span> <span class="frac"><span class="n">d̄</span><span class="d"><span class="rad">√</span><span class="sqrt">V̂ / T</span></span></span> · <span class="rad">√</span><span class="sqrt"><span class="frac"><span class="n">T + 1 − 2h + h(h−1)/T</span><span class="d">T</span></span></span></div>
+      </div>
+      <dl class="terms">
+        <dt>d̄</dt><dd>Media del diferencial de pérdida. <b>DM &lt; 0</b> ⇒ el modelo A pierde menos (mejor).</dd>
+        <dt>γ̂<sub>j</sub></dt><dd>Autocovarianza de rezago <i>j</i> del diferencial; la ventana de Bartlett protege contra autocorrelación.</dd>
+        <dt>h</dt><dd>Horizonte de pronóstico (aquí h = 1); el factor HLN corrige el sesgo de muestra pequeña. p-valor con t de Student.</dd>
+      </dl>
+
+      <h3>Precisión direccional — Pesaran-Timmermann</h3>
+      <div class="eq multi"><span class="tag">(9.4)</span>
+        <div class="row"><span class="up">PT</span> <span class="op">=</span> <span class="frac"><span class="n">P̂ − P̂<sub>*</sub></span><span class="d"><span class="rad">√</span><span class="sqrt"><span class="up">V</span>(P̂) − <span class="up">V</span>(P̂<sub>*</sub>)</span></span></span> <span class="up">~</span> <span class="up">N</span>(0,1)</div>
+        <div class="row">P̂<sub>*</sub> <span class="op">=</span> P<sub>y</sub> P<sub>x</sub> <span class="op">+</span> (1 <span class="op">−</span> P<sub>y</sub>)(1 <span class="op">−</span> P<sub>x</sub>)</div>
+      </div>
+      <dl class="terms">
+        <dt>P̂</dt><dd>Proporción de aciertos de signo entre <span class="up">sign</span>(predicho) y <span class="up">sign</span>(realizado).</dd>
+        <dt>P̂<sub>*</sub></dt><dd>Aciertos esperados bajo independencia, dadas las frecuencias marginales P<sub>y</sub>, P<sub>x</sub> de signos positivos.</dd>
+      </dl>
+
+      <h3>Calibración — Brier y su descomposición</h3>
+      <div class="eq multi"><span class="tag">(9.5)</span>
+        <div class="row"><span class="up">Brier</span> <span class="op">=</span> <span class="frac"><span class="n">1</span><span class="d">T</span></span> Σ<sub>t</sub> Σ<sub>k</sub> (ξ<sub>t|t−1</sub>(k) <span class="op">−</span> y<sub>t</sub>(k))<span class="up"><sup>2</sup></span></div>
+        <div class="row"><span class="up">Brier</span> <span class="op">=</span> <span class="up">confiabilidad</span> <span class="op">−</span> <span class="up">resolución</span> <span class="op">+</span> <span class="up">incertidumbre</span></div>
+      </div>
+      <p>La <strong>log-loss</strong> multiclase, menor es mejor: <span class="up">LL</span> = −(1/T) Σ<sub>t</sub> Σ<sub>k</sub> y<sub>t</sub>(k) log ξ<sub>t|t−1</sub>(k).</p>
+
+      <h3>Intervalos — bootstrap estacionario y método delta</h3>
+      <p>Para series dependientes, el bootstrap i.i.d. es inválido; se usa el <strong>bootstrap estacionario</strong> de Politis-Romano (bloques de longitud geométrica, media ℓ). El IC del branching ratio, función no lineal de (α, β, marcas), se obtiene por <strong>método delta</strong>:</p>
+      <div class="eq multi"><span class="tag">(9.6)</span>
+        <div class="row"><span class="up">Var</span>(n) <span class="op">≈</span> g′ <span class="up">Cov</span>(α,β) g <span class="op">+</span> <span class="up">(</span><span class="frac"><span class="n">α</span><span class="d">β</span></span><span class="up">)</span><span class="up"><sup>2</sup></span> <span class="up">Var</span>(m), &nbsp; m <span class="op">=</span> <span class="up">E</span>[s]</div>
+        <div class="row">g <span class="op">=</span> <span class="up">(</span><span class="frac"><span class="n">m</span><span class="d">β</span></span>, <span class="op">−</span><span class="frac"><span class="n">α m</span><span class="d">β<span class="up"><sup>2</sup></span></span></span><span class="up">)</span>, &nbsp; IC<sub>95</sub> <span class="op">=</span> n <span class="op">±</span> 1.96 <span class="rad">√</span><span class="sqrt"><span class="up">Var</span>(n)</span></div>
+      </div>
+      <div class="note"><b>El maxdd y el régimen degenerado no llevan IC.</b> El máximo drawdown es un funcional de valor extremo: el bootstrap por bloques rompe la trayectoria de la que depende y fingiría precisión. Un régimen que no persiste tampoco recibe IC. Se publica el punto, con el intervalo en blanco — nunca un intervalo inventado.</div>
+      <div class="readout">
+        <div class="rhead">Resultados de validación — SPY (walk-forward, 19 bloques)</div>
+        <div class="rgrid">
+          <div><span class="rk">BIC</span><span class="rv">K=2 gana</span><span class="rnote">8195.8 &lt; K=1, K=3, K=4</span></div>
+          <div><span class="rk">K=2 vs K=1</span><span class="rv">p ≤ 0.02</span><span class="rnote">bootstrap-LR = 305 vs q95 18.4</span></div>
+          <div><span class="rk">M1 vs M0</span><span class="rv">−3.21</span><span class="rnote">DM, p = 0.001 · regímenes aportan</span></div>
+          <div><span class="rk">M2 vs M1</span><span class="rv">+1.62</span><span class="rnote">DM, p = 0.106 · TVTP no aporta</span></div>
+          <div><span class="rk">Brier</span><span class="rv">0.071</span><span class="rnote">vs 0.232 climatología</span></div>
+          <div><span class="rk">log-loss</span><span class="rv">0.169</span><span class="rnote">vs 0.394 climatología</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section id="s10">
+      <h2><span class="snum">10</span> Capa económica</h2>
+      <p class="section-note">Regla de des-riesgo binaria, pre-registrada antes de correrla. No es una señal de trading ni una promesa de rendimiento.</p>
+      <p>La única pregunta: ¿la probabilidad filtrada de régimen aporta valor económico frente a comprar y mantener, después de costos? La regla — congelada antes de ver un número — sale a efectivo cuando la probabilidad de alta volatilidad supera un umbral:</p>
+      <div class="eq multi"><span class="tag">(10.1)</span>
+        <div class="row"><i>w<sub>t</sub></i> <span class="op">=</span>
+          <span class="cases"><span class="brace">{</span><span class="lines">
+            <span>1 &nbsp; si P<sub>t−1</sub>(alta vol) ≤ p<sub>umbral</sub></span>
+            <span>w<sub>red</sub> &nbsp; si P<sub>t−1</sub>(alta vol) &gt; p<sub>umbral</sub></span>
+          </span></span>
+        </div>
+        <div class="row"><span class="up">turnover</span><sub>t</sub> <span class="op">=</span> |w<sub>t</sub> <span class="op">−</span> w<sub>t−1</sub>|, &nbsp; r<span class="up"><sup>estr</sup></span><sub>t</sub> <span class="op">=</span> w<sub>t</sub> r<sub>t</sub> <span class="op">−</span> costo<sub>bps</sub> · turnover<sub>t</sub></div>
+      </div>
+      <dl class="terms">
+        <dt>P<sub>t−1</sub>(alta vol)</dt><dd>Componente de ξ<sub>t−1|t−1</sub> del régimen de mayor varianza. <b>Filtrada, no suavizada</b> (R1), rezagada (R3).</dd>
+        <dt>p<sub>umbral</sub></dt><dd>= 0.5, el clasificador natural de argmax binario. No se optimiza (evita sobreajuste).</dd>
+        <dt>w<sub>red</sub></dt><dd>= 0 (salir a efectivo). Sin apalancamiento, sin cortos — el caso más simple e interpretable.</dd>
+      </dl>
+      <p>El éxito se juzga por el Sharpe anualizado de la <em>diferencia</em> frente a comprar-y-mantener, con IC bootstrap que debe excluir 0 por arriba:</p>
+      <div class="eq"><span class="tag">(10.2)</span>
+        <div class="row"><span class="up">Sharpe</span> <span class="op">=</span> <span class="frac"><span class="n"><span class="up">media</span>(r)</span><span class="d"><span class="up">desv</span>(r)</span></span> <span class="rad">√</span><span class="sqrt">252</span>, &nbsp; <span class="up">maxDD</span> <span class="op">=</span> <span class="up">máx</span><sub>t</sub><span class="up">(</span>1 <span class="op">−</span> <span class="frac"><span class="n">equity<sub>t</sub></span><span class="d">máx<sub>s≤t</sub> equity<sub>s</sub></span></span><span class="up">)</span></div>
+      </div>
+      <div class="readout">
+        <div class="rhead">Resultado económico — SPY (2 pb de costo, 9.5 años)</div>
+        <div class="rgrid">
+          <div><span class="rk">éxito</span><span class="rv stress">NO</span><span class="rnote">IC no excluye 0 por arriba</span></div>
+          <div><span class="rk">Sharpe estr.</span><span class="rv">0.71</span><span class="rnote">vs 0.78 comprar-y-mantener</span></div>
+          <div><span class="rk">ΔSharpe</span><span class="rv">−0.32</span><span class="rnote">IC95 [−1.07, 0.27]</span></div>
+          <div><span class="rk">maxDD</span><span class="rv">32.5 %</span><span class="rnote">vs 33.7 % B&amp;H</span></div>
+          <div><span class="rk">exposición</span><span class="rv">86.6 %</span><span class="rnote">132 cambios de posición</span></div>
+          <div><span class="rk">retorno anual</span><span class="rv">11.9 %</span><span class="rnote">vs 14.3 % B&amp;H</span></div>
+        </div>
+      </div>
+      <div class="note warn"><b>No hay capa de Kelly.</b> No hay sizing continuo ni apalancamiento: la regla es binaria a propósito. El resultado publicado es <b>negativo</b> (no supera a comprar-y-mantener tras costos), documentado tal cual — un resultado negativo honesto vale más que uno positivo maquillado.</div>
+    </section>
+
+    <!-- ============ 11 ============ -->
+    <section id="s11">
+      <h2><span class="snum">11</span> Glosario de símbolos</h2>
+      <p class="section-note">Referencia rápida de toda la notación.</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Símbolo</th><th>Nombre</th><th>Valor (run publicado, SPY)</th><th>§</th></tr></thead>
+        <tbody>
+          <tr><td class="sym">r<sub>t</sub></td><td>Log-retorno diario ×100</td><td>serie observada</td><td>1</td></tr>
+          <tr><td class="sym">S<sub>t</sub></td><td>Estado (régimen) latente ∈ {1…K}</td><td>latente</td><td>1</td></tr>
+          <tr><td class="sym">ξ<sub>t|t</sub></td><td>Probabilidad filtrada de régimen (se publica)</td><td>[0.949, 0.051]</td><td>5</td></tr>
+          <tr><td class="sym">v<sub>k</sub></td><td>Varianza incondicional del régimen k (orden R5)</td><td>0.249 · 4.719</td><td>3</td></tr>
+          <tr><td class="sym">σ<sub>k</sub></td><td>Volatilidad incondicional √v<sub>k</sub> (%/día)</td><td>0.50 · 2.17</td><td>2</td></tr>
+          <tr><td class="sym">μ<sub>k</sub></td><td>Media del retorno en el régimen k (%/día)</td><td>0.106 · −0.623</td><td>2</td></tr>
+          <tr><td class="sym">α<sub>k</sub></td><td>Reacción ARCH</td><td>0.000 · 0.010</td><td>2–3</td></tr>
+          <tr><td class="sym">γ<sub>k</sub></td><td>Asimetría GJR (apalancamiento)</td><td>0.229 · 0.026</td><td>2–3</td></tr>
+          <tr><td class="sym">β<sub>k</sub></td><td>Persistencia GARCH</td><td>0.822 · 0.973</td><td>2–3</td></tr>
+          <tr><td class="sym">κ<sub>k</sub></td><td>Persistencia total α+γ/2+β = p<sub>k</sub></td><td>0.936 · 0.995</td><td>3</td></tr>
+          <tr><td class="sym">ν<sub>k</sub></td><td>Grados de libertad de la t de Student</td><td>n/a (SPY Normal)</td><td>2–3</td></tr>
+          <tr><td class="sym">P</td><td>Matriz de transición (constante en M1)</td><td>[[.902,.098],[.854,.146]]</td><td>4</td></tr>
+          <tr><td class="sym">β<sub>ij</sub></td><td>Pesos del logit de transición (TVTP)</td><td>inactivo (M1)</td><td>4</td></tr>
+          <tr><td class="sym">H<sub>t</sub></td><td>Entropía de la creencia filtrada</td><td>0.201 / 0.693</td><td>6</td></tr>
+          <tr><td class="sym">E[D<sub>k</sub>]</td><td>Duración esperada del régimen k (días)</td><td>10.2 · 1.2</td><td>6</td></tr>
+          <tr><td class="sym">μ<sub>N</sub></td><td>Intensidad basal de noticias (/día)</td><td>103.0</td><td>7</td></tr>
+          <tr><td class="sym">α, β</td><td>Auto-excitación y olvido del Hawkes</td><td>329.7 · 284.0</td><td>7</td></tr>
+          <tr><td class="sym">s<sub>i</sub></td><td>Relevancia (marca) del titular; E[s]</td><td>E[s] = 0.636</td><td>7</td></tr>
+          <tr><td class="sym">n</td><td>Razón de ramificación α·E[s]/β</td><td>0.739 [0.731, 0.747]</td><td>7</td></tr>
+          <tr><td class="sym">τ<sub>i</sub></td><td>Tiempos re-escalados; KS vs Exp(1)</td><td>D = 0.0289 (rechaza)</td><td>7</td></tr>
+          <tr><td class="sym">SI<sub>t</sub>, δ</td><td>Índice de sorpresa y su decaimiento</td><td>inactivo (0 consenso)</td><td>8</td></tr>
+          <tr><td class="sym">w<sub>t</sub></td><td>Posición de la regla económica ∈ {0,1}</td><td>p<sub>umbral</sub>=0.5, w<sub>red</sub>=0</td><td>10</td></tr>
+          <tr><td class="sym">K</td><td>Número de regímenes</td><td>2 (SPY) · 1 (BTC)</td><td>1</td></tr>
+          <tr><td class="sym">T</td><td>Número de observaciones</td><td>3425 (SPY)</td><td>9</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <footer>
+      IRF-N — Índice de Régimen Filtrado con Noticias · Especificación matemática generada desde el modelo publicado (run_id 3b4f1e39b59c, V3/M1, asof 2026-08-14). Modelo: Markov-switching GJR-GARCH (Haas, Mittnik &amp; Paolella 2004) con capa de Hawkes. Este documento describe qué estima el sistema; no es una recomendación de inversión ni una promesa de rendimiento.
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Scrollspy: resalta la sección activa en el índice lateral.
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+    var map = {};
+    links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+    var sections = links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(l){ l.classList.remove('active'); });
+          if(map[e.target.id]) map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -78% 0px', threshold: 0 });
+    sections.forEach(function(s){ obs.observe(s); });
+  })();
+</script>

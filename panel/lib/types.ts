@@ -3,9 +3,14 @@
  * contrato y al script de exportacion, no se inventa en el frontend (R9). */
 
 export interface MetricCI {
-  value: number;
+  /** El pipeline suprime el punto (value=null) en metricas anualizadas de un
+   * regimen que no persiste (E[D] < umbral) o con muy pocas observaciones:
+   * anualizar un estado que por diseno no dura no tiene sentido. La app lo
+   * muestra como "no anualizable", nunca como 0.0% (paridad con Streamlit). */
+  value: number | null;
   ci_low: number | null;
   ci_high: number | null;
+  n_obs?: number;
 }
 
 export interface ConditionalStatsEntry {

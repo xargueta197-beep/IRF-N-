@@ -14,6 +14,16 @@ const METRICS: { key: keyof ConditionalStatsEntry; label: string; fmt: (v: numbe
 ];
 
 function cell(m: MetricCI, fmt: (v: number) => string) {
+  // Punto suprimido por el pipeline (regimen que no persiste o con pocas obs):
+  // se muestra "no anualizable", NUNCA fmt(null) -> "0.0%" (numero falso).
+  // Paridad con app/pages/4_Retornos_condicionales.py (_fmt_cell).
+  if (m.value === null) {
+    return (
+      <span style={{ color: colors.muted }}>
+        no anualizable{typeof m.n_obs === "number" ? ` — ${m.n_obs} obs` : ""}
+      </span>
+    );
+  }
   const includesZero = m.ci_low !== null && m.ci_high !== null && m.ci_low <= 0 && m.ci_high >= 0;
   const hasCI = m.ci_low !== null && m.ci_high !== null;
   return (

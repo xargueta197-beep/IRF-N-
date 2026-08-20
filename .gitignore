@@ -27,6 +27,7 @@ artifacts/publish_log.jsonl
 panel/node_modules/
 panel/out/
 panel/.next/
+*.tsbuildinfo
 
 # logs de corridas en la raiz del proyecto
 _*.log

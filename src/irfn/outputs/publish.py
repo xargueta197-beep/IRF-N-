@@ -350,6 +350,7 @@ def default_hawkes_layer_params(blocker: str | None = None) -> dict:
         "mean_mark": None, "branching_ratio": None,
         "branching_ratio_se": None, "branching_ratio_ci_low": None, "branching_ratio_ci_high": None,
         "expected_cascade": None, "expected_cascade_bounded": None,
+        "branching_ratio_span_calendar": None, "expected_cascade_span_calendar": None,
         "stationary": None,
         "ks_stat": None, "ks_pvalue": None, "ks_passed": None,
         "n_events": 0, "n_starts": 0, "starts_at_best": 0,

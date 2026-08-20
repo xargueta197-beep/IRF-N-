@@ -1,4 +1,4 @@
-import { colors, regimeColor } from "@/lib/theme";
+import { colors, regimeColor, textOn } from "@/lib/theme";
 
 export interface TransitionMatrixProps {
   matrix: number[][];
@@ -54,7 +54,7 @@ export function TransitionMatrix({ matrix, labels, currentIndex }: TransitionMat
                     className="rounded p-2 text-center tabular-nums"
                     style={{ backgroundColor: hexToRgba(destColor, 0.12 + 0.75 * Math.min(1, Math.max(0, p))) }}
                   >
-                    <span style={{ color: p > 0.55 ? colors.background : colors.foreground }}>
+                    <span style={{ color: p > 0.55 ? textOn(destColor) : colors.foreground }}>
                       {(p * 100).toFixed(0)}%
                     </span>
                   </td>

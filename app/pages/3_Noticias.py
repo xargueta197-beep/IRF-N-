@@ -50,7 +50,7 @@ def _si_chart(si_hist: pd.DataFrame | None, events: list[dict]) -> None:
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=si_hist.index, y=si_hist["surprise_index"],
-        mode="lines", name="SI_t", line=dict(color="#1565C0", width=1.5),
+        mode="lines", name="SI_t", line=dict(color="#5B8DEF", width=1.5),
     ))
     if events:
         edf = pd.DataFrame(events)
@@ -59,10 +59,12 @@ def _si_chart(si_hist: pd.DataFrame | None, events: list[dict]) -> None:
         # fuera del rango publicado); tamano ∝ |z_i|, color por signo de z_i.
         y_vals = edf["fecha"].map(lambda d: si_hist["surprise_index"].get(d, 0.0))
         sizes = 6 + 14 * (edf["z"].abs() / max(edf["z"].abs().max(), 1e-9))
-        colors = ["#C62828" if z < 0 else "#2E7D32" for z in edf["z"]]
+        # sorpresa por signo de z: divergente sobre fondo oscuro (no verde/rojo,
+        # reservados al signo del precio) -- warm = negativa, cool = positiva.
+        colors = ["#C9553D" if z < 0 else "#5FB4E8" for z in edf["z"]]
         fig.add_trace(go.Scatter(
             x=edf["fecha"], y=y_vals, mode="markers", name="releases",
-            marker=dict(size=sizes, color=colors, line=dict(width=1, color="white")),
+            marker=dict(size=sizes, color=colors, line=dict(width=1, color="#0E1117")),
             text=[f"{row.indicator}: z={row.z:.2f}" for row in edf.itertuples()],
             hoverinfo="text+x",
         ))
@@ -127,12 +129,12 @@ def _criticality_bar(n: float, threshold: float | None) -> None:
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=[min(max(n, 0.0), 1.0)], y=[""], orientation="h",
-        marker=dict(color="#C62828" if n >= thr else "#1565C0"),
+        marker=dict(color="#FDE725" if n >= thr else "#5B8DEF"),
         width=0.6, showlegend=False, hoverinfo="skip",
     ))
-    fig.add_vline(x=thr, line_dash="dot", line_color="#C62828",
+    fig.add_vline(x=thr, line_dash="dot", line_color="#8B93A5",
                   annotation_text=f"umbral reflexivo {thr:.2f}", annotation_position="top")
-    fig.add_vline(x=1.0, line_color="#7f7f7f",
+    fig.add_vline(x=1.0, line_color="#8B93A5",
                   annotation_text="criticidad n=1", annotation_position="bottom right")
     fig.update_xaxes(range=[0, 1.05], title=None)
     fig.update_yaxes(visible=False)
@@ -154,7 +156,7 @@ def _lambda_chart(lam_hist: pd.DataFrame | None, rug: pd.DataFrame | None) -> No
                         vertical_spacing=0.02)
     fig.add_trace(go.Scatter(
         x=lam_hist.index, y=lam_hist["lambda_N"], mode="lines", name="lambda_N",
-        line=dict(color="#6A1B9A", width=1.4),
+        line=dict(color="#A47BE0", width=1.4),
     ), row=1, col=1)
     if rug is not None and not rug.empty:
         cutoff = rug["hora_titular"].max() - pd.Timedelta(days=RUG_DISPLAY_DAYS)
@@ -269,16 +271,34 @@ def _hawkes_section(irfn: dict) -> None:
     _lambda_chart(load_hawkes_history(), load_headline_rug())
     _hawkes_params_table(h)
 
-    with st.expander("Branching ratio n (fragilidad del flujo, NO es un KPI) y cascada esperada"):
+    with st.expander("Branching ratio n (fragilidad del flujo, NO es un KPI) — con sus DOS incertidumbres"):
+        ci_lo = h.get("branching_ratio_ci_low")
+        ci_hi = h.get("branching_ratio_ci_high")
+        n_span = h.get("branching_ratio_span_calendar")
+        casc_span = h.get("expected_cascade_span_calendar")
         cascade_str = "no acotada" if cascade is None else f"{cascade:.2f}"
-        st.metric("branching ratio n = alpha*E[s]/beta", f"{n:.3f}")
+        st.metric("branching ratio n (ventana OBSERVADA, publicado)", f"{n:.3f}")
         st.metric("cascada esperada E[hijos] = 1/(1-n)", cascade_str)
+        # (a) Incertidumbre de MUESTREO del MLE, dentro de la ventana observada.
+        if ci_lo is not None and ci_hi is not None:
+            st.caption(
+                f"**(a) IC del MLE en la ventana observada:** [{ci_lo:.3f}, {ci_hi:.3f}] — "
+                "ruido de estimacion del valor publicado (incluye el aporte del de-empate por Rubin)."
+            )
+        # (b) Sensibilidad a la ELECCION de ventana. NO es un IC.
+        if n_span is not None:
+            casc_span_str = "no acotada" if casc_span is None else f"~{casc_span:.0f}"
+            st.caption(
+                f"**(b) Banda de eleccion de ventana (NO es un IC):** observado {n:.3f} "
+                f"(cascada {cascade_str}) **vs** span-calendario {n_span:.4f} "
+                f"(cascada {casc_span_str}). El span-calendario integra sobre los dias SIN corpus: "
+                "es una **cota superior diagnostica**, cruza el umbral reflexivo y por eso NUNCA "
+                "es el indicador publicado (decision del director 2026-08-19)."
+            )
         st.caption(
-            "n < 1: cada noticia genera en promedio n noticias hijas y las cascadas mueren. "
-            "n -> 1: el sistema se acerca a la criticidad y las cascadas se alargan sin limite. "
-            "Se saco del bloque de KPIs porque su valor depende fuertemente de una decision "
-            "metodologica (ventana de integracion) que se tomo y se revirtio en 24 horas -- "
-            "ver 'Archivo de decisiones' para la banda de sensibilidad real (0.7388-0.9994)."
+            "Las dos incertidumbres NO se funden: (a) es azar de muestreo; (b) es una decision "
+            "estructural (que soporte integra el compensador). Como 1/(1-n) es convexa y explota "
+            "cerca de n=1, un solo intervalo colapsado seria matematicamente enganoso."
         )
         _criticality_bar(n, thr)
         if thr is not None and n >= thr:
@@ -287,8 +307,8 @@ def _hawkes_section(irfn: dict) -> None:
                     else "la cascada esperada es NO ACOTADA (n toca la frontera n = 1).")
             st.warning(
                 f"Con la ventana vigente, n = {n:.3f} se acerca al umbral de criticidad "
-                f"({thr:.2f}): " + cola + " Leer junto con la banda de sensibilidad de "
-                "arriba, no como una alerta aislada."
+                f"({thr:.2f}): " + cola + " Leer junto con la banda (b) de arriba, "
+                "no como una alerta aislada."
             )
 
 

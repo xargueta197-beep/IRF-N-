@@ -1,0 +1,126 @@
+{
+  "D2_n_publicado": {
+    "alpha": 329.66305611857194,
+    "beta": 283.95884101524234,
+    "mean_mark": 0.6364006500994613,
+    "n_recalc": 0.7388316647495151,
+    "n_publicado": 0.7388316647495151,
+    "coincide": true,
+    "cascada_recalc": 3.828948096027439,
+    "cascada_publicada": 3.828948096027439,
+    "cascada_coincide": true
+  },
+  "D7_ks": {
+    "N_interarribos": 95084,
+    "D_obs": 0.02890070620698454,
+    "D_crit_5pct": 0.004404311501694995,
+    "ratio_obs_sobre_crit": 6.561912388772259,
+    "nota_lilliefors": "kstest se aplica con parametros ESTIMADOS de la misma muestra: el p-valor nominal no es exacto (efecto tipo Lilliefors). Con D/D_crit ~ 6.6 la conclusion (rechazo del kernel exponencial) no cambia, pero el p exacto no es interpretable literalmente.",
+    "encuadre_efecto": "D=0.0289 = desviacion maxima de 2.9 puntos porcentuales en la CDF de interarribos re-escalados; el rechazo lo domina N~95k."
+  },
+  "D5_empates": {
+    "n_eventos": 95234,
+    "timestamps_unicos_pre_dither": 16001,
+    "frac_eventos_empatados_pre_dither": 0.8319822752378352,
+    "timestamps_unicos_post_dither": 95234,
+    "empates_post_dither": 0
+  },
+  "D1_reproduccion_fit_publicado": {
+    "T_obs": 242.0,
+    "est": {
+      "mu": 102.91849217286405,
+      "alpha": 329.4885050353979,
+      "beta": 283.85299892038233
+    },
+    "pub": {
+      "mu_N": 103.0425648697413,
+      "alpha": 329.66305611857194,
+      "beta": 283.95884101524234
+    },
+    "n_est": 0.7384730110772059,
+    "n_pub": 0.7388316647495151,
+    "coincide_1e-6_rel": false,
+    "unidades": "times en DIAS desde origin => mu_N y beta en 1/dia; n adimensional"
+  },
+  "D6_ic_perfilado_vs_delta": {
+    "ci_delta_publicado": [
+      0.7311238622386146,
+      0.7465394672604156
+    ],
+    "ci_perfilado_95": [
+      0.7328316647495151,
+      0.7448316647495151
+    ],
+    "grid": [
+      0.7188316647495151,
+      0.7208316647495151,
+      0.7228316647495151,
+      0.7248316647495151,
+      0.7268316647495151,
+      0.7288316647495151,
+      0.7308316647495151,
+      0.7328316647495151,
+      0.7348316647495151,
+      0.7368316647495151,
+      0.7388316647495151,
+      0.7408316647495151,
+      0.7428316647495151,
+      0.7448316647495151,
+      0.7468316647495151,
+      0.7488316647495151,
+      0.7508316647495151,
+      0.7528316647495151,
+      0.7548316647495151,
+      0.7568316647495151,
+      0.7588316647495151
+    ],
+    "deviance": [
+      28.528430985054,
+      22.990161666995846,
+      18.05387157772202,
+      13.717655722983181,
+      9.979645311250351,
+      6.837958644609898,
+      4.290734849288128,
+      2.3361257311189547,
+      0.9722704906016588,
+      0.19729808997362852,
+      0.009441589121706784,
+      0.406828265520744,
+      1.387655669124797,
+      2.950118219596334,
+      5.092411998310126,
+      7.812760550878011,
+      11.109357523382641,
+      14.980431653209962,
+      19.42422747751698,
+      24.438976450474,
+      30.022928281105123
+    ],
+    "wall_s": 6.0,
+    "nota": "perfil en n con alpha=n*beta/E[s]; E[s] tratado como constante (su varianza muestral con N=95k es despreciable frente a la de (alpha,beta))"
+  },
+  "D4_borde_kernel_lento": {
+    "n_true": 0.85,
+    "n_ventana_sin_historia": 0.8475030557480607,
+    "n_ventana_borde": 0.8402554185469934,
+    "delta_n_por_borde": -0.007247637201067358,
+    "eventos_ventana": 9373
+  },
+  "D4_borde_escala_prod": {
+    "n_true": 0.74,
+    "n_ventana_sin_historia": 0.7424454407205282,
+    "n_ventana_borde": 0.7420616607442675,
+    "delta_n_por_borde": -0.0003837799762607119,
+    "eventos_ventana": 46293
+  },
+  "D3_censura_activa": {
+    "llamada_en_serializacion": "scripts/run_v3.py:572",
+    "trigger_config": 0.95,
+    "artefacto": {
+      "ci_high": 0.7465394672604156,
+      "bounded_publicado": true
+    },
+    "coherente": true
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "H2_runid_artefacto_manifest": {
+    "ok": true,
+    "detail": {
+      "irfn": "3b4f1e39b59c",
+      "manifest": "3b4f1e39b59c"
+    }
+  },
+  "H2_runid_panel_irfn": {
+    "ok": true,
+    "detail": {
+      "panel": "3b4f1e39b59c"
+    }
+  },
+  "H2_validacion_panel": {
+    "ok": true,
+    "detail": {
+      "validates": "3b4f1e39b59c",
+      "published": "3b4f1e39b59c",
+      "stale": false
+    }
+  },
+  "H2_asof_panel": {
+    "ok": true,
+    "detail": {
+      "panel": "2026-08-14",
+      "art": "2026-08-14"
+    }
+  },
+  "H3_panel_es_M1": {
+    "ok": true,
+    "detail": {
+      "tvtp": false,
+      "covariates": [],
+      "K": 2,
+      "version": "V3"
+    }
+  },
+  "H1_expected_duration": {
+    "ok": true,
+    "detail": {
+      "recalc": [
+        10.166673410731029,
+        1.1710891867176938
+      ],
+      "pub": [
+        10.166673410731029,
+        1.1710891867176938
+      ]
+    }
+  },
+  "H1_entropia_hoy": {
+    "ok": true,
+    "detail": {
+      "recalc": 0.20087816857090107,
+      "pub": 0.20087816857090107
+    }
+  },
+  "H1_entropy_max": {
+    "ok": true
+  },
+  "H1_branching_ratio": {
+    "ok": true,
+    "detail": {
+      "recalc": 0.7388316647495151
+    }
+  },
+  "H1_cascada": {
+    "ok": true
+  },
+  "H1_vol_ann_regimen0": {
+    "ok": false,
+    "detail": {
+      "recalc": 0.17353832574517228,
+      "pub": 0.1592982623848418,
+      "nota": "tolerancia 2%: el punto publicado es la media bootstrap? no: es el puntual; ddof puede diferir"
+    }
+  },
+  "H1_panel_history_ultima_fila": {
+    "ok": true,
+    "detail": {
+      "panel": {
+        "fecha": null
+      },
+      "parquet_fecha": "2026-07-01 00:00:00"
+    }
+  },
+  "H_no_lookahead_history": {
+    "ok": true,
+    "detail": {
+      "history_end": "2026-07-01",
+      "asof": "2026-08-14"
+    }
+  }
+}

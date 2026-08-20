@@ -1,0 +1,146 @@
+{
+  "B1_hawkes_loglik_vs_double_sum": {
+    "value": 1.1853965461670903e-15,
+    "tol": 1e-10,
+    "ok": true,
+    "ll_prod": 2301.747979729799,
+    "ll_naive": 2301.747979729802,
+    "n_events": 3000,
+    "note": "error RELATIVO"
+  },
+  "B1b_hawkes_loglik_prod_scale": {
+    "value": 3.2792702645002054e-15,
+    "tol": 1e-10,
+    "ok": true,
+    "ll_prod": -16086.107105560499,
+    "ll_naive": -16086.107105560446
+  },
+  "B2_compensator_vs_quadrature": {
+    "value": 1.4035300420149328e-16,
+    "tol": 1e-08,
+    "ok": true,
+    "comp_prod": 202.50161079275003,
+    "comp_quad": 202.50161079275006
+  },
+  "B2b_time_rescaling_identity": {
+    "value": 1.1368683772161603e-13,
+    "tol": 1e-10,
+    "ok": true
+  },
+  "B3_hamilton_const_loglik": {
+    "value": 0.0,
+    "tol": 1e-10,
+    "ok": true,
+    "ll_prod": -1457.5691275897107,
+    "ll_naive": -1457.5691275897107
+  },
+  "B3_hamilton_const_xi": {
+    "value": 6.661338147750939e-16,
+    "tol": 1e-10,
+    "ok": true
+  },
+  "B3_hamilton_student_loglik": {
+    "value": 0.0,
+    "tol": 1e-10,
+    "ok": true,
+    "ll_prod": -1417.5311295591032,
+    "ll_naive": -1417.5311295591032
+  },
+  "B3_hamilton_student_xi": {
+    "value": 1.27675647831893e-15,
+    "tol": 1e-10,
+    "ok": true
+  },
+  "B3_hamilton_tvtp_loglik": {
+    "value": 0.0,
+    "tol": 1e-10,
+    "ok": true,
+    "ll_prod": -1456.9688535569862,
+    "ll_naive": -1456.9688535569862
+  },
+  "B3_hamilton_tvtp_xi": {
+    "value": 4.996003610813204e-16,
+    "tol": 1e-10,
+    "ok": true
+  },
+  "B4_msgarch_vs_statsmodels": {
+    "value": 3.862686185839267e-11,
+    "tol": 1e-06,
+    "ok": true,
+    "ll_prod": -2568.9720612456013,
+    "ll_statsmodels": -2568.9720613448326,
+    "note": "caso comparable: persistencia GARCH 1e-8 (varianza constante por regimen)"
+  },
+  "B5_bic_manual": {
+    "K2_normal": {
+      "k_manual": 12,
+      "k_code": 12,
+      "match_k": true,
+      "bic_code": 2198.7011694624416,
+      "bic_manual": 2198.7011694624416,
+      "match_bic": true,
+      "params_enumerados": [
+        "mu1",
+        "mu2",
+        "v1",
+        "v2",
+        "kappa1",
+        "kappa2",
+        "c11",
+        "c12",
+        "c21",
+        "c22",
+        "p11",
+        "p22"
+      ],
+      "T_usada": 600
+    },
+    "K1_t": {
+      "k_manual": 6,
+      "k_code": 6,
+      "match_k": true,
+      "bic_code": 2174.982835998192,
+      "bic_manual": 2174.982835998192,
+      "match_bic": true,
+      "params_enumerados": [
+        "mu",
+        "v",
+        "kappa",
+        "c1",
+        "c2",
+        "nu"
+      ],
+      "T_usada": 600
+    },
+    "K2_t": {
+      "k_manual": 14,
+      "k_code": 14,
+      "match_k": true,
+      "bic_code": 2219.7586573394256,
+      "bic_manual": 2219.7586573394256,
+      "match_bic": true,
+      "params_enumerados": [
+        "mu1",
+        "mu2",
+        "v1",
+        "v2",
+        "kappa1",
+        "kappa2",
+        "c11",
+        "c12",
+        "c21",
+        "c22",
+        "p11",
+        "p22",
+        "nu1",
+        "nu2"
+      ],
+      "T_usada": 600
+    }
+  },
+  "B5_nota_n": "n del BIC = T total de la muestra (600 aqui); el filtro no descarta warm-up (sigma2_0 = v es funcion de parametros), asi que T total es el numero de contribuciones efectivas a la loglik: consistente.",
+  "B6_fracdiff": {
+    "ok": null,
+    "note": "NO APLICA: no existe fracdiff/ARFIMA en src/ (grep sin resultados)"
+  }
+}
