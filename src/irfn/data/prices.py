@@ -124,6 +124,46 @@ def _load_close_binance(symbol: str, start: str) -> pd.Series:
     return close
 
 
+def load_volume(symbol: str, start: str, *, source: str = "binance") -> pd.Series:
+    """Volumen diario (base asset) desde los klines de Binance -- col [5] del kline,
+    que _load_close_binance descarta. Para la capa cripto-nativa de BTC (GARCH-X):
+    el volumen es un proxy de liquidez, ya disponible sin fuentes nuevas. Cacheado
+    aparte del cierre. Solo Binance (la unica linea con volumen; SPY es yfinance)."""
+    if source != "binance":
+        raise NotImplementedError("load_volume: solo Binance por ahora.")
+    cache = _RAW_DIR / f"volume_{symbol}_{start}.parquet"
+    if _cache_is_fresh(cache):
+        s = pd.read_parquet(cache)["volume"]
+        s.index = pd.to_datetime(s.index)
+        s.name = "volume"
+        return s
+    start_ms = int(pd.Timestamp(start, tz="UTC").timestamp() * 1000)
+    end_ms = int(pd.Timestamp.now(tz="UTC").timestamp() * 1000)
+    rows: list[list] = []
+    cursor = start_ms
+    while cursor < end_ms:
+        page = _fetch_binance_page_with_retry(symbol, cursor, end_ms)
+        if not page:
+            break
+        rows.extend(page)
+        next_cursor = int(page[-1][6]) + 1
+        if next_cursor <= cursor:
+            break
+        cursor = next_cursor
+        if len(page) < _BINANCE_PAGE_LIMIT:
+            break
+        _time.sleep(0.2)
+    if not rows:
+        raise RuntimeError(f"Binance no devolvio klines (volumen) para {symbol!r}.")
+    idx = pd.to_datetime([r[0] for r in rows], unit="ms", utc=True).tz_localize(None)
+    vol = pd.Series([float(r[5]) for r in rows], index=idx, name="volume")
+    vol.index.name = "fecha"
+    vol = vol[~vol.index.duplicated(keep="last")].sort_index()
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    vol.to_frame().to_parquet(cache)
+    return vol
+
+
 def load_close(
     symbol: str, start: str, *, source: str = "yfinance", use_cache: bool = True
 ) -> pd.Series:
