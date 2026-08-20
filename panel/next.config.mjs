@@ -8,6 +8,10 @@ const repo = "IRF-N-";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  // Exporta cada ruta como <ruta>/index.html en vez de <ruta>.html, para que
+  // GitHub Pages sirva tanto /historico como /historico/ (sin esto, la variante
+  // con slash da 404). Estandar para Next static export en Pages.
+  trailingSlash: true,
   images: { unoptimized: true },
   // El panel es puramente estatico: lee de public/data/*.json en build, jamas
   // hace fetch en runtime (ver scripts/export_panel_data.py).
