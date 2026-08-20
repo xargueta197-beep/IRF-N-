@@ -193,6 +193,33 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-19 (Franjas 1-3 del plan de avisos + BTC/cripto). Estado completo:
+  `reports/estado_proyecto_2026-08-19.md`.**
+  - **Publicado SPY** = `75f650b1d59d` (M1, asof 2026-08-19, dos bandas de `n` + supresión
+    F2.c). **BTC** = `ece4ad3df66f` (K=1, asof 2026-08-16). **Panel PÚBLICO desplegado**:
+    https://xargueta197-beep.github.io/IRF-N-/ (GitHub Pages via Actions; repo hecho público).
+  - **Franja 1** (avisos): banda OOS en Histórico, paridad panel (`value=null`→"no anualizable"),
+    reapertura observable (`scripts/check_reopen_status.py`, `docs/reopen_conditions.md`).
+  - **Franja 2** (decisiones director, `reports/nota_decisiones_director_franja2_2026-08-19.md`):
+    kernel = exponencial (power-law falla criterio pre-registrado (b): D baja 13.7%<20%);
+    degenerado = documentar; **`n` = DOS BANDAS separadas** (IC del MLE vs banda de ventana
+    span-calendario, esta última etiquetada como estimador SESGADO). Campos nuevos de schema
+    `branching_ratio_span_calendar`/`expected_cascade_span_calendar`.
+  - **Franja 3**: **M4/M5 CERRADOS DEFINITIVAMENTE** (`reports/cierre_m4_m5_2026-08-19.md`; caso
+    estadístico: M2 peor que M1 p=0.025, M3 no aporta, bias-variance, sin consenso gratis) + panel
+    desplegado. No se paga Trading Economics.
+  - **BTC K=1** confirmado correcto por BIC (colas gordas, no regímenes; "100%" es por
+    construcción). Display arreglado (app + panel): "Sin estructura de regímenes".
+  - **Capa cripto-nativa GARCH-X** (línea nueva del director; `models/garchx.py`,
+    `scripts/run_garchx_btc.py`, `prices.load_volume`; `reports/diseno_capa_cripto_btc_2026-08-19.md`
+    + `reports/garchx_btc_resultados_2026-08-19.md`): 3 drivers pre-registrados. Volumen NEGATIVO
+    (OOS DM−3.01), FNG/sentimiento NEGATIVO (sobreajuste), **funding PROMETEDOR pero no cruza**
+    (in-sample t=3.41, OOS DM+1.77 p=0.078, subapoderado 5 bloques). Lección: ningún driver
+    rezagado mejora la densidad diaria (consistente con SPY). Código conservado para revisit.
+  - **157 passed.** Todo pusheado a `origin/master`. **Pendiente (no bloqueante):** F6
+    (validation.json stale, bajo impacto), refresh de BTC (cosmético), revisit pre-registrado de
+    funding (opcional). Ver `reports/estado_proyecto_2026-08-19.md` §4.
+
 - **Sesión 2026-08-16 (Migración a M1 en producción — A4, Ruta B1 autorizada):**
   - **Artefacto publicado cambia de M2 a M1.** Con el contrato ya desvinculado (`V1+⇒tvtp`
     ya no es obligatorio, commit `cd0e45b`) y la autorización explícita del director, se
