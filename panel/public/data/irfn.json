@@ -1,9 +1,9 @@
 {
-  "run_id": "9d30960c94cc",
-  "generated_at": "2026-08-19T23:50:20.513512Z",
-  "git_commit": "e01e0f8",
+  "run_id": "75f650b1d59d",
+  "generated_at": "2026-08-20T03:42:58.217147Z",
+  "git_commit": "241e99b",
   "config_hash": "c151e5b865d8",
-  "asof": "2026-08-14",
+  "asof": "2026-08-19",
   "version": "V3",
   "model": {
     "K": 2,
@@ -127,6 +127,8 @@
       "branching_ratio_ci_high": 0.7461740594062608,
       "expected_cascade": 3.823697141617808,
       "expected_cascade_bounded": true,
+      "branching_ratio_span_calendar": 0.9991977193462278,
+      "expected_cascade_span_calendar": 1246.4466085504675,
       "stationary": true,
       "ks_stat": 0.03058988727696399,
       "ks_pvalue": 7.469571270479896e-78,
@@ -151,36 +153,36 @@
       "alta volatilidad"
     ],
     "xi_filtered": [
-      0.949195191705485,
-      0.05080480829451499
+      0.9529016445078463,
+      0.04709835549215368
     ],
-    "entropy": 0.20087816857090107,
+    "entropy": 0.1898812282402071,
     "entropy_max": 0.6931471805599453,
     "confidence": "alta",
     "expected_duration_days": [
-      10.166673410731029,
-      1.1710891867176938
+      10.220078748995881,
+      1.1699546126137286
     ],
     "argmax": "baja volatilidad",
     "xi_momentum_5d": [
-      -0.004703055284831392,
-      0.004703055284831399
+      -0.006717148913436333,
+      0.006717148913436263
     ]
   },
   "transition_matrix_today": [
     [
-      0.9016394095098511,
-      0.0983605904901489
+      0.9021533958240537,
+      0.09784660417594634
     ],
     [
-      0.853905929063166,
-      0.14609407093683396
+      0.8547340120878342,
+      0.1452659879121658
     ]
   ],
   "news": {
     "surprise_index": 0.0,
     "lambda_N": 102.91849217286405,
-    "lambda_N_z": -0.6492702385124884,
+    "lambda_N_z": -0.6492702385124883,
     "branching_ratio": 0.7384730110772059,
     "branching_ratio_ci_low": 0.7307719627481509,
     "branching_ratio_ci_high": 0.7461740594062608,
@@ -196,28 +198,28 @@
     "SPY": {
       "baja volatilidad": {
         "mean_ann": {
-          "value": 0.27842290556742627,
-          "ci_low": 0.2146581102735894,
-          "ci_high": 0.33456910717171084,
-          "n_obs": 3319
+          "value": 0.2750956904325823,
+          "ci_low": 0.21226194845968466,
+          "ci_high": 0.33649132807966586,
+          "n_obs": 3324
         },
         "vol_ann": {
-          "value": 0.1592982623848418,
-          "ci_low": 0.1325243314229134,
-          "ci_high": 0.18954769124398377,
-          "n_obs": 3319
+          "value": 0.15931940705869405,
+          "ci_low": 0.13355442527378258,
+          "ci_high": 0.187388950439112,
+          "n_obs": 3324
         },
         "sharpe": {
-          "value": 1.7478088046861202,
-          "ci_low": 1.196504461103232,
-          "ci_high": 2.3943123389524845,
-          "n_obs": 3319
+          "value": 1.7266929089890204,
+          "ci_low": 1.207830526586107,
+          "ci_high": 2.3613649200276305,
+          "n_obs": 3324
         },
         "maxdd": {
-          "value": -0.31443585645631256,
+          "value": -0.31443591413931715,
           "ci_low": null,
           "ci_high": null,
-          "n_obs": 3319
+          "n_obs": 3324
         }
       },
       "alta volatilidad": {
@@ -225,25 +227,25 @@
           "value": null,
           "ci_low": null,
           "ci_high": null,
-          "n_obs": 106
+          "n_obs": 104
         },
         "vol_ann": {
-          "value": 0.21676668653153836,
+          "value": 0.21875549681694392,
           "ci_low": null,
           "ci_high": null,
-          "n_obs": 106
+          "n_obs": 104
         },
         "sharpe": {
           "value": null,
           "ci_low": null,
           "ci_high": null,
-          "n_obs": 106
+          "n_obs": 104
         },
         "maxdd": {
           "value": null,
           "ci_low": null,
           "ci_high": null,
-          "n_obs": 106
+          "n_obs": 104
         }
       }
     }

@@ -1,0 +1,57 @@
+name: Deploy panel to GitHub Pages
+
+# Publica el panel publico estatico (Next export) a GitHub Pages. Se dispara al
+# cambiar el panel (codigo o datos en panel/public/data/) o manualmente. El panel
+# nunca hace fetch en runtime: lee panel/public/data/*.json embebidos en build (R9).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "panel/**"
+      - ".github/workflows/deploy-panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo deploy a la vez; no cancelar uno en curso (queremos que termine).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: panel/package-lock.json
+      - run: npm ci
+      - name: Build (static export con basePath de Pages)
+        run: npm run build
+        env:
+          GITHUB_PAGES: "true"
+      - name: .nojekyll (que Pages no ignore _next/)
+        run: touch out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: panel/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
