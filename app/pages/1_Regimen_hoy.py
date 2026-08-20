@@ -109,10 +109,26 @@ def main():
 
     st.caption(f"asof {irfn['asof']}  ·  run_id {irfn['run_id']}  ·  {irfn['version']}")
 
+    single_regime = len(labels) == 1
+
     col_izq, col_der = st.columns([3, 2])
     with col_izq:
         st.subheader("Estado del mercado")
-        if confidence == "el modelo no distingue":
+        if single_regime:
+            # K=1 (elegido por BIC, p.ej. BTC): no hay estructura de regimenes. El
+            # 100%/entropia 0 son por construccion, no una senal. Se dice la verdad.
+            st.markdown(
+                "<div style='font-size:2.4rem;font-weight:700;'>Sin estructura de regimenes</div>",
+                unsafe_allow_html=True,
+            )
+            st.caption(
+                "Este activo se ajusto con UN SOLO regimen (K=1, elegido por BIC): sus "
+                "colas gordas explican la turbulencia, no un cambio de regimen. El indice "
+                "de regimen es trivialmente 100% y la entropia 0 -- no hay nada que "
+                "distinguir. Lo informativo aqui es la volatilidad condicional y la capa "
+                "de noticias (Hawkes), no el regimen."
+            )
+        elif confidence == "el modelo no distingue":
             st.markdown(
                 "<div style='font-size:2.4rem;font-weight:700;color:#FDE725;'>Sin senal clara</div>",
                 unsafe_allow_html=True,
@@ -129,10 +145,10 @@ def main():
             )
             st.caption(f"Confianza: {confidence}.")
 
-        st.plotly_chart(_barras_xi(labels, xi), width="stretch")
-
-        dur = reg["expected_duration_days"][argmax_idx]
-        st.info(f"Este regimen dura en promedio **{dur:.0f} dias** mas (E[D] = 1/(1-p_kk)).")
+        if not single_regime:
+            st.plotly_chart(_barras_xi(labels, xi), width="stretch")
+            dur = reg["expected_duration_days"][argmax_idx]
+            st.info(f"Este regimen dura en promedio **{dur:.0f} dias** mas (E[D] = 1/(1-p_kk)).")
 
         # P3-13: momentum 5d de la probabilidad filtrada (publicado en el artefacto).
         mom = momentum_5d(irfn)

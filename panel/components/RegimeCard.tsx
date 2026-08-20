@@ -40,9 +40,33 @@ function MomentumBars({ values, barColor }: { values: number[]; barColor: string
 export function RegimeCard({ regime, xi, confidence, expected_duration, momentum }: RegimeCardProps) {
   const noSignal = confidence === "el modelo no distingue";
   const K = xi.length;
+  const singleRegime = K === 1;
   const argmaxIndex = xi.indexOf(Math.max(...xi));
   const bg = regimeColor(argmaxIndex, K);
   const hatchId = "hatch-regimecard";
+
+  // K=1 (elegido por BIC, p.ej. BTC): NO hay estructura de regimenes. El indice
+  // es trivialmente 100% y la entropia 0 por construccion -- mostrarlo como
+  // "confianza alta / dura 1e12 dias" seria enganoso. Se dice la verdad: no hay
+  // regimen que analizar; lo informativo es la volatilidad condicional y el Hawkes.
+  if (singleRegime) {
+    return (
+      <div className="relative overflow-hidden rounded-lg border border-border" style={{ backgroundColor: colors.background }}>
+        <div className="relative flex min-h-[220px] flex-col justify-center gap-3 p-8">
+          <p className="font-display text-4xl leading-tight" style={{ color: colors.foreground }}>
+            Sin estructura de regímenes
+          </p>
+          <p className="font-body text-sm" style={{ color: colors.muted }}>
+            Este activo se ajustó con un solo régimen (K=1, elegido por BIC): sus colas
+            gordas explican la turbulencia, no un cambio de régimen. El índice de régimen
+            es trivialmente 100% y la entropía 0 — no hay nada que distinguir. Lo
+            informativo aquí no es el régimen, sino la volatilidad condicional y la capa
+            de noticias (Hawkes).
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (noSignal) {
     return (
