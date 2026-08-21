@@ -19,7 +19,7 @@ innegociables que gobiernan este repo.
 
 **V4 — validación estadística formal.** Modelo completo y vivo: MS-GJR-GARCH
 K=2 con filtro de Hamilton, TVTP y capa Hawkes. Indicador publicado
-atómicamente en `artifacts/latest/` (SPY `run_id=7c44a7fac16d`, R6). El detalle
+atómicamente en `artifacts/latest/` (SPY `run_id=75f650b1d59d`, asof 2026-08-19, R6). El detalle
 por sesión vive en "ESTADO ACTUAL DEL PROYECTO" (`CLAUDE.md`); la validación
 formal en `reports/validation_v4.md`.
 
@@ -31,7 +31,7 @@ covariable de transición añade valor OOS distinguible.
 
 | Módulo | Qué es | Estado | Motivo |
 | :-- | :-- | :-- | :-- |
-| **M1** (regímenes) | HMM K=2, P constante | **MODELO DE PRODUCCIÓN — PUBLICADO** (`3b4f1e39b59c`, 2026-08-16) | Único aporte robusto (DM vs M0 p=0.001). Mismo sesgo que M2 con menor varianza (bias-variance). El contrato ya NO exige tvtp para V1+ (`outputs/contract.py`). |
+| **M1** (regímenes) | HMM K=2, P constante | **MODELO DE PRODUCCIÓN — PUBLICADO** (SPY `75f650b1d59d`, asof 2026-08-19; BTC `d7dca6e40eeb`, K=1, asof 2026-08-21) | Único aporte robusto (DM vs M0 p=0.001). Mismo sesgo que M2 con menor varianza (bias-variance). El contrato ya NO exige tvtp para V1+ (`outputs/contract.py`). |
 | **M2** (TVTP técnico) | + sma_gap, bb_width_z en el logit | Reemplazado por M1 (era `7c44a7fac16d`) | DM M2 vs M1 p=0.106: no aporta OOS distinguible. Válido bajo el contrato, pero A4 publica M1. |
 | **M3** (macro) | + slope_2s10y, hy_oas_z | **CERRADO POR INEFICIENCIA OOS** | Con L1 canónica, DM M3 vs M2 p=0.299: no aporta (`reports/ablation_m3_l1.md`). |
 | **V2 / M4** (sorpresa) | Índice de sorpresa SI_t (consenso point-in-time) | **CERRADO DEFINITIVAMENTE** (decisión del director 2026-08-19, `reports/cierre_m4_m5_2026-08-19.md`) | No se paga Trading Economics. Base: (a) el eje de covariables de transición ya salió negativo con test formal (M2 **peor** que M1, DM p=0.025; M3 no aporta, p=0.299); (b) bias-variance/potencia en contra; (c) sin fuente gratuita de consenso (4 descartadas, `reports/data_audit.md`). Reabre solo si `check_reopen_status.py` cumple el umbral gratis. |
@@ -45,7 +45,9 @@ transición constante, `covariates=[]`, `tvtp=false`), reemplazando al M2 salien
 (`7c44a7fac16d`). La migración se hizo con `run_v3 --publish-m1` + `promote.py`
 (atómico), re-validación formal en `reports/validation_v4.md` y panel re-exportado
 (`stale=false`). Histórico de la decisión: contrato primero (`cd0e45b`), migración del
-artefacto después (`3b4f1e39b59c`).
+artefacto después (`3b4f1e39b59c`). **Actualización:** el artefacto SPY publicado hoy es
+`75f650b1d59d` (mismo modelo M1, datos frescos asof 2026-08-19; re-validación F6 2026-08-20
+con `stale=false`); BTC refrescado a `d7dca6e40eeb` (K=1, asof 2026-08-21).
 
 **A1 (kernel Hawkes).** El sesgo de "días fantasma" está **cerrado**: el Hawkes se
 ajusta sobre tiempo observado (decisión del director 2026-08-15; `run_v3.py`,

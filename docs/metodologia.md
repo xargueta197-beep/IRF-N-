@@ -72,9 +72,9 @@ Por eso cada número que ves en este panel, para cada fecha, se calculó usando
    reportan igual:
 
    - **Cuántos regímenes hay:** el criterio estadístico principal (BIC)
-     elige dos regímenes de forma clara. Una prueba más exigente (bootstrap
-     de Hansen) no tuvo suficiente potencia en esta corrida para confirmarlo
-     con un número — quedó pendiente de una corrida más larga.
+     elige dos regímenes de forma clara, y una prueba más exigente (bootstrap
+     de Hansen, con el número de arranques completo) también los confirma:
+     rechaza la hipótesis de un solo régimen (p=0.02).
    - **Calibración:** cuando el modelo dice "70% de probabilidad de régimen
      agitado", acierta con una frecuencia parecida a ese 70% — está bien
      calibrado, incluso un poco conservador. Pero en la métrica de log-loss
@@ -82,19 +82,24 @@ Por eso cada número que ves en este panel, para cada fecha, se calculó usando
      estrategia ingenua de "predecir siempre la frecuencia histórica de cada
      régimen".
    - **Precisión direccional:** esta prueba (¿acierta el signo del retorno
-     mejor que el azar?) no se pudo ejecutar en esta versión por un dato
-     faltante en el pipeline de validación. No se inventó un resultado; se
-     dejó pendiente.
+     mejor que el azar?) da un resultado apenas por encima del azar: acierta
+     el signo el 55.5% de los días frente al 54.4% esperado. Aunque cruza el
+     umbral estadístico por muy poco, es **frágil**: el modelo predice "sube"
+     casi todos los días (la tendencia de fondo del mercado), no una señal
+     direccional propia. En un modelo de regímenes de *volatilidad*, la
+     dirección es de segundo orden.
    - **Comparación con puntos de referencia:** el modelo **sí** le gana de
      forma clara a un modelo de un solo régimen (sin distinguir estados). Pero
      **no** le gana a la estrategia ingenua de "predecir siempre el régimen
      más común".
-   - **Desempeño fuera de muestra:** no existe todavía un backtest económico
-     (con una regla de inversión real, costos, etc.) — este indicador nunca
-     definió una estrategia de trading, a propósito. Lo que sí existe es una
-     validación estadística por bloques de tiempo: el modelo aporta valor de
-     forma concentrada en los períodos de estrés del mercado (marzo 2020,
-     2021, marzo 2023), no de forma pareja en todo momento.
+   - **Desempeño fuera de muestra:** el backtest económico, con una regla de
+     des-riesgo **pre-registrada** (reducir exposición cuando el modelo señala
+     alta volatilidad) y con costos de operación, **no supera** a simplemente
+     comprar y mantener: el intervalo de confianza de la diferencia de Sharpe
+     incluye el cero. Este indicador nunca definió una estrategia de trading,
+     a propósito. Lo que sí aporta es una validación estadística por bloques de
+     tiempo: el modelo concentra su valor en los períodos de estrés del mercado
+     (marzo 2020, 2021, marzo 2023), no de forma pareja en todo momento.
    - **El Sharpe (retorno ajustado por riesgo):** el intervalo de confianza
      del Sharpe condicional al régimen excluye el cero, pero es prácticamente
      idéntico al de simplemente comprar y mantener el activo sin ningún
