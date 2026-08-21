@@ -193,6 +193,32 @@ run_id, generated_at, git_commit, config_hash, asof, version, model{K, spec, tvt
 
 Claude Code: actualiza esta sección al final de cada sesión.
 
+- **Sesión 2026-08-20/21 (cierre de pendientes F6 + refresh BTC + Franja 4 background):**
+  - **F6 CERRADO (validation.json ya no stale).** `reports/validation_v4.md` reescrito sobre el
+    run PUBLICADO `75f650b1d59d` (antes describía `3b4f1e39b59c`, mismo modelo M1, datos ~5d más
+    antiguos). Tests 2/3/5/6 recomputados sobre los artefactos del run vivo; Tests 1/4/7 (selección
+    de K y ablación M0/M2/M3) etiquetados como análisis ESTRUCTURALES de selección de modelo (no se
+    re-generan por 5d de cola, mismo M1 ganador). Panel re-exportado: `validation.json` comparte
+    run_id con el indicador, **`stale=false`**, chequeo espejo OK. **HALLAZGO honesto:** con datos
+    frescos el Test 3 (PT) pasa de p=0.086 a **p=0.032** (cruza el 5% unilateral) — reportado tal
+    cual pero marcado FRÁGIL (efecto 1.1pp, deriva ~90%, no robusto); NO se lee como señal
+    direccional. Test 5 económico re-corrido: Sharpe diff −0.503 IC95 [−1.133, 0.040], NO SUPERA.
+  - **BTC refrescado (cosmético).** Cache de close movido a `.stale`, re-descarga de Binance,
+    re-corrida `run_v3 --asset BTC --no-capture`; **promovido `d7dca6e40eeb` (K=1, asof 2026-08-21)**.
+    Modelo sin cambios de fondo (K=1 t, Hawkes standalone n=0.738, cascada 3.82); walk-forward
+    reanudado desde checkpoint (fresh data no añade bloque → backtest idéntico). Panel BTC
+    re-exportado. Asof de BTC ya no va por detrás de SPY.
+  - **Franja 4 (#8) — capture_consensus AHORA corre solo.** Se descubrió que NO existía tarea
+    programada (los snapshots de consenso tenían huecos porque solo se capturaban en sesiones
+    manuales). Registrada tarea de Windows **`IRFN_capture_consensus`** (diaria 07:00, verificada:
+    lanza python y escribió `2026-08-21.json`). Borrar con
+    `Unregister-ScheduledTask -TaskName IRFN_capture_consensus`. **GDELT: se mantiene CERRADO**
+    (decisión del director 2026-08-12, no reabrir); se usa el corpus en disco (241d) para el Hawkes.
+  - **157 passed** (`-m "not slow"`). 3 commits pusheados a `origin/master`
+    (`2161eaa` F6, `1956165` BTC reports, `ce5577a` BTC promote+panel); panel público redesplegado
+    vía Actions. **Pendiente (opcional):** revisit de funding — requiere PRE-REGISTRAR un test más
+    potente antes de correrlo (R8), dejado pendiente por decisión del director.
+
 - **Sesión 2026-08-19 (Franjas 1-3 del plan de avisos + BTC/cripto). Estado completo:
   `reports/estado_proyecto_2026-08-19.md`.**
   - **Publicado SPY** = `75f650b1d59d` (M1, asof 2026-08-19, dos bandas de `n` + supresión

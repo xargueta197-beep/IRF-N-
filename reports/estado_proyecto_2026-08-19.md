@@ -10,7 +10,7 @@ vivo y que falta, sin leer todo el historial.
 | Componente | Estado |
 | :-- | :-- |
 | **SPY (linea principal)** | Publicado: M1 (K=2, matriz constante, `covariates=[]`, `tvtp=false`), `run_id=75f650b1d59d`, asof **2026-08-19**. Con las DOS bandas de `n` + supresion F2.c del regimen degenerado. |
-| **BTC** | Publicado: K=1 Student-t, `run_id=ece4ad3df66f`, asof **2026-08-16**. Display "sin estructura de regimenes" (K=1 correcto por BIC). |
+| **BTC** | Publicado: K=1 Student-t, `run_id=d7dca6e40eeb`, asof **2026-08-21** (refrescado 2026-08-21, antes `ece4ad3df66f`/2026-08-16). Display "sin estructura de regimenes" (K=1 correcto por BIC). |
 | **Panel publico** | VIVO: https://xargueta197-beep.github.io/IRF-N-/ (GitHub Pages via Actions; repo publico). |
 | **Git** | Todo en `origin/master`, arbol limpio, 0 sin pushear. |
 | **Tests** | 157 passed (`-m "not slow"`). |
@@ -44,15 +44,17 @@ vivo y que falta, sin leer todo el historial.
 
 ## 4. Lo que FALTA (nada bloqueante, por impacto)
 
-1. **F6 — `validation.json` stale** *(bajo impacto).* La validacion formal (`validation_v4.md`)
-   describe `3b4f1e39b59c`; el publicado es `75f650b1d59d` (datos frescos -> modelo cambio
-   levemente, log-loss 0.1651 vs 0.1688). Divulgado con `stale=true`; el panel NO renderiza
-   validation.json. **Resolucion:** reescribir `validation_v4.md` sobre `75f650b1d59d` (Tests 2-7
-   desde sus artefactos + re-correr Test 5 economico) y re-exportar el panel. Es lo unico para
-   dejar el proyecto 100% coherente.
-2. **BTC 3 dias por detras de SPY** *(cosmetico).* Refresh de BTC (mover cache a .stale + re-run
-   + promote, como SPY) alinea asof. Trivial.
-3. **Revisit de funding** *(investigacion opcional).* El unico lead prometedor. Requiere
+> **Actualizacion 2026-08-20/21:** #1 (F6) y #2 (BTC) RESUELTOS. Solo queda #3 (funding, opcional).
+
+1. ~~**F6 — `validation.json` stale**~~ **RESUELTO (2026-08-20).** `validation_v4.md` reescrito
+   sobre `75f650b1d59d`; Tests 2/3/5/6 recomputados sobre el run vivo, Tests 1/4/7 (seleccion de K
+   y ablacion) etiquetados como estructurales; panel re-exportado con `stale=false` y chequeo espejo
+   OK. Nota: con datos frescos el Test 3 (PT) paso de p=0.086 a p=0.032 (cruza el 5% unilateral pero
+   FRAGIL, reportado tal cual, no señal robusta). Test 5 re-corrido: NO SUPERA.
+2. ~~**BTC 3 dias por detras de SPY**~~ **RESUELTO (2026-08-21).** BTC refrescado (cache a .stale +
+   re-run + promote): publicado `d7dca6e40eeb`, asof 2026-08-21. Modelo sin cambios de fondo.
+3. **Revisit de funding** *(investigacion opcional; PENDIENTE por decision del director 2026-08-20).*
+   El unico lead prometedor. Requiere
    PRE-REGISTRAR un test mas potente (mas historia de perps, o datos de 8h, o 3a train
    pre-especificado) ANTES de correrlo. NO re-correr con train mas corto post-hoc = p-hacking.
 
