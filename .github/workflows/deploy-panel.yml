@@ -9,6 +9,7 @@ on:
     branches: [master]
     paths:
       - "panel/**"
+      - "docs/metodologia.md"   # el panel /metodologia lo lee en build (page.tsx)
       - ".github/workflows/deploy-panel.yml"
   workflow_dispatch:
 
