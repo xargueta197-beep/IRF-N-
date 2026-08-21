@@ -222,9 +222,9 @@
       <h1>Toda la matemática del modelo, ecuación por ecuación</h1>
       <p class="lede">Referencia completa de las expresiones que estima IRF-N: un <strong>Markov-switching GJR-GARCH</strong> (especificación Haas, Mittnik &amp; Paolella 2004) con probabilidades de transición opcionalmente variables en el tiempo, y una capa de noticias como proceso puntual autoexcitante de Hawkes. Cada ecuación va acompañada del significado de todos sus términos.</p>
       <div class="meta">
-        <span class="chip"><b>run_id</b> 3b4f1e39b59c</span>
+        <span class="chip"><b>run_id</b> 75f650b1d59d</span>
         <span class="chip"><b>versión</b> V3 · M1</span>
-        <span class="chip"><b>asof</b> 2026-08-14</span>
+        <span class="chip"><b>asof</b> 2026-08-19</span>
         <span class="chip"><b>K</b> 2 regímenes</span>
       </div>
       <div class="scale" aria-label="Escala del índice IRF-N">
@@ -252,10 +252,10 @@
       <div class="note rule"><span class="tag-rule">R1</span> &nbsp;<b>Solo se publica la filtrada ξ<sub>t|t</sub>.</b> La suavizada ξ<sub>t|T</sub> usa el futuro y está prohibida en cualquier ruta que llegue al artefacto o a la interfaz — produce gráficas hermosas y modelos que fallan en producción.</p></div>
       <p>La arquitectura es en capas, y este documento las recorre en orden de dependencia: la densidad de observación (§2) se parametriza sin restricciones (§3); la dinámica de estados puede depender de covariables (§4); el filtro de Hamilton (§5) combina ambas y produce las salidas (§6); la capa de noticias (§7–8) alimenta covariables; y la validación (§9) y la capa económica (§10) evalúan todo fuera de muestra.</p>
       <div class="readout">
-        <div class="rhead">Estado de hoy — SPY · asof 2026-08-14</div>
+        <div class="rhead">Estado de hoy — SPY · asof 2026-08-19</div>
         <div class="rgrid">
-          <div><span class="rk">ξ<sub>t|t</sub></span><span class="rv">[0.949, 0.051]</span><span class="rnote">argmax = baja volatilidad</span></div>
-          <div><span class="rk">H<sub>t</sub></span><span class="rv">0.201 / 0.693</span><span class="rnote">confianza: alta</span></div>
+          <div><span class="rk">ξ<sub>t|t</sub></span><span class="rv">[0.953, 0.047]</span><span class="rnote">argmax = baja volatilidad</span></div>
+          <div><span class="rk">H<sub>t</sub></span><span class="rv">0.190 / 0.693</span><span class="rnote">confianza: alta</span></div>
           <div><span class="rk">E[D]</span><span class="rv">10.2 d · 1.2 d</span><span class="rnote">por régimen</span></div>
           <div><span class="rk">K</span><span class="rv">2</span><span class="rnote">Normal · P constante</span></div>
         </div>
@@ -600,7 +600,7 @@
         <tbody>
           <tr><td class="sym">r<sub>t</sub></td><td>Log-retorno diario ×100</td><td>serie observada</td><td>1</td></tr>
           <tr><td class="sym">S<sub>t</sub></td><td>Estado (régimen) latente ∈ {1…K}</td><td>latente</td><td>1</td></tr>
-          <tr><td class="sym">ξ<sub>t|t</sub></td><td>Probabilidad filtrada de régimen (se publica)</td><td>[0.949, 0.051]</td><td>5</td></tr>
+          <tr><td class="sym">ξ<sub>t|t</sub></td><td>Probabilidad filtrada de régimen (se publica)</td><td>[0.953, 0.047]</td><td>5</td></tr>
           <tr><td class="sym">v<sub>k</sub></td><td>Varianza incondicional del régimen k (orden R5)</td><td>0.249 · 4.719</td><td>3</td></tr>
           <tr><td class="sym">σ<sub>k</sub></td><td>Volatilidad incondicional √v<sub>k</sub> (%/día)</td><td>0.50 · 2.17</td><td>2</td></tr>
           <tr><td class="sym">μ<sub>k</sub></td><td>Media del retorno en el régimen k (%/día)</td><td>0.106 · −0.623</td><td>2</td></tr>
@@ -609,9 +609,9 @@
           <tr><td class="sym">β<sub>k</sub></td><td>Persistencia GARCH</td><td>0.822 · 0.973</td><td>2–3</td></tr>
           <tr><td class="sym">κ<sub>k</sub></td><td>Persistencia total α+γ/2+β = p<sub>k</sub></td><td>0.936 · 0.995</td><td>3</td></tr>
           <tr><td class="sym">ν<sub>k</sub></td><td>Grados de libertad de la t de Student</td><td>n/a (SPY Normal)</td><td>2–3</td></tr>
-          <tr><td class="sym">P</td><td>Matriz de transición (constante en M1)</td><td>[[.902,.098],[.854,.146]]</td><td>4</td></tr>
+          <tr><td class="sym">P</td><td>Matriz de transición (constante en M1)</td><td>[[.902,.098],[.855,.145]]</td><td>4</td></tr>
           <tr><td class="sym">β<sub>ij</sub></td><td>Pesos del logit de transición (TVTP)</td><td>inactivo (M1)</td><td>4</td></tr>
-          <tr><td class="sym">H<sub>t</sub></td><td>Entropía de la creencia filtrada</td><td>0.201 / 0.693</td><td>6</td></tr>
+          <tr><td class="sym">H<sub>t</sub></td><td>Entropía de la creencia filtrada</td><td>0.190 / 0.693</td><td>6</td></tr>
           <tr><td class="sym">E[D<sub>k</sub>]</td><td>Duración esperada del régimen k (días)</td><td>10.2 · 1.2</td><td>6</td></tr>
           <tr><td class="sym">μ<sub>N</sub></td><td>Intensidad basal de noticias (/día)</td><td>103.0</td><td>7</td></tr>
           <tr><td class="sym">α, β</td><td>Auto-excitación y olvido del Hawkes</td><td>329.7 · 284.0</td><td>7</td></tr>
@@ -628,7 +628,7 @@
     </section>
 
     <footer>
-      IRF-N — Índice de Régimen Filtrado con Noticias · Especificación matemática generada desde el modelo publicado (run_id 3b4f1e39b59c, V3/M1, asof 2026-08-14). Modelo: Markov-switching GJR-GARCH (Haas, Mittnik &amp; Paolella 2004) con capa de Hawkes. Este documento describe qué estima el sistema; no es una recomendación de inversión ni una promesa de rendimiento.
+      IRF-N — Índice de Régimen Filtrado con Noticias · Especificación matemática generada desde el modelo publicado (run_id 75f650b1d59d, V3/M1, asof 2026-08-19). Modelo: Markov-switching GJR-GARCH (Haas, Mittnik &amp; Paolella 2004) con capa de Hawkes. Este documento describe qué estima el sistema; no es una recomendación de inversión ni una promesa de rendimiento.
     </footer>
   </main>
 </div>
